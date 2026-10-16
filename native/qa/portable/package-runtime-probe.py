@@ -163,7 +163,8 @@ def main():
   require(args.https_proxy.startswith(('http://','https://')),'Invalid explicit HTTPS proxy');env['https_proxy']=args.https_proxy;env['HTTPS_PROXY']=args.https_proxy
  # Keep local controlled TLS fixtures off transport proxies; no certificate bypass.
  env['NO_PROXY']=env['no_proxy']='localhost,127.0.0.1,::1'
- command=[sys.executable,'-I',str(Path(__file__).resolve()),'--child-tls',str(raw),'--child-maps',str(maps),'--tls-helper',args.tls_helper,'--openssl',args.openssl,'--official-url',args.official_url]
+ command=[sys.executable,'-I','-B',str(Path(__file__).resolve()),'--child-tls',str(raw),'--child-maps',str(maps),'--tls-helper',args.tls_helper,'--openssl',args.openssl,'--official-url',args.official_url]
+ if sys.platform=='darwin':command=['/usr/bin/arch','-'+arch['process_architecture'],*command]
  if args.https_proxy:command+=['--https-proxy',args.https_proxy]
  result=subprocess.run(command,env=env,timeout=180)
  tls=json.loads(raw.read_text());child=json.loads(maps.read_text());require(all(child[k]==arch[k] for k in arch),'TLS child architecture changed')
