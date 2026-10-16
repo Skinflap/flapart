@@ -21,5 +21,11 @@ text=text.replace('QString key = "Krita5"','QString key = "FlapartNative0"')
 assert 'KAboutData aboutData("krita",' in text
 text=text.replace('KAboutData aboutData("krita",','KAboutData aboutData("flapart-native",')
 text=text.replace('aboutData.setOrganizationDomain("krita.org");','aboutData.setOrganizationDomain("flaptown.com");')
+old = 'app.setDesktopFileName(QStringLiteral("org.kde.krita"));'
+assert text.count(old) == 1
+text = text.replace(old, 'app.setDesktopFileName(QStringLiteral("com.flaptown.FlapartNative"));')
+old = 'KAboutData::setApplicationData(aboutData);'
+assert text.count(old) == 1
+text = text.replace(old, 'aboutData.setDesktopFileName(QStringLiteral("com.flaptown.FlapartNative"));\n    ' + old)
 f.write_text(text)
 print('Independent Flapart native identity; explicit file namespaces:',len(changed))
