@@ -63,6 +63,7 @@ try:
   found=[f for base in search_roots for f in base.rglob('Qt5Network.dll') if f.is_file()];assert len(found)==1,found
   shutil.copy2(found[0],candidate/'bin/Qt5Network.dll')
   for f in (prefix/'bin').glob('*.dll'):shutil.copy2(f,candidate/'bin'/f.name)
+  env['FLAPART_DLL_DIRS']=os.pathsep.join(map(str,[candidate/'bin',prefix/'bin']))
   run('stage-python',[sys.executable,ROOT/'stage-windows-python.py','--downloads',downloads,'--old-python',original/'python','--destination',work/'python-new','--site-packages',candidate/'lib/site-packages'])
   old=candidate/'python';old.rename(work/'python-sdk-original');shutil.move(work/'python-new',old)
   # App DLL lookup must not pick an older duplicate Python runtime in bin.
@@ -82,7 +83,12 @@ try:
   python=old/'Versions/3.13/bin/python3.13';openssl=prefix/'bin/openssl'
   env['DYLD_FRAMEWORK_PATH']=str(candidate/'lib');env['DYLD_LIBRARY_PATH']=os.pathsep.join(map(str,[candidate/'lib',prefix/'lib']));env['PYTHONPATH']=str(candidate/'lib/python3.13/site-packages')
  env['OPENSSL_MODULES']=str(prefix/'lib/ossl-modules');env['QT_QPA_PLATFORM']='offscreen'
- run('tls-validation',[python,ROOT/'https-validation-probe.py','--openssl',openssl,'--output',output/'tls-validation.json'],custom_env=env)
+ probe_args=[str(ROOT/'https-validation-probe.py'),'--openssl',str(openssl),'--output',str(output/'tls-validation.json')]
+ if system=='Windows':
+  # Python3.8+ DLL loading requires explicit search directories, not just PATH.
+  bootstrap='import os,sys,runpy;handles=[os.add_dll_directory(p) for p in os.environ["FLAPART_DLL_DIRS"].split(os.pathsep)];sys.argv=sys.argv[1:];runpy.run_path(sys.argv[0],run_name="__main__")'
+  run('tls-validation',[python,'-c',bootstrap,*probe_args],custom_env=env)
+ else:run('tls-validation',[python,*probe_args],custom_env=env)
  tls=json.loads((output/'tls-validation.json').read_text());assert tls['passed'];receipt['passed']=True;receipt['stage']='native-tls-probe-passed';receipt['relocated_distribution_qualified']=False
 except Exception as error:
  receipt['error']=repr(error);raise

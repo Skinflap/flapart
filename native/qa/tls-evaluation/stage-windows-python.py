@@ -27,6 +27,6 @@ if a.site_packages not in paths:paths.append(a.site_packages)
 paths.append('import site');(dest/'python313._pth').write_text('\n'.join(paths)+'\n')
 receipt={'version':'3.13.16','source_sha256':next(x['sha256'] for x in lock['artifacts'] if x['name'].startswith('Python-')),'runtime_sha256':hashlib.sha256(archive.read_bytes()).hexdigest(),'whole_official_runtime':True,'custom_site_files':preserved,'python_path_entries':paths,'runtime_executed':False}
 if platform.system()=='Windows':
- code='import sys,ssl,hashlib,json;from PyQt5.QtCore import QT_VERSION_STR;print(json.dumps(dict(python=sys.version,ssl=ssl.OPENSSL_VERSION,qt=QT_VERSION_STR,sha256=hashlib.sha256(b"flapart").hexdigest())))'
+ code='import os,sys,ssl,hashlib,json;handles=[os.add_dll_directory(p) for p in os.environ.get("FLAPART_DLL_DIRS","").split(os.pathsep) if p];from PyQt5.QtCore import QT_VERSION_STR;print(json.dumps(dict(python=sys.version,ssl=ssl.OPENSSL_VERSION,qt=QT_VERSION_STR,sha256=hashlib.sha256(b"flapart").hexdigest())))'
  receipt['probe']=json.loads(subprocess.check_output([str(dest/'python.exe'),'-c',code],text=True));assert 'OpenSSL 3.5.9' in receipt['probe']['ssl'];receipt['runtime_executed']=True
 (dest/'flapart-python-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');print(json.dumps(receipt,indent=2))
