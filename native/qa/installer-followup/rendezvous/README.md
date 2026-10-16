@@ -80,3 +80,60 @@ or valid OpenPGP material. They test identity, expiry, replay binding, authentic
 observation mismatch, input/output mutations, recomputed attacker inventory, duplicate
 JSON keys, symlinks, missing/extra members and output overlap. No native qualification
 is manufactured. A harmless real GPG/GitHub handshake remains separate future work.
+
+## Read-only GitHub adapter
+
+`github_read.py` adds GET/download only. `Client(token)` requires an explicit caller-
+supplied token; it does not discover credentials or inspect environment/credential
+files. `fetch_request` checks the authenticated workflow run, exact attempt's job
+membership, fixed `installer-arm64` / `installer-x86_64` job name and approved
+`macos-15` / `macos-15-intel` label, then authenticates the explicit artifact ID/name,
+run/commit, API digest and exact downloaded ZIP bytes. The archive permits only two
+bounded regular files: request.json and recipient-public.asc. No extraction to disk.
+
+`fetch_response` requires an explicit draft ID and fresh absolute ciphertext path.
+It verifies draft tag (`draft_tag(request)`), author, exact commit, unpublished state
+and strict exchange body before downloading. Body must be `encode({'schema':1,
+'request_sha256':digest(encode(request))})`. Complete asset listing must contain only
+candidate.gpg and response.json; both authenticated uploaders must be the expected
+operator. API hashes/lengths/IDs and response bindings are checked before ciphertext
+admission. Ciphertext is streamed with a byte bound to an exclusively created file,
+then rehashed. Failure removes only this attempt's file. No existing file is replaced.
+
+Metadata is bounded to 2 MiB, artifact ZIP to 1 MiB, each request/key member to 64 KiB,
+response metadata to 64 KiB and ciphertext strictly below 2 GiB. Missing API digests
+fail closed. A job listing exceeding one complete 100-item page is refused; this
+minimal workflow should contain only its two known jobs. Deadlines are rechecked
+with elapsed monotonic time after download. Caller still owns poll cadence, retry
+admission, cancellation, ephemeral-key lifetime and independent native-job outcome.
+
+Authorization is sent only to api.github.com. Download redirects are explicitly
+processed, HTTPS-only, without credentials/userinfo/fragments, to githubusercontent.com
+or Azure blob.core.windows.net subdomains. Redirected requests contain no authorization,
+and no automatic redirect handler is enabled. New storage origins fail closed and
+need review. Raw transport errors are replaced with fixed messages; no URL, signed
+query, API body or token is logged or included in returned evidence. The HTTP adapter
+only returns the normalized metadata and exact input bytes needed by the caller.
+
+Sources for response shapes and GET/download behavior:
+[Artifacts API](https://docs.github.com/en/rest/actions/artifacts),
+[workflow job attempt API](https://docs.github.com/en/rest/actions/workflow-jobs),
+[release assets API](https://docs.github.com/en/rest/releases/assets).
+Tests use documentation-shaped offline HTTP fixtures, not captured live requests.
+No actual token permission, redirect origin or hosted GUI behavior is proven by them.
+
+The additional parent-owned `test_encrypted_exchange.py` executes real local GPG
+pack→encrypt→decrypt→validate with ephemeral homes and a harmless exact payload.
+It checks ciphertext corruption (including recomputed outer hash) and expiry. That
+is actual local encryption evidence; the original protocol tests use opaque fixture
+ciphertext. Neither suite executes a native application. A real GitHub harmless
+handshake remains future work, separate from these offline adapter tests.
+
+Parent's read-only live check, recorded separately in
+`../github-read-live-observation.json`, downloaded an existing harmless artifact and
+matched its API byte count and SHA. It found that the artifact ZIP endpoint requires
+the documented vendor-JSON Accept header; release asset binary requests use
+octet-stream. The adapter now distinguishes these endpoints and tests both headers.
+That observation establishes the tested artifact download behavior only, not a live
+rendezvous/draft exchange or native execution. Run authentication also requires the
+API's triggering_actor ID, so a different rerun operator is not silently accepted.
