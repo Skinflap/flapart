@@ -522,10 +522,10 @@ index 730c0f2..8311797 100644
              m_plugins.append(plugin);
          }
 diff --git a/plugins/python/CMakeLists.txt b/plugins/python/CMakeLists.txt
-index 4260fa1..5db53d2 100644
+index 4260fa1..098576f 100644
 --- a/plugins/python/CMakeLists.txt
 +++ b/plugins/python/CMakeLists.txt
-@@ -101,3 +101,7 @@ install(
+@@ -101,3 +101,8 @@ install(
          PATTERN "*.py"
          PATTERN "__pycache__*" EXCLUDE
    )
@@ -533,3 +533,4 @@ index 4260fa1..5db53d2 100644
 +# Flaptown Advancements: GPLv3 native workspace overlay.
 +install_pykrita_plugin(flapart PATTERNS "*.ttf" "*.txt" "*.svg")
 +install(FILES flapart/Flaptown.colors DESTINATION ${KDE_INSTALL_DATADIR}/color-schemes)
++install(FILES flapart/flapart.action DESTINATION ${KDE_INSTALL_DATADIR}/krita/actions)

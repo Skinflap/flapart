@@ -4,7 +4,7 @@ Flapart Studio adds a simpler starting point to Krita's native painting engine. 
 
 ## Available now: Flapart Studio plugin source
 
-Use Krita 5.3 with Python support. Download `flapart-studio-0.1.0-krita-plugin.zip`, open **Tools → Scripts → Import Python Plugin from File**, select the ZIP, enable **Flapart Studio** in **Settings → Configure Krita → Python Plugin Manager**, and restart Krita. Open **Tools → Scripts → Flapart Studio**, or press **Ctrl+Alt+F**.
+Use Krita 5.3 with Python support. Download `flapart-studio-0.1.1-krita-plugin.zip`, open **Tools → Scripts → Import Python Plugin from File**, select the ZIP, enable **Flapart Studio** in **Settings → Configure Krita → Python Plugin Manager**, and restart Krita. Open **Tools → Scripts → Flapart Studio**, or press **Ctrl+Alt+F**.
 
 You can start a canvas, save an editable original, export a PNG, open brush settings, and hide/restore panels. Profile/Town Hall actions first export a picture locally, then open Flapart in your browser. Import the PNG and choose the destination. The plugin does not silently upload your art, store account credentials or replace the layered original.
 
@@ -38,4 +38,4 @@ Build the plugin archive with `python3 scripts/package-plugin.py`. Its SHA-256 a
 
 ## Validation
 
-The native tests use isolated profiles and a virtual display, without attaching to a user's desktop. A test-only Python plugin creates a document through Flapart, writes known pixels, invokes its real PNG helper with a controlled chooser, checks the fixed browser URL without publishing, saves/reopens KRA, checks exact pixels and panel restoration, and captures the Studio window. The compiled source test also seeds ordinary Krita settings/resources/logs to verify separation. Official Windows runtime plus Studio passes under Wine; this is not native Windows qualification. Portable test source is supplied separately for native Windows/macOS runners. Physical pen pressure/tilt and every native tool need additional qualification.
+The native tests use isolated profiles and a virtual display, without attaching to a user's desktop. A test-only Python plugin creates a document through Flapart, writes known pixels, invokes its real PNG helper with a controlled chooser, checks the fixed browser URL without publishing, saves/reopens KRA, checks exact pixels, panel restoration, registered-menu reopening and the default shortcut, and captures the Studio window. The compiled source test also seeds ordinary Krita settings/resources/logs to verify separation. Official Windows runtime plus Studio passes native Windows 11 evaluation VM drawing, PNG/KRA, and menu regression checks; official macOS runtime plus Studio passes an Intel macOS hosted-runner probe. These are distinct from compiled-fork qualification. Portable test source is supplied separately for native Windows/macOS runners. Physical pen pressure/tilt and every native tool need additional qualification.

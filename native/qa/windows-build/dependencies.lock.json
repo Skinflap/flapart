@@ -1,8 +1,94 @@
 {
   "platform": "windows",
   "branch": "master (Qt5 stable)",
-  "cutoff": "2026-09-30T10:59:49Z",
+  "cutoff": "2026-09-30T23:59:59Z",
   "upstream_source_commit": "bd6e8d061d2f0388c5b10278786cf0fe62e3135f",
+  "seed_recipe_commit": "7eab9569cb65fe8422224fc1de644a169fd8b0f4",
+  "seed_path": "latest/krita-deps.yml",
+  "required_roots": [
+    "ext_boost",
+    "ext_brotli",
+    "ext_dlfcn_win32",
+    "ext_drmingw",
+    "ext_eigen3",
+    "ext_exiv2",
+    "ext_expat",
+    "ext_extra_cmake_modules",
+    "ext_ffmpeg",
+    "ext_fftw3",
+    "ext_flac",
+    "ext_fontconfig",
+    "ext_freetype",
+    "ext_fribidi",
+    "ext_gettext",
+    "ext_giflib",
+    "ext_googleangle",
+    "ext_gperf",
+    "ext_gsl",
+    "ext_highway",
+    "ext_iconv",
+    "ext_icoutils",
+    "ext_icu",
+    "ext_imath",
+    "ext_immer",
+    "ext_jpeg",
+    "ext_jpegxl",
+    "ext_json_c",
+    "ext_karchive",
+    "ext_kcompletion",
+    "ext_kconfig",
+    "ext_kcoreaddons",
+    "ext_kdcraw",
+    "ext_kguiaddons",
+    "ext_ki18n",
+    "ext_kimageformats",
+    "ext_kitemmodels",
+    "ext_kitemviews",
+    "ext_kwidgetsaddons",
+    "ext_kwindowsystem",
+    "ext_lager",
+    "ext_lame",
+    "ext_lcms2",
+    "ext_libaom",
+    "ext_libde265",
+    "ext_libheif",
+    "ext_libogg",
+    "ext_libraw",
+    "ext_libtheora",
+    "ext_libvorbis",
+    "ext_libx265",
+    "ext_libx265_10bit",
+    "ext_libx265_12bit",
+    "ext_lzma",
+    "ext_mlt",
+    "ext_mypaint",
+    "ext_ocio",
+    "ext_openexr",
+    "ext_openh264",
+    "ext_openjpeg",
+    "ext_openssl",
+    "ext_opus",
+    "ext_pkgconfig",
+    "ext_png",
+    "ext_poppler",
+    "ext_pyqt-builder",
+    "ext_pyqt5",
+    "ext_pyqt5-sip",
+    "ext_python",
+    "ext_qt",
+    "ext_quazip",
+    "ext_sdl2",
+    "ext_seexpr",
+    "ext_sip",
+    "ext_tiff",
+    "ext_unibreak",
+    "ext_vpl",
+    "ext_vpx",
+    "ext_webp",
+    "ext_xsimd",
+    "ext_zlib",
+    "ext_zug"
+  ],
   "packages": [
     {
       "name": "ext_boost",
@@ -11,7 +97,8 @@
       "sha256": "82b917ee94ac26638469bd8e97442469ad7f7b63a2978993381e04475bb29166",
       "bytes": 181657600,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_brotli",
@@ -20,7 +107,8 @@
       "sha256": "41091b57b870ba0bc4010c98018d5f4a11dcbeea37156a0fdde8cbaa92e48819",
       "bytes": 1976320,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_dlfcn_win32",
@@ -29,7 +117,8 @@
       "sha256": "411aaf87201b6b37063b4645b812d1f8149f080927037706bf10f1ebc9061996",
       "bytes": 133120,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_drmingw",
@@ -38,7 +127,8 @@
       "sha256": "1ccc4728dd6fdcd268de80ba3d9deed25f36d593e8f3cb98171158d20bd95afb",
       "bytes": 8069120,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_eigen3",
@@ -47,7 +137,8 @@
       "sha256": "4ebfc6035806ebc65e5461a82c99c71327deaa067f00b1f010e6672cfbd4bb2c",
       "bytes": 11182080,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_exiv2",
@@ -61,7 +152,8 @@
         "ext_brotli": "master",
         "ext_iconv": "master",
         "ext_zlib": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_expat",
@@ -70,7 +162,8 @@
       "sha256": "9f2631d993a83a2345a61f7dda1e9efaba6ef16d1331c90861c2415ae9faae57",
       "bytes": 819200,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_extra_cmake_modules",
@@ -79,7 +172,8 @@
       "sha256": "b75209602efda2afd1c6ecb7210027747965d650c9bd4efbebdd7f7edb826e83",
       "bytes": 931840,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_ffmpeg",
@@ -106,7 +200,8 @@
         "ext_lzma": "master",
         "ext_vpl": "master",
         "ext_zlib": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_fftw3",
@@ -115,7 +210,8 @@
       "sha256": "f739e57ee8eb1951a44b75bb0f904d95c41e1e520680e653e684eba906e598d7",
       "bytes": 3706880,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_flac",
@@ -127,7 +223,8 @@
       "dependencies": {
         "ext_pkgconfig": "master",
         "ext_libogg": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_fontconfig",
@@ -142,7 +239,8 @@
         "ext_gperf": "master",
         "ext_pkgconfig": "master",
         "ext_gettext": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_freetype",
@@ -155,7 +253,8 @@
         "ext_png": "master",
         "ext_icu": "master",
         "ext_pkgconfig": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_fribidi",
@@ -164,7 +263,8 @@
       "sha256": "9effc9c5dacb1d509d967106697c0565d277637093f85d84928fe0402612c98e",
       "bytes": 757760,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_gettext",
@@ -175,7 +275,8 @@
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
       "dependencies": {
         "ext_iconv": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_giflib",
@@ -184,7 +285,8 @@
       "sha256": "cd8eb3d6f55d45e57d11d09b85130abadacf2258c1e6e3d4a91d218eafe8a6b1",
       "bytes": 204800,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_googleangle",
@@ -195,7 +297,8 @@
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
       "dependencies": {
         "ext_zlib": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_gperf",
@@ -204,7 +307,8 @@
       "sha256": "362827e1af5d0754fd5ab61d1a21247d4be692c4ef11bf867ac547da0215fc20",
       "bytes": 440320,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_gsl",
@@ -213,7 +317,8 @@
       "sha256": "f35884e279e14387505c70b1716aa8d93f71ec38a8425e3b5b21e98f93207165",
       "bytes": 10997760,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_highway",
@@ -222,7 +327,8 @@
       "sha256": "b75c1a37f9c6c02b1a74458fdcacf1546de62dfc26d55fd7ae875c507c158b4f",
       "bytes": 73553920,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_iconv",
@@ -231,7 +337,8 @@
       "sha256": "e4a7a67d2e62470e178793443b2585899cc8e7a01df7a9cdf61bc20587e7dc37",
       "bytes": 337920,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_icoutils",
@@ -242,7 +349,8 @@
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
       "dependencies": {
         "ext_png": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_icu",
@@ -251,7 +359,8 @@
       "sha256": "e9cbfd648efec7f8ca4140c2faa3bd62605112043df704e08e618b4a4f373cdc",
       "bytes": 82810880,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_imath",
@@ -262,7 +371,8 @@
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
       "dependencies": {
         "ext_patch": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_immer",
@@ -271,7 +381,8 @@
       "sha256": "2f5c07a80fe60d7bcfe7463e8f98c497fe3c85977eb417e22f04992e2b169313",
       "bytes": 1013760,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_jpeg",
@@ -280,7 +391,8 @@
       "sha256": "be200c286873dc1881ca6aaf9faabbba4bbf60477df41151ce6ff0705e82714a",
       "bytes": 7485440,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_jpegxl",
@@ -296,7 +408,8 @@
         "ext_jpeg": "master",
         "ext_png": "master",
         "ext_zlib": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_json_c",
@@ -307,7 +420,8 @@
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
       "dependencies": {
         "ext_patch": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_karchive",
@@ -319,7 +433,8 @@
       "dependencies": {
         "ext_qt": "master",
         "ext_extra_cmake_modules": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_kcompletion",
@@ -333,7 +448,8 @@
         "ext_qt": "master",
         "ext_kconfig": "master",
         "ext_kwidgetsaddons": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_kconfig",
@@ -345,7 +461,8 @@
       "dependencies": {
         "ext_qt": "master",
         "ext_extra_cmake_modules": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_kcoreaddons",
@@ -357,21 +474,8 @@
       "dependencies": {
         "ext_extra_cmake_modules": "master",
         "ext_qt": "master"
-      }
-    },
-    {
-      "name": "ext_kcrash",
-      "version": "master-1703165126",
-      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_kcrash/master-1703165126/archive.tar",
-      "sha256": "a3a96a4773443a395ef09fcec4389f8cf5a14ba712435f2692de800af967a6ab",
-      "bytes": 215040,
-      "recipe_commit": "9f6163122bf5ce5581ef522a9b884a35481529e2",
-      "dependencies": {
-        "ext_qt": "master",
-        "ext_extra_cmake_modules": "master",
-        "ext_kcoreaddons": "master",
-        "ext_kwindowsystem": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_kdcraw",
@@ -384,7 +488,8 @@
         "ext_libraw": "master",
         "ext_extra_cmake_modules": "master",
         "ext_qt": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_kguiaddons",
@@ -396,7 +501,8 @@
       "dependencies": {
         "ext_qt": "master",
         "ext_extra_cmake_modules": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_ki18n",
@@ -409,7 +515,8 @@
         "ext_qt": "master",
         "ext_extra_cmake_modules": "master",
         "ext_gettext": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_kimageformats",
@@ -422,7 +529,8 @@
         "ext_qt": "master",
         "ext_extra_cmake_modules": "master",
         "ext_karchive": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_kitemmodels",
@@ -434,7 +542,8 @@
       "dependencies": {
         "ext_qt": "master",
         "ext_extra_cmake_modules": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_kitemviews",
@@ -446,7 +555,8 @@
       "dependencies": {
         "ext_qt": "master",
         "ext_extra_cmake_modules": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_kwidgetsaddons",
@@ -458,7 +568,8 @@
       "dependencies": {
         "ext_qt": "master",
         "ext_extra_cmake_modules": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_kwindowsystem",
@@ -470,7 +581,8 @@
       "dependencies": {
         "ext_qt": "master",
         "ext_extra_cmake_modules": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_lager",
@@ -482,7 +594,8 @@
       "dependencies": {
         "ext_zug": "master",
         "ext_immer": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_lame",
@@ -493,7 +606,8 @@
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
       "dependencies": {
         "ext_pkgconfig": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_lcms2",
@@ -502,7 +616,8 @@
       "sha256": "ec54ab8ca8434f94190f997ff1977c109eae8b613d0898a72adea8459fc54888",
       "bytes": 2631680,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_libaom",
@@ -511,7 +626,8 @@
       "sha256": "8b564702aa90b71cc064bfcb2cfb3f9c6b6a3bc1c53a24a98645f595f007db3d",
       "bytes": 15759360,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_libde265",
@@ -520,7 +636,8 @@
       "sha256": "e899febbcd62cba207f863bb0dfd59b737301ff881276f5b9a0f9b25f8a78834",
       "bytes": 2949120,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_libheif",
@@ -533,7 +650,8 @@
         "ext_libaom": "master",
         "ext_libde265": "master",
         "ext_libx265": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_libogg",
@@ -542,7 +660,8 @@
       "sha256": "16156ae9d9e3280fe4cbb90a7756c6f089980200972d4fc56a5f2c11ac841ea4",
       "bytes": 768000,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_libraw",
@@ -555,7 +674,8 @@
         "ext_lcms2": "master",
         "ext_jpeg": "master",
         "ext_zlib": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_libtheora",
@@ -569,7 +689,8 @@
         "ext_libvorbis": "master",
         "ext_png": "master",
         "ext_pkgconfig": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_libvorbis",
@@ -580,7 +701,8 @@
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
       "dependencies": {
         "ext_libogg": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_libx265",
@@ -591,7 +713,8 @@
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
       "dependencies": {
         "ext_libx265_12bit": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_libx265_10bit",
@@ -600,7 +723,8 @@
       "sha256": "81e2d66448584dfca4f918f1c78b31d402c5550a3d329ff9b159f3934ef42e2e",
       "bytes": 10106880,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_libx265_12bit",
@@ -611,7 +735,8 @@
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
       "dependencies": {
         "ext_libx265_10bit": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_lzma",
@@ -620,16 +745,8 @@
       "sha256": "c8e364de7f100a124199e0458078ef870c885a28bafce30f966d1f3ebbe5c242",
       "bytes": 3031040,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
-    },
-    {
-      "name": "ext_meson",
-      "version": "master-1744743954",
-      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_meson/master-1744743954/archive.tar",
-      "sha256": "4eb892db3b776381920175df3da6468096d81d11e6e9349c5e21cb82c84976a5",
-      "bytes": 4536320,
-      "recipe_commit": "243a18ec65aefa41292215a020726faeabf37792",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_mlt",
@@ -645,7 +762,8 @@
         "ext_fftw3": "master",
         "ext_fontconfig": "master",
         "ext_dlfcn_win32": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_mypaint",
@@ -657,16 +775,8 @@
       "dependencies": {
         "ext_json_c": "master",
         "ext_extra_cmake_modules": "master"
-      }
-    },
-    {
-      "name": "ext_nasm",
-      "version": "master-1789993041",
-      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_nasm/master-1789993041/archive.tar",
-      "sha256": "63d5994ba605425feccca782f2fac2f6cfed01dc232c437e8b37021c36fe0664",
-      "bytes": 2816000,
-      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_ocio",
@@ -677,7 +787,8 @@
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
       "dependencies": {
         "ext_openexr": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_openexr",
@@ -688,7 +799,8 @@
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
       "dependencies": {
         "ext_imath": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_openh264",
@@ -699,7 +811,8 @@
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
       "dependencies": {
         "ext_pkgconfig": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_openjpeg",
@@ -710,7 +823,8 @@
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
       "dependencies": {
         "ext_lcms2": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_openssl",
@@ -719,7 +833,8 @@
       "sha256": "6f0da19443d5e55985dc57845aa7143f0e7a329772dadf7ba9064beb9ad26848",
       "bytes": 8140800,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_opus",
@@ -728,7 +843,8 @@
       "sha256": "dd8a5175355cde6419342126327c87fe1a3daea576a85f47e37372a1badd25b7",
       "bytes": 1280000,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_patch",
@@ -737,7 +853,8 @@
       "sha256": "a6f764d743f869a2f69582277ff6a500140ba70d635b871ffc316636ffce8786",
       "bytes": 133120,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_pkgconfig",
@@ -746,7 +863,20 @@
       "sha256": "f8f1664829b186e668a362876b111f121e77ee4f98e26457c4445299f12e7795",
       "bytes": 686080,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
+    },
+    {
+      "name": "ext_png",
+      "version": "master-1790768556",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_png/master-1790768556/archive.tar",
+      "sha256": "e92e578b22e8eb3c733131e725475fbd38f745ff19151ba88646a0274f57e994",
+      "bytes": 2795520,
+      "recipe_commit": "d93b4b8c8b905e897ba1f2660a912c54f9909431",
+      "dependencies": {
+        "ext_zlib": "master"
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_poppler",
@@ -765,7 +895,8 @@
         "ext_boost": "master",
         "ext_lcms2": "master",
         "ext_iconv": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_pyqt-builder",
@@ -777,7 +908,8 @@
       "dependencies": {
         "ext_python": "master",
         "ext_qt": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_pyqt5",
@@ -791,7 +923,8 @@
         "ext_qt": "master",
         "ext_pyqt-builder": "master",
         "ext_sip": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_pyqt5-sip",
@@ -805,7 +938,8 @@
         "ext_sip": "master",
         "ext_qt": "master",
         "ext_pyqt5": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_python",
@@ -814,29 +948,8 @@
       "sha256": "987d9c23a49a98938290eda9d7af70720cb31a527701165c7840d79afbf71c3c",
       "bytes": 27586560,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
-    },
-    {
-      "name": "ext_python-modules",
-      "version": "master-1705338335",
-      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_python-modules/master-1705338335/archive.tar",
-      "sha256": "af3b5a116336abee06c4f56470426cfc30d492029238af4d541979965650426b",
-      "bytes": 6799360,
-      "recipe_commit": "f493b59f3e5a446a9a50ed996b03fbcba4c51687",
-      "dependencies": {
-        "ext_python": "master"
-      }
-    },
-    {
-      "name": "ext_python-openvino",
-      "version": "master-1789735184",
-      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_python-openvino/master-1789735184/archive.tar",
-      "sha256": "024cdbe62dc0e7b4c44bfc6001b220cf7eb163907c6868300a4bc409cc51ca73",
-      "bytes": 331212800,
-      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {
-        "ext_python": "master"
-      }
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_qt",
@@ -853,26 +966,8 @@
         "ext_googleangle": "master",
         "ext_openssl": "master",
         "ext_zlib": "master"
-      }
-    },
-    {
-      "name": "ext_qt-quickcontrols2",
-      "version": "master-1716378873",
-      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_qt-quickcontrols2/master-1716378873/archive.tar",
-      "sha256": "20645dd2a0670c98d55a231423274a99d5ef9df8af416a0d276e065421564de7",
-      "bytes": 322232320,
-      "recipe_commit": "a3d879b835353cc731660180ed78d01b4fed4c70",
-      "dependencies": {
-        "ext_icu": "master",
-        "ext_freetype": "master",
-        "ext_png": "master",
-        "ext_jpeg": "master",
-        "ext_patch": "master",
-        "ext_googleangle": "master",
-        "ext_strawberryperl": "master",
-        "ext_openssl": "master",
-        "ext_zlib": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_quazip",
@@ -884,7 +979,8 @@
       "dependencies": {
         "ext_qt": "master",
         "ext_zlib": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_sdl2",
@@ -893,7 +989,8 @@
       "sha256": "b808e782bf0ec0d8ecff3e29c83cc666e019f84b88b3033871ac54940f143aae",
       "bytes": 7096320,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_seexpr",
@@ -906,7 +1003,8 @@
         "ext_qt": "master",
         "ext_extra_cmake_modules": "master",
         "ext_ki18n": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_sip",
@@ -917,16 +1015,21 @@
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
       "dependencies": {
         "ext_python": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
-      "name": "ext_strawberryperl",
-      "version": "master-1789993020",
-      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_strawberryperl/master-1789993020/archive.tar",
-      "sha256": "80e2f55e63891bb2481ccdb0a9560816eb0f4063da893bff2ae4a6c1c63cfb91",
-      "bytes": 198389760,
-      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "name": "ext_tiff",
+      "version": "master-1790768603",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_tiff/master-1790768603/archive.tar",
+      "sha256": "a6b3178214874d80d92af5c275cd835d6d8c0aa6fddf2123814b1e13e827744c",
+      "bytes": 9226240,
+      "recipe_commit": "d93b4b8c8b905e897ba1f2660a912c54f9909431",
+      "dependencies": {
+        "ext_zlib": "master",
+        "ext_jpeg": "master"
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_unibreak",
@@ -935,7 +1038,8 @@
       "sha256": "77b7caf196aa4722a9c4b7e8bb79312a570a4fc611fac228d91c7134a187a162",
       "bytes": 266240,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_vpl",
@@ -944,7 +1048,8 @@
       "sha256": "e1436a69d101bf87927cccb661bb730980572c471d11c0602ad6dc6adc94e160",
       "bytes": 22046720,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_vpx",
@@ -955,7 +1060,8 @@
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
       "dependencies": {
         "ext_pkgconfig": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_webp",
@@ -970,7 +1076,8 @@
         "ext_tiff": "master",
         "ext_giflib": "master",
         "ext_zlib": "master"
-      }
+      },
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_xsimd",
@@ -979,7 +1086,8 @@
       "sha256": "3875fadf36944b65bb80cff2d22cdf8de192c5fe8eb2105596b75e46a9806a9a",
       "bytes": 1966080,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_zlib",
@@ -988,7 +1096,8 @@
       "sha256": "e0000164d53e2b8c1b2032460f0944c635ccc733287ec540a16ef8ff6fe24c4f",
       "bytes": 1546240,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     },
     {
       "name": "ext_zug",
@@ -997,7 +1106,8 @@
       "sha256": "078f18aab8235074aa496e3dfc53c0a919c4801ba9741b86b8efda5119691378",
       "bytes": 368640,
       "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
-      "dependencies": {}
+      "dependencies": {},
+      "runtime_dependencies": {}
     }
   ]
 }

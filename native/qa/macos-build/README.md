@@ -29,3 +29,5 @@ https://invent.kde.org/packaging/krita-deps-management/-/blob/master/tools/macos
 The upstream full pipeline includes private signing/notary/upload steps; those are
 intentionally absent here. Use the local reviewed source mirror rather than blindly
 executing the upstream publishing pipeline.
+
+The SDK lock follows the pinned upstream dependency seed and recursively includes build/runtime dependencies. Registry leftovers are excluded. Extraction checks every archive path before writing, rejects differing file collisions, and allows only the reviewed macOS Python framework directory alias. The dated SDK snapshot is our reproducible build input; it is not asserted to be the exact historical release SDK.

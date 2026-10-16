@@ -18,6 +18,7 @@ text=text.replace('aboutData.setHomepage(QStringLiteral("https://krita.org"));',
 f.write_text(text)
 target=r/'plugins/python/flapart'; shutil.copytree(own/'plugin/flapart',target)
 shutil.copy2(own/'plugin/flapart.desktop',target/'kritapykrita_flapart.desktop')
+shutil.copy2(own/'plugin/flapart.action',target/'flapart.action')
 f=r/'plugins/python/CMakeLists.txt'; text=f.read_text(); text+='\n# Flaptown Advancements: GPLv3 native workspace overlay.\ninstall_pykrita_plugin(flapart PATTERNS "*.ttf" "*.txt" "*.svg")\n'; f.write_text(text)
 print('Prepared Flapart Native source with full Krita core and Flapart Studio plugin.')
 
@@ -66,3 +67,6 @@ text=text.replace('cfg.readEntry<QString>(customSystemFontCfgName, QString())','
 assert text.count('cfg.readEntry<int>(customFontSizeCfgName, -1)') == 1
 text=text.replace('cfg.readEntry<int>(customFontSizeCfgName, -1)','cfg.readEntry<int>(customFontSizeCfgName, 10)')
 f.write_text(text)
+
+f=r/'plugins/python/CMakeLists.txt'
+f.write_text(f.read_text()+'install(FILES flapart/flapart.action DESTINATION ${KDE_INSTALL_DATADIR}/krita/actions)\n')
