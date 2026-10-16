@@ -1,0 +1,929 @@
+{
+  "platform": "macos",
+  "branch": "master (Qt5 stable)",
+  "cutoff": "2026-09-30T10:59:49Z",
+  "upstream_source_commit": "bd6e8d061d2f0388c5b10278786cf0fe62e3135f",
+  "packages": [
+    {
+      "name": "ext_boost",
+      "version": "master-1789741164",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_boost/master-1789741164/archive.tar",
+      "sha256": "371eb667b9a658f871fa747c5c5699b91163fbe2835da2ec27d96865cf03310d",
+      "bytes": 181657600,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_brotli",
+      "version": "master-1789741182",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_brotli/master-1789741182/archive.tar",
+      "sha256": "c3b48e1a90958505735bdea8e4a9f17b9f18c8731e0b49a3b23b58749adc36c1",
+      "bytes": 2252800,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_eigen3",
+      "version": "master-1789741190",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_eigen3/master-1789741190/archive.tar",
+      "sha256": "3d96fa28f5bf9de2851c289d5b86770087591da69da78e4a01a3a650af6a3c2d",
+      "bytes": 11192320,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_exiv2",
+      "version": "master-1789743033",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_exiv2/master-1789743033/archive.tar",
+      "sha256": "30c2527860c59f621292126dc561e0efff17e39dd3bd181f1b9d75b0889941df",
+      "bytes": 7731200,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_expat": "master",
+        "ext_brotli": "master",
+        "ext_zlib": "master"
+      }
+    },
+    {
+      "name": "ext_expat",
+      "version": "master-1789741201",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_expat/master-1789741201/archive.tar",
+      "sha256": "e7c52d8500ba68277419808dd72295e4f881335fa63a06507c7810daa5519e9d",
+      "bytes": 768000,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_extra_cmake_modules",
+      "version": "master-1789741205",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_extra_cmake_modules/master-1789741205/archive.tar",
+      "sha256": "a86e6f1c73a47a293c31293155d91a6647b3a8ae883ec020a2305f6b2d0776ea",
+      "bytes": 931840,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_ffmpeg",
+      "version": "master-1789747227",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_ffmpeg/master-1789747227/archive.tar",
+      "sha256": "ef707f55a1eb3b60a832ce7c8f521e056dd83959f060564bbd9abbefe271b954",
+      "bytes": 66078720,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_flac": "master",
+        "ext_opus": "master",
+        "ext_sdl2": "master",
+        "ext_vpx": "master",
+        "ext_libvorbis": "master",
+        "ext_libtheora": "master",
+        "ext_openh264": "master",
+        "ext_lame": "master",
+        "ext_libaom": "master",
+        "ext_webp": "master",
+        "ext_png": "master",
+        "ext_jpeg": "master",
+        "ext_pkgconfig": "master",
+        "ext_lzma": "master",
+        "ext_zlib": "master"
+      }
+    },
+    {
+      "name": "ext_fftw3",
+      "version": "master-1789741226",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_fftw3/master-1789741226/archive.tar",
+      "sha256": "d709c423eb59cd762243e794488298c9d4693ec9432a86c7a8a1f93610bfd29d",
+      "bytes": 2549760,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_flac",
+      "version": "master-1789743141",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_flac/master-1789743141/archive.tar",
+      "sha256": "03ce1c8ba352fa0bcfd8e240eeb31b4e815f56f4ae7b1e67ebe4dcc11b509a2a",
+      "bytes": 1495040,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_libogg": "master"
+      }
+    },
+    {
+      "name": "ext_fontconfig",
+      "version": "master-1789747375",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_fontconfig/master-1789747375/archive.tar",
+      "sha256": "3dd662b309293a00f224c0a5ed173953d859f81f1bd721699e8489164068f0b3",
+      "bytes": 2007040,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_freetype": "master",
+        "ext_expat": "master",
+        "ext_pkgconfig": "master",
+        "ext_gettext": "master"
+      }
+    },
+    {
+      "name": "ext_freetype",
+      "version": "master-1789744081",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_freetype/master-1789744081/archive.tar",
+      "sha256": "a06ca3b874f2996c33523e943068ec22549821f83a8a5c23394ab1c5f0b6ec2a",
+      "bytes": 11673600,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_png": "master",
+        "ext_icu": "master",
+        "ext_pkgconfig": "master",
+        "ext_zlib": "master"
+      }
+    },
+    {
+      "name": "ext_fribidi",
+      "version": "master-1789741244",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_fribidi/master-1789741244/archive.tar",
+      "sha256": "85fbc810cf3a2f5b3b88b397340c6b4da94e92bcf8d329a5bf43a2789ad2d783",
+      "bytes": 716800,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_gettext",
+      "version": "master-1789742793",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_gettext/master-1789742793/archive.tar",
+      "sha256": "5ac8b9c9275ead59b2e7477cb1f2fc59834d54da8e465ea51252c25e7af0f28c",
+      "bytes": 28538880,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_giflib",
+      "version": "master-1789741249",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_giflib/master-1789741249/archive.tar",
+      "sha256": "bf73ce5c2ee9bf59244d7a61805858a64cffa3158dcfa2c5039d041568fa9990",
+      "bytes": 174080,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_gsl",
+      "version": "master-1789741296",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_gsl/master-1789741296/archive.tar",
+      "sha256": "49b0257404aa35102d861e5a0009871011b943ac1ceb0833ac6ac4effb696193",
+      "bytes": 9533440,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_highway",
+      "version": "master-1789741422",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_highway/master-1789741422/archive.tar",
+      "sha256": "3125400820f17c2875648206b40555134da96dbf99a5054993d4fb7278f075c2",
+      "bytes": 126894080,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_iconv",
+      "version": "master-1713380359",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_iconv/master-1713380359/archive.tar",
+      "sha256": "1da1a4605061466e9fba0e7037f25dd92bedd8304478f5d7cd55f650e6a2fcd2",
+      "bytes": 2478080,
+      "recipe_commit": "9da83163951b7370b9f9bc1e8562da4e11bdfd5f",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_icu",
+      "version": "master-1789741545",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_icu/master-1789741545/archive.tar",
+      "sha256": "757f8b91d83d21f138dadb7f2c7255aaa7d6a6100b934bfce0f78e9701777e66",
+      "bytes": 81039360,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_imath",
+      "version": "master-1789741553",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_imath/master-1789741553/archive.tar",
+      "sha256": "6ef71543e9378f9945a58ae32985c889e9d44b89e125f17c002ecb1579a03949",
+      "bytes": 1372160,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_immer",
+      "version": "master-1789741558",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_immer/master-1789741558/archive.tar",
+      "sha256": "3fbe9d9248894482248670c7fd38b98ae16bc167ab18d68a8975e48036747dbf",
+      "bytes": 1013760,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_jpeg",
+      "version": "master-1789741613",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_jpeg/master-1789741613/archive.tar",
+      "sha256": "ce392d989699d9717b6cbb54a32273372b753cc81b7b895163c930e0b3bd7d48",
+      "bytes": 21780480,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_jpegxl",
+      "version": "master-1789744187",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_jpegxl/master-1789744187/archive.tar",
+      "sha256": "8460c0e021b27c277b364734867d803e98b87b331d6ace3f9c7dddd82513c6f5",
+      "bytes": 8273920,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_highway": "master",
+        "ext_brotli": "master",
+        "ext_lcms2": "master",
+        "ext_jpeg": "master",
+        "ext_png": "master",
+        "ext_zlib": "master"
+      }
+    },
+    {
+      "name": "ext_json_c",
+      "version": "master-1789741627",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_json_c/master-1789741627/archive.tar",
+      "sha256": "85b3af0f58bc9ae334c9084a667ee411a8a5b3fbc6ced9f90997df8b78385d3e",
+      "bytes": 983040,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_karchive",
+      "version": "master-1789747393",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_karchive/master-1789747393/archive.tar",
+      "sha256": "609c6e48b9c018cb75eb91f8bf539432b7a8c70181790c295e136194dbe3abc6",
+      "bytes": 829440,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master"
+      }
+    },
+    {
+      "name": "ext_kcompletion",
+      "version": "master-1789748643",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_kcompletion/master-1789748643/archive.tar",
+      "sha256": "fad0ae3f910a8aa00800d8968422d5d201886f4e1b6ae82541845f521a07bb31",
+      "bytes": 1505280,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_extra_cmake_modules": "master",
+        "ext_qt": "master",
+        "ext_kconfig": "master",
+        "ext_kwidgetsaddons": "master"
+      }
+    },
+    {
+      "name": "ext_kconfig",
+      "version": "master-1789747426",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_kconfig/master-1789747426/archive.tar",
+      "sha256": "d118fe8ff2af07ab8f13b2dcba5a1b2f740cfadadab8b7f7e0280c362b7938d0",
+      "bytes": 4106240,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master"
+      }
+    },
+    {
+      "name": "ext_kcoreaddons",
+      "version": "master-1789747462",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_kcoreaddons/master-1789747462/archive.tar",
+      "sha256": "e42815e6d1c7d00c48f10b40cc2dfe1c29c1278ff3afa5a93d4d915a93f54657",
+      "bytes": 4034560,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_extra_cmake_modules": "master",
+        "ext_qt": "master"
+      }
+    },
+    {
+      "name": "ext_kdcraw",
+      "version": "master-1789747308",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_kdcraw/master-1789747308/archive.tar",
+      "sha256": "81a2efd193cf7b3c3f8afe7f6ca9c624dd693916c0e5d8e14b49fc36906ce568",
+      "bytes": 337920,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_libraw": "master",
+        "ext_extra_cmake_modules": "master",
+        "ext_qt": "master"
+      }
+    },
+    {
+      "name": "ext_kguiaddons",
+      "version": "master-1789747485",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_kguiaddons/master-1789747485/archive.tar",
+      "sha256": "6bb4ae55c392b7edb971a475ef49631b9601ef72494a3ce8eaeb69e02929dd0e",
+      "bytes": 675840,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master"
+      }
+    },
+    {
+      "name": "ext_ki18n",
+      "version": "master-1789747517",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_ki18n/master-1789747517/archive.tar",
+      "sha256": "00aa371f8e7e5624a3c423e60731792710571d024b363b669fa8cdf6e9009b79",
+      "bytes": 20520960,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master",
+        "ext_gettext": "master"
+      }
+    },
+    {
+      "name": "ext_kimageformats",
+      "version": "master-1789747542",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_kimageformats/master-1789747542/archive.tar",
+      "sha256": "58966f71df06869efe9e5e467725b2cf9d79ce2ca5a513ab084993793b774d2e",
+      "bytes": 1853440,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master",
+        "ext_karchive": "master"
+      }
+    },
+    {
+      "name": "ext_kitemmodels",
+      "version": "master-1789747564",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_kitemmodels/master-1789747564/archive.tar",
+      "sha256": "754ec06000542bfcabc19bd3479dcbb67eee95bc9f70e92296ac315b656f3d88",
+      "bytes": 1249280,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master"
+      }
+    },
+    {
+      "name": "ext_kitemviews",
+      "version": "master-1789747586",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_kitemviews/master-1789747586/archive.tar",
+      "sha256": "1426cb5daeeabb2f2e2a7cf7c159b15926f8213f3ffb522ac4c3ffadab29240b",
+      "bytes": 1433600,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master"
+      }
+    },
+    {
+      "name": "ext_kwidgetsaddons",
+      "version": "master-1789747644",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_kwidgetsaddons/master-1789747644/archive.tar",
+      "sha256": "25fbc4ab1f125399758e66759afc6ffb7d0b6414064c304d4d9047e887e0ce65",
+      "bytes": 10465280,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master"
+      }
+    },
+    {
+      "name": "ext_kwindowsystem",
+      "version": "master-1789747665",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_kwindowsystem/master-1789747665/archive.tar",
+      "sha256": "336e482719e844239f8bf745d004f32d9762d74ae3427bea0304f32a6eeec044",
+      "bytes": 1259520,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master"
+      }
+    },
+    {
+      "name": "ext_lager",
+      "version": "master-1789743049",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_lager/master-1789743049/archive.tar",
+      "sha256": "0f764f64a4d33da26de91d9372d1e1eaf8bd2454b081e1b958a49c544916c0cb",
+      "bytes": 409600,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_zug": "master",
+        "ext_immer": "master"
+      }
+    },
+    {
+      "name": "ext_lame",
+      "version": "master-1789743164",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_lame/master-1789743164/archive.tar",
+      "sha256": "2264fd322c669c5687b2e5d39e9d3e9a547f8580af61ab6dff7b6ed58bfd3bcf",
+      "bytes": 890880,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_pkgconfig": "master"
+      }
+    },
+    {
+      "name": "ext_lcms2",
+      "version": "master-1789741636",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_lcms2/master-1789741636/archive.tar",
+      "sha256": "bf234464ca3c5e72e0f8961b53543a9fc5f39c07836f0eb127686d7007253df2",
+      "bytes": 5232640,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_libaom",
+      "version": "master-1789741985",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_libaom/master-1789741985/archive.tar",
+      "sha256": "d645d21940bb88c7adcf056fce4c825a4b447e1d221d9d21a896993bb3bd690e",
+      "bytes": 85032960,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_libde265",
+      "version": "master-1789742158",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_libde265/master-1789742158/archive.tar",
+      "sha256": "68f13959b15e4be1aec90a1bf995f429702e4fa1b13678ef0e9d4689306add9b",
+      "bytes": 1658880,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_libheif",
+      "version": "master-1789747292",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_libheif/master-1789747292/archive.tar",
+      "sha256": "d057036d034dbc0f8406e84fadc028a45f63e1ab7f07477b4dda3cbaad48e6ff",
+      "bytes": 17623040,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_libaom": "master",
+        "ext_libde265": "master",
+        "ext_libx265": "master"
+      }
+    },
+    {
+      "name": "ext_libogg",
+      "version": "master-1789741749",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_libogg/master-1789741749/archive.tar",
+      "sha256": "c32b84bc57117bd5a98dc71ca8b124fc25782010eb7096aecb84693d08ab0029",
+      "bytes": 747520,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_libraw",
+      "version": "master-1789743338",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_libraw/master-1789743338/archive.tar",
+      "sha256": "9b6d0672d09325809c8eeef51c72748df5a39d9039493bb6d633efcc736fd88b",
+      "bytes": 6420480,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_lcms2": "master",
+        "ext_jpeg": "master",
+        "ext_zlib": "master"
+      }
+    },
+    {
+      "name": "ext_libtheora",
+      "version": "master-1789743189",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_libtheora/master-1789743189/archive.tar",
+      "sha256": "52f59c351660383fdc47a72fc3abffa8c5c2c1803538b5c4c56336882eeb328c",
+      "bytes": 1587200,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_libogg": "master",
+        "ext_libvorbis": "master",
+        "ext_png": "master",
+        "ext_pkgconfig": "master"
+      }
+    },
+    {
+      "name": "ext_libvorbis",
+      "version": "master-1789741756",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_libvorbis/master-1789741756/archive.tar",
+      "sha256": "f297a9c2c20f10f8c8c5ca954ee9f748b0d020aa8b2f4a3bbb456c705f184931",
+      "bytes": 2263040,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_libogg": "master"
+      }
+    },
+    {
+      "name": "ext_libx265",
+      "version": "master-1789743292",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_libx265/master-1789743292/archive.tar",
+      "sha256": "f43e6bca2574370536688d21e916e6d694165189a7b88e49a4c1142e30d84e57",
+      "bytes": 35819520,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_libx265_12bit": "master"
+      }
+    },
+    {
+      "name": "ext_libx265_10bit",
+      "version": "master-1789742178",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_libx265_10bit/master-1789742178/archive.tar",
+      "sha256": "084ea0c63fe5eb91532dc775435a8581764f55de0a122aa88bcb7540a6602286",
+      "bytes": 17602560,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_libx265_12bit",
+      "version": "master-1789742199",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_libx265_12bit/master-1789742199/archive.tar",
+      "sha256": "f891b6dbf5d2c503a17b8ec0332ddcc31dcb6f556b8fdf536f7fafcc709a9db9",
+      "bytes": 17602560,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_libx265_10bit": "master"
+      }
+    },
+    {
+      "name": "ext_lzma",
+      "version": "master-1789742006",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_lzma/master-1789742006/archive.tar",
+      "sha256": "0687ce8a3d2c9b1396fc83f26a83fa0ce0705750e6b1eacac1dea8f0664f95c1",
+      "bytes": 4495360,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_meson",
+      "version": "master-1744749995",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_meson/master-1744749995/archive.tar",
+      "sha256": "d6b723e49c12f14fcfc79ebd28a4da5b28d950e9b6e8eb0785ae1dfdb6def5ab",
+      "bytes": 4546560,
+      "recipe_commit": "243a18ec65aefa41292215a020726faeabf37792",
+      "dependencies": {
+        "ext_python": "master"
+      }
+    },
+    {
+      "name": "ext_mlt",
+      "version": "master-1789747705",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_mlt/master-1789747705/archive.tar",
+      "sha256": "9d1b7842bce966625ebf6b26426b3700a91a1ba0643367eda047ad28f0f71001",
+      "bytes": 4474880,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_ffmpeg": "master",
+        "ext_sdl2": "master",
+        "ext_libvorbis": "master",
+        "ext_fftw3": "master",
+        "ext_fontconfig": "master"
+      }
+    },
+    {
+      "name": "ext_mypaint",
+      "version": "master-1789741641",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_mypaint/master-1789741641/archive.tar",
+      "sha256": "fa749d746fe0ba8dbef9059e7c764ce94cda793b795e94980982c1bdb5735575",
+      "bytes": 440320,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_json_c": "master",
+        "ext_extra_cmake_modules": "master"
+      }
+    },
+    {
+      "name": "ext_nasm",
+      "version": "master-1789740916",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_nasm/master-1789740916/archive.tar",
+      "sha256": "e9275de170eefd8d025929bb4195e0a2891be18385e5e18324b60c5ed938b39e",
+      "bytes": 6379520,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_ocio",
+      "version": "master-1789742137",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_ocio/master-1789742137/archive.tar",
+      "sha256": "b333e92c79f6f15895d5066051f559f37fad09bb1068ba1ea51f9c99b2dfe74e",
+      "bytes": 16179200,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_openexr": "master"
+      }
+    },
+    {
+      "name": "ext_openexr",
+      "version": "master-1789741705",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_openexr/master-1789741705/archive.tar",
+      "sha256": "7ebdd8b9f7ee311e2707a9468336eca02882b8265be6c1bf8fceda860d2a442a",
+      "bytes": 10516480,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_imath": "master"
+      }
+    },
+    {
+      "name": "ext_openh264",
+      "version": "master-1789743210",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_openh264/master-1789743210/archive.tar",
+      "sha256": "f02c270f7054bc37816cbb93cd853cbf71620dac76d21e174328b5138d983854",
+      "bytes": 2621440,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_pkgconfig": "master"
+      }
+    },
+    {
+      "name": "ext_openjpeg",
+      "version": "master-1789741720",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_openjpeg/master-1789741720/archive.tar",
+      "sha256": "76d9366db9292ca97da4da9ad15c7d8e881cc7caa8ce846a41ff1e70106f61db",
+      "bytes": 5038080,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_lcms2": "master"
+      }
+    },
+    {
+      "name": "ext_openssl",
+      "version": "master-1789742873",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_openssl/master-1789742873/archive.tar",
+      "sha256": "b6f93f33b4625efa850ac59685ce24b8324c76839fe0249837f873c022ef300d",
+      "bytes": 18749440,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_opus",
+      "version": "master-1789741776",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_opus/master-1789741776/archive.tar",
+      "sha256": "c134e170158dface7da1503d23b8c31f0ea06d466d67141839a5d90d3be39cd0",
+      "bytes": 1361920,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_pkgconfig",
+      "version": "master-1789742985",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_pkgconfig/master-1789742985/archive.tar",
+      "sha256": "8834eedad4a6de97bf3c460d2dc6737bb6ca31e3ff75a0cd5afde18e34aab89a",
+      "bytes": 3041280,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_png",
+      "version": "master-1789743065",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_png/master-1789743065/archive.tar",
+      "sha256": "568d60804f778586cf537dba6e225276613d782f2324a26f9dde3ec190247abd",
+      "bytes": 4556800,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_zlib": "master"
+      }
+    },
+    {
+      "name": "ext_poppler",
+      "version": "master-1789747839",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_poppler/master-1789747839/archive.tar",
+      "sha256": "a7390f945e5b09bcc870c9c048e64e5be64155319446ff5d893ccf45584993a3",
+      "bytes": 11151360,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_freetype": "master",
+        "ext_fontconfig": "master",
+        "ext_qt": "master",
+        "ext_jpeg": "master",
+        "ext_png": "master",
+        "ext_tiff": "master",
+        "ext_boost": "master",
+        "ext_lcms2": "master"
+      }
+    },
+    {
+      "name": "ext_pyqt-builder",
+      "version": "master-1789747327",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_pyqt-builder/master-1789747327/archive.tar",
+      "sha256": "b887cd6b12fc710155ab717d3301e7d5614a903456c7b0847381114b887add50",
+      "bytes": 9697280,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_python": "master",
+        "ext_qt": "master",
+        "ext_python-modules": "master"
+      }
+    },
+    {
+      "name": "ext_pyqt5",
+      "version": "master-1789748548",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_pyqt5/master-1789748548/archive.tar",
+      "sha256": "48d87e57e3f1e6e08264fb92520d105ffc578828399f6340adeb5011712195c0",
+      "bytes": 40806400,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_python": "master",
+        "ext_qt": "master",
+        "ext_pyqt-builder": "master",
+        "ext_sip": "master",
+        "ext_python-modules": "master"
+      }
+    },
+    {
+      "name": "ext_pyqt5-sip",
+      "version": "master-1789748619",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_pyqt5-sip/master-1789748619/archive.tar",
+      "sha256": "0310edb24349cda2c45e98833f6df2976a1d7cd55d72b1f31543c82ac0958c52",
+      "bytes": 399360,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_python": "master",
+        "ext_sip": "master",
+        "ext_qt": "master",
+        "ext_pyqt5": "master",
+        "ext_python-modules": "master"
+      }
+    },
+    {
+      "name": "ext_python",
+      "version": "master-1789743937",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_python/master-1789743937/archive.tar",
+      "sha256": "492fb12e3285b06e7da063b68fc2d271a654bcb9966f3bddb840789cdc6398c5",
+      "bytes": 244090880,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_lzma": "master",
+        "ext_openssl": "master"
+      }
+    },
+    {
+      "name": "ext_python-modules",
+      "version": "master-1789743966",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_python-modules/master-1789743966/archive.tar",
+      "sha256": "bfd38a9cf51d30745db1c2ac9125399bc77aa0eda85d95501af74b1d06aca302",
+      "bytes": 11089920,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_python": "master"
+      }
+    },
+    {
+      "name": "ext_python-openvino",
+      "version": "master-1789751521",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_python-openvino/master-1789751521/archive.tar",
+      "sha256": "6eefa7f15c0c23ceffa24af058c8d9e8098bd98dee1cd42cba816de8a147f3ee",
+      "bytes": 203141120,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_python": "master"
+      }
+    },
+    {
+      "name": "ext_qt",
+      "version": "master-1789746820",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_qt/master-1789746820/archive.tar",
+      "sha256": "5b6a4df691aa6567bfbbdf0c8038d9557d242e0ff2ec4b488dbb685ac131d0df",
+      "bytes": 460922880,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_icu": "master",
+        "ext_freetype": "master",
+        "ext_png": "master",
+        "ext_jpeg": "master",
+        "ext_openssl": "master",
+        "ext_zlib": "master"
+      }
+    },
+    {
+      "name": "ext_qt-quickcontrols2",
+      "version": "master-1722505564",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_qt-quickcontrols2/master-1722505564/archive.tar",
+      "sha256": "2608610c4d303279af1b16bd27ddf18d4093824deac948dcc5cd05eb088c6e66",
+      "bytes": 471367680,
+      "recipe_commit": "f5e43e1a0fd35a3c8ec54af0ec4f38c4682de99d",
+      "dependencies": {
+        "ext_icu": "master",
+        "ext_freetype": "master",
+        "ext_png": "master",
+        "ext_jpeg": "master",
+        "ext_openssl": "master",
+        "ext_zlib": "master"
+      }
+    },
+    {
+      "name": "ext_quazip",
+      "version": "master-1789746861",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_quazip/master-1789746861/archive.tar",
+      "sha256": "f354482aa11a7f0eb76501e896595a1998b13cd39ca80f6a3463d6746bad140b",
+      "bytes": 768000,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_zlib": "master"
+      }
+    },
+    {
+      "name": "ext_sdl2",
+      "version": "master-1789741810",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_sdl2/master-1789741810/archive.tar",
+      "sha256": "7fc0655ad1ee32ebe72d968a09f722948a13a3100fb1a96e22c5fd45a33e03e8",
+      "bytes": 7772160,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_seexpr",
+      "version": "master-1789747743",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_seexpr/master-1789747743/archive.tar",
+      "sha256": "d594df57498231113400b187e8723306c371075241994043131311b228b42e26",
+      "bytes": 3584000,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master",
+        "ext_ki18n": "master"
+      }
+    },
+    {
+      "name": "ext_sip",
+      "version": "master-1789747344",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_sip/master-1789747344/archive.tar",
+      "sha256": "4d59a2d7d4abc211a57a5420c5ad17e24645faf80b30b8883a1066f68e915eef",
+      "bytes": 13608960,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_python": "master",
+        "ext_python-modules": "master"
+      }
+    },
+    {
+      "name": "ext_tiff",
+      "version": "master-1789743088",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_tiff/master-1789743088/archive.tar",
+      "sha256": "7dacd51a3b3bf78d787a3e9666a716fd3498455e0e3ba7ff42b820b7ea1289e1",
+      "bytes": 8816640,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_zlib": "master",
+        "ext_jpeg": "master"
+      }
+    },
+    {
+      "name": "ext_unibreak",
+      "version": "master-1789741724",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_unibreak/master-1789741724/archive.tar",
+      "sha256": "f433636691c55806fdd5bb6795176f10b06844e037d1afca47af4d60e0bcf422",
+      "bytes": 614400,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_vpx",
+      "version": "master-1789743268",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_vpx/master-1789743268/archive.tar",
+      "sha256": "3c2b9d6ac8fd08bb4a7d2b646046d79630865ba62abf26fe03813fb8bbed6637",
+      "bytes": 5273600,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_pkgconfig": "master"
+      }
+    },
+    {
+      "name": "ext_webp",
+      "version": "master-1789743126",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_webp/master-1789743126/archive.tar",
+      "sha256": "eadc7c43d94e2fc5b51c0c01073893c8fca5707c3f1fd4750553c2d2ee14c122",
+      "bytes": 3287040,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_png": "master",
+        "ext_jpeg": "master",
+        "ext_tiff": "master",
+        "ext_giflib": "master",
+        "ext_zlib": "master"
+      }
+    },
+    {
+      "name": "ext_xsimd",
+      "version": "master-1789741728",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_xsimd/master-1789741728/archive.tar",
+      "sha256": "5bd9d2826db0f406db91735237c523533e18b0a5b4b5dd1a5eb71471a622792a",
+      "bytes": 1966080,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_zlib",
+      "version": "master-1789742991",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_zlib/master-1789742991/archive.tar",
+      "sha256": "222adba44a432f1f8a055e8e9da4932f62df35cdf0914b0eb4c005299900d084",
+      "bytes": 1689600,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_zug",
+      "version": "master-1789741743",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-macos/packages/generic/ext_zug/master-1789741743/archive.tar",
+      "sha256": "2818dc3b931e2f8d963cf5cd07bd6517c186e1a5c3b553b6f27a9e3cfb0f73bf",
+      "bytes": 358400,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    }
+  ]
+}

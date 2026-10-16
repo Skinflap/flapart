@@ -174,6 +174,26 @@ index d611b3a..9de4fe7 100644
  #endif
      d->actionManager()->updateGUI();
  
+diff --git a/libs/ui/KisUiFont.cpp b/libs/ui/KisUiFont.cpp
+index b866d9d..fae4a94 100644
+--- a/libs/ui/KisUiFont.cpp
++++ b/libs/ui/KisUiFont.cpp
+@@ -58,12 +58,12 @@ QFont systemDefaultUiFont()
+ boost::optional<QFont> userCfgUiFont()
+ {
+     KisConfig cfg(true);
+-    if (cfg.readEntry<bool>(useCustomSystemFontCfgName, false)) {
+-        QString fontName = cfg.readEntry<QString>(customSystemFontCfgName, QString());
++    if (cfg.readEntry<bool>(useCustomSystemFontCfgName, true)) {
++        QString fontName = cfg.readEntry<QString>(customSystemFontCfgName, QStringLiteral("Syne Mono"));
+         if (fontName.isEmpty()) {
+             return boost::none;
+         }
+-        int fontSize = cfg.readEntry<int>(customFontSizeCfgName, -1);
++        int fontSize = cfg.readEntry<int>(customFontSizeCfgName, 10);
+         if (fontSize <= 6) {
+             // Font size may be in pixels (on Android) or points (everywhere else.)
+             QFont systemFont = systemDefaultUiFont();
 diff --git a/libs/ui/KoDocumentInfo.cpp b/libs/ui/KoDocumentInfo.cpp
 index f49e2b4..471befa 100644
 --- a/libs/ui/KoDocumentInfo.cpp

@@ -1,10 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 try:
     from PyQt5.QtCore import QTimer
-    from PyQt5.QtWidgets import QApplication, QDockWidget, QToolTip
+    from PyQt5.QtWidgets import QApplication, QDockWidget, QToolTip, QPushButton
+    from PyQt5.QtGui import QFontInfo, QPalette
 except ImportError:
     from PyQt6.QtCore import QTimer
-    from PyQt6.QtWidgets import QApplication, QDockWidget, QToolTip
+    from PyQt6.QtWidgets import QApplication, QDockWidget, QToolTip, QPushButton
+    from PyQt6.QtGui import QFontInfo, QPalette
 from krita import Krita, InfoObject
 import json, pathlib, traceback, os, platform
 
@@ -52,17 +54,38 @@ def run():
         result['focus_restores_panels'] = before == {d.objectName(): d.isVisible() for d in docks}
         studio.show_studio(w)
         result['action']=bool(k.action('flapart_studio'))
-        QTimer.singleShot(700,lambda: finish(result,w,out))
+        QTimer.singleShot(700,lambda: finish(result,w,out,studio))
     except Exception:
         result['error']=traceback.format_exc()
-        finish(result,w,out)
+        finish(result,w,out,locals().get("studio"))
 
-def finish(result,w,out):
-    QToolTip.hideText()
-    w.qwindow().grab().save(str(out/'studio.png'))
-    result['platform'] = platform.platform()
-    result['native_engine_version'] = Krita.instance().version()
+def finish(result,w,out,studio=None):
+    try:
+        QToolTip.hideText()
+        w.qwindow().grab().save(str(out/'main-window.png'))
+        result['platform'] = platform.platform()
+        result['native_engine_version'] = Krita.instance().version()
+        result['application_font'] = QFontInfo(QApplication.instance().font()).family()
+        dialog = studio.dialogs[-1] if studio and studio.dialogs else None
+        if dialog is not None:
+            dialog.grab().save(str(out/'studio.png'))
+            result['dialog_font'] = QFontInfo(dialog.font()).family()
+            result['dialog_visible'] = dialog.isVisible()
+            result['guided_controls'] = [button.text() for button in dialog.findChildren(QPushButton) if button.isVisible()]
+            assert result['dialog_font'] == 'Syne Mono', 'Guided dialog did not resolve Syne Mono'
+            assert result['dialog_visible']
+            for text in ('Start drawing','Open a drawing…','Export PNG picture…'):
+                assert text in result['guided_controls'], 'Missing guided control: '+text
+        else:
+            raise AssertionError('No visible Flapart Studio dialog')
+        role = QPalette.Window if hasattr(QPalette,'Window') else QPalette.ColorRole.Window
+        result['window_palette'] = QApplication.instance().palette().color(role).name()
+        result['theme_setting'] = Krita.instance().readSetting('theme','Theme','')
+        if os.environ.get('FLAPART_QA_EXPECT_COMPILED') == '1':
+            assert result['application_font'] == 'Syne Mono', 'Compiled app font differs'
+            assert result['window_palette'] == '#1f2128', 'Compiled app default theme differs'
+    except Exception:
+        result['error'] = traceback.format_exc()
     (out/'result.json').write_text(json.dumps(result,indent=2))
-    import os
-    os._exit(0)
+    os._exit(1 if 'error' in result else 0)
 QTimer.singleShot(3500,run)

@@ -54,3 +54,15 @@ f.write_text(text.replace(old,new))
 
 # Independent platform settings, resources, logs and single-instance identity.
 subprocess.run([__import__('sys').executable, str(own/'scripts/namespace-fork.py'), str(r)],check=True)
+
+# Krita reapplies its UI font after Python setup; default to the bundled Flaptown
+# font here while preserving explicitly selected user font preferences.
+f=r/"libs/ui/KisUiFont.cpp"
+text=f.read_text()
+assert text.count('cfg.readEntry<bool>(useCustomSystemFontCfgName, false)') == 1
+text=text.replace('cfg.readEntry<bool>(useCustomSystemFontCfgName, false)','cfg.readEntry<bool>(useCustomSystemFontCfgName, true)')
+assert text.count('cfg.readEntry<QString>(customSystemFontCfgName, QString())') == 1
+text=text.replace('cfg.readEntry<QString>(customSystemFontCfgName, QString())','cfg.readEntry<QString>(customSystemFontCfgName, QStringLiteral("Syne Mono"))')
+assert text.count('cfg.readEntry<int>(customFontSizeCfgName, -1)') == 1
+text=text.replace('cfg.readEntry<int>(customFontSizeCfgName, -1)','cfg.readEntry<int>(customFontSizeCfgName, 10)')
+f.write_text(text)
