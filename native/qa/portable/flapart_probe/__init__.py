@@ -13,6 +13,9 @@ import json, pathlib, traceback, os, platform
 def run():
     out=pathlib.Path(os.environ['FLAPART_QA_OUTPUT']); out.mkdir(parents=True, exist_ok=True)
     result={}
+    owned_documents=[]
+    keepalive=[]
+    w=None
     (out/"stage.txt").write_text("entered")
     try:
         k=Krita.instance(); w=k.activeWindow()
@@ -22,6 +25,7 @@ def run():
         studio.new_canvas(w,(64,64))
         (out/"stage.txt").write_text("canvas created")
         doc=k.activeDocument()
+        owned_documents.append(doc)
         doc.setBatchmode(True)
         result['canvas']=[doc.width(),doc.height()]
         layer=doc.activeNode()
@@ -42,6 +46,7 @@ def run():
         doc.setBatchmode(True)
         result['kra']=doc.saveAs(str(out/'drawing.kra'))
         reopened=k.openDocument(str(out/'drawing.kra'))
+        owned_documents.append(reopened)
         nodes = reopened.rootNode().childNodes()
         drawing = next(node for node in nodes if node.name() == 'Draw here')
         result['round_trip'] = [reopened.width(), reopened.height(), drawing.name()]
@@ -66,12 +71,14 @@ def run():
         result['action_reopens']=bool(registered.dialogs and registered.dialogs[-1].isVisible())
         assert result['action_reopens']
         studio=registered
-        QTimer.singleShot(700,lambda: finish(result,w,out,studio))
+        # Retain wrappers until asynchronous projection and final UI capture finish.
+        keepalive.extend([doc,layer,reopened,nodes,drawing])
+        QTimer.singleShot(700,lambda: finish(result,w,out,studio,owned_documents,keepalive))
     except Exception:
         result['error']=traceback.format_exc()
-        finish(result,w,out,locals().get("studio"))
+        finish(result,w,out,locals().get("studio"),owned_documents,keepalive)
 
-def finish(result,w,out,studio=None):
+def finish(result,w,out,studio=None,owned_documents=(),keepalive=()):
     try:
         QToolTip.hideText()
         w.qwindow().grab().save(str(out/'main-window.png'))
@@ -112,6 +119,34 @@ def finish(result,w,out,studio=None):
             assert result['window_palette'] == '#1f2128', 'Compiled app default theme differs'
     except Exception:
         result['error'] = traceback.format_exc()
-    (out/'result.json').write_text(json.dumps(result,indent=2))
-    os._exit(1 if 'error' in result else 0)
+    result['lifecycle'] = {'method':'qt-event-loop-exit','cleanup_started':False,
+                           'qa_documents_closed':False,'qt_exit_requested':False,
+                           'about_to_quit':False}
+    def write_result():
+        (out/'result.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+    def about_to_quit():
+        result['lifecycle']['about_to_quit'] = True
+        write_result()
+    QApplication.instance().aboutToQuit.connect(about_to_quit)
+    def close_normally():
+        # This plugin runs only in a disposable QA profile. Close the two
+        # documents created above, retaining their wrappers through cleanup.
+        retained = keepalive
+        result['lifecycle']['cleanup_started'] = True
+        try:
+            for document in owned_documents:
+                document.waitForDone()
+                document.setModified(False)
+                assert document.close(), 'QA document did not close'
+            result['lifecycle']['qa_documents_closed'] = True
+            for top in QApplication.topLevelWidgets():
+                if top.isVisible():
+                    top.close()
+        except Exception:
+            result['error'] = result.get('error','') + traceback.format_exc()
+        result['lifecycle']['qt_exit_requested'] = True
+        write_result()
+        QApplication.instance().exit(1 if 'error' in result else 0)
+    write_result()
+    QTimer.singleShot(100,close_normally)
 QTimer.singleShot(3500,run)

@@ -55,6 +55,9 @@ if a.process_architecture:assert process_arch==a.process_architecture,'Applicati
 for key in ('png','kra','batchmode_restored','focus_hides_panels','focus_restores_panels','action'):assert result.get(key) is True,key
 assert result['canvas']==[64,64] and result['round_trip']==[64,64,'Draw here'] and result['round_trip_pixel']==[70,110,191,255]
 assert result['browser_handoff']==['https://flaptown.com/flapart/?from=native&destination=profile']
+lifecycle=result.get('lifecycle',{})
+assert lifecycle.get('method')=='qt-event-loop-exit'
+assert all(lifecycle.get(key) is True for key in ('cleanup_started','qa_documents_closed','qt_exit_requested','about_to_quit')),lifecycle
 assert all(path.exists() and hashlib.sha256(path.read_bytes()).hexdigest()==digest for path,digest in sentinels.items()),'Original Krita sentinel changed'
 qualification={'platform':platform.platform(),'architecture':process_arch,'process_architecture':process_arch,'hardware_architecture':hardware_arch,'execution_mode':execution_mode,'native_runtime_test':True,'original_krita_sentinels_preserved':True,'compiled_fork':True,'relocated_package_test':a.packaged,'signed':False,'notarized':False,'physical_tablet_tested':False}
 (output/'qualification.json').write_text(json.dumps(qualification,indent=2)+'\n');print('Native source application probe and Krita namespace preservation passed.')
