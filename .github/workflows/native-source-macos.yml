@@ -41,7 +41,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 native/qa/macos-build/package-candidate.py --source "$RUNNER_TEMP/flapart-upstream" --prefix "$RUNNER_TEMP/flapart-sdk" --output "$RUNNER_TEMP/flapart-packaged" 2>&1 | tee qa-result/package.log
+          python3 native/qa/macos-build/package-candidate.py --universal --source "$RUNNER_TEMP/flapart-upstream" --prefix "$RUNNER_TEMP/flapart-sdk" --output "$RUNNER_TEMP/flapart-packaged" 2>&1 | tee qa-result/package.log
           cp "$RUNNER_TEMP/flapart-packaged/candidate-inventory.json" qa-result/candidate-inventory.json
           python3 native/qa/portable/test-relocated.py --candidate "$RUNNER_TEMP/flapart-packaged/Flapart Studio.app" --probe native/qa/portable --output qa-result/relocated --previous-qualification qa-result/runtime/qualification.json
       - name: Retain source-build evidence only
