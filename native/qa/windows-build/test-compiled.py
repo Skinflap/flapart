@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Native Windows CI test; settings paths come from Windows Known Folders."""
-import argparse,ctypes,uuid,pathlib,platform,os,subprocess,json,shutil,hashlib
+import argparse,ctypes,uuid,pathlib,platform,os,subprocess,json,shutil,hashlib,sys,time
 p=argparse.ArgumentParser();p.add_argument('--prefix',required=True,type=pathlib.Path);p.add_argument('--probe',required=True,type=pathlib.Path);p.add_argument('--output',required=True,type=pathlib.Path);p.add_argument('--packaged',action='store_true',help='Require a relocated self-contained runtime without build-prefix environment');p.add_argument('--timeout',type=int,default=180);a=p.parse_args()
 if platform.system()!='Windows' or os.environ.get('CI')!='true':raise SystemExit('Requires a disposable native Windows CI profile (CI=true).')
 def knownfolder(identifier):
@@ -32,11 +32,20 @@ receipt=output/'result.json'
 if receipt.exists():raise SystemExit('Output already contains a receipt; use a fresh output directory.')
 with (output/'runtime.log').open('w') as log:
  process=subprocess.Popen([str(executable),'--nosplash'],env=env,stdout=log,stderr=log)
+ timed_out=False
  try:process.wait(timeout=a.timeout)
  except subprocess.TimeoutExpired:
+  timed_out=True
+  try:subprocess.run([sys.executable,str(pathlib.Path(__file__).with_name('capture-startup.py')),'--pid',str(process.pid),'--output',str(output)],timeout=15,check=True)
+  except Exception as error:(output/'capture-error.log').write_text(repr(error))
   process.terminate()
   try:process.wait(timeout=10)
   except subprocess.TimeoutExpired:process.kill();process.wait()
+(output/'launch.json').write_text(json.dumps({'returncode':process.returncode,'returncode_hex':hex(process.returncode & 0xffffffff),'timed_out':timed_out,'executable':str(executable)},indent=2)+'\n')
+for base in (local,roaming):
+ for name in ('flapart-native.log','flapart-native-sysinfo.log'):
+  source=base/name
+  if source.is_file():shutil.copy2(source,output/('native-'+base.name+'-'+name))
 if not receipt.exists():raise SystemExit('No native result.json; inspect runtime.log and Flapart native logs.')
 result=json.loads(receipt.read_text());print(json.dumps(result,indent=2));assert process.returncode==0 and 'error' not in result
 for key in ('png','kra','batchmode_restored','focus_hides_panels','focus_restores_panels','action'):assert result.get(key) is True,key

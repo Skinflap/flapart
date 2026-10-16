@@ -1,5 +1,5 @@
 {
-  "version": "0.1.6",
+  "version": "0.1.7",
   "downloads": [
     {
       "title": "Flapart Studio for Linux",
@@ -11,7 +11,7 @@
       "title": "Source code",
       "description": "Browser editor, account modules, tests, native overlay, and build instructions. GPL v3; font licenses included.",
       "status": "Source package \u00b7 requires development tools",
-      "url": "/flapsoft/downloads/flapart-source-0.1.6.zip"
+      "url": "/flapsoft/downloads/flapart-source-0.1.7.zip"
     },
     {
       "title": "Flapart Studio for Krita",
