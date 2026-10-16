@@ -1,0 +1,95 @@
+From 6fedb3e3f7b120266550a848bcf302e11f950dc4 Mon Sep 17 00:00:00 2001
+From: Cary Phillips <seabeepea@gmail.com>
+Date: Thu, 1 Oct 2026 17:14:52 -0700
+Subject: [PATCH] Fix integer overflow in readCoreTiledPart tile size
+ accumulation (#2688)
+
+The per-channel tile byte count in exrcheck's readCoreTiledPart was
+widened to uint64_t before multiplication, but the running sum across
+channels had no overflow check. A crafted tiled EXR with many channels
+and/or huge tile dimensions could wrap the accumulated size, causing
+tiledata.resize() to allocate a too-small buffer while channel stride
+metadata still reflected the original large width. This led to an
+out-of-bounds read in unpack_32bit via exr_decoding_run.
+
+Add accumOverflowSafe(), a checked multiply-then-add helper, and use
+it for the tile byte accumulation. On overflow the checker now
+rejects the tile with EXR_ERR_INVALID_ATTR instead of proceeding
+with inconsistent buffer/stride sizes.
+
+Addresses https://github.com/AcademySoftwareFoundation/openexr/security/advisories/GHSA-7qg8-w3rj-qxx9
+
+Assisted-by: Copilot / Claude Sonnet 5
+
+Signed-off-by: Cary Phillips <seabeepea@gmail.com>
+---
+ src/lib/OpenEXRUtil/ImfCheckFile.cpp | 42 +++++++++++++++++++++++++---
+ 1 file changed, 38 insertions(+), 4 deletions(-)
+
+diff --git a/src/lib/OpenEXRUtil/ImfCheckFile.cpp b/src/lib/OpenEXRUtil/ImfCheckFile.cpp
+index a7855cbb6d..d5d81ac660 100644
+--- a/src/lib/OpenEXRUtil/ImfCheckFile.cpp
++++ b/src/lib/OpenEXRUtil/ImfCheckFile.cpp
+@@ -54,6 +54,26 @@ const uint64_t gMaxBytesPerDeepScanline = 1 << 12;
+ const int gTargetPixelsToRead = 1 << 28;
+ const int gMaxScanlinesToRead = 1 << 20;
+ 
++//
++// Accumulate total += a * b * c, checking for uint64_t overflow in both the
++// multiplication and the running addition. Returns false (and leaves total
++// unmodified) if an overflow would occur.
++//
++static bool
++accumOverflowSafe (uint64_t& total, uint64_t a, uint64_t b, uint64_t c)
++{
++    if (a != 0 && b > UINT64_MAX / a) return false;
++    uint64_t ab = a * b;
++
++    if (ab != 0 && c > UINT64_MAX / ab) return false;
++    uint64_t abc = ab * c;
++
++    if (total > UINT64_MAX - abc) return false;
++
++    total += abc;
++    return true;
++}
++
+ //
+ // compute row stride appropriate to process files quickly
+ // only used for the 'Rgba' interfaces, which read potentially non-existent channels
+@@ -1558,7 +1578,8 @@ readCoreTiledPart (
+                             break;
+                         }
+ 
+-                        uint64_t bytes = 0;
++                        uint64_t bytes    = 0;
++                        bool     overflow = false;
+                         for (int c = 0; c < decoder.channel_count; c++)
+                         {
+                             exr_coding_channel_info_t& outc =
+@@ -1569,9 +1590,22 @@ readCoreTiledPart (
+                                 outc.user_bytes_per_element;
+                             outc.user_line_stride =
+                                 outc.user_pixel_stride * curtw;
+-                            bytes += (uint64_t) curtw *
+-                                     (uint64_t) outc.user_bytes_per_element *
+-                                     (uint64_t) curth;
++                            if (!accumOverflowSafe (
++                                    bytes,
++                                    (uint64_t) curtw,
++                                    (uint64_t) outc.user_bytes_per_element,
++                                    (uint64_t) curth))
++                            {
++                                overflow = true;
++                                break;
++                            }
++                        }
++
++                        if (overflow)
++                        {
++                            frv       = EXR_ERR_INVALID_ATTR;
++                            keepgoing = false;
++                            break;
+                         }
+ 
+                         doread = true;

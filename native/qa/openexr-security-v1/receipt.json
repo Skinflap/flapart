@@ -1,0 +1,22 @@
+{
+  "upstream_commit": "6fedb3e3f7b120266550a848bcf302e11f950dc4",
+  "patch_sha256": "ffad7e1be2493ff7c5e201f5a2c1240a610bd9b6d09d4ad0237b4d18ea27e6a9",
+  "changed_files": [
+    {
+      "path": "src/lib/OpenEXRUtil/ImfCheckFile.cpp",
+      "before_sha256": "745f7377794904fbe362bbd4bdf7bd5527c2de9072da6361e9f78bb2a299f6b4",
+      "after_sha256": "48b68e0fbab0644bf027f74251e2113f1ea311f9f6fc665eea964b8c350029ef"
+    }
+  ],
+  "matches_v3_5_2_file_exactly": true,
+  "unpatched_host_suite": {
+    "tests": 140,
+    "passed": 140,
+    "result_sha256": "231bbb0b59c9934ab3b6b8ccf621b24ee0d86972971bb8d8552efdaf0724f5a3"
+  },
+  "patched_build_qualified": false,
+  "release_qualified": false,
+  "archive_url": "https://github.com/AcademySoftwareFoundation/openexr/releases/download/v3.4.16/openexr-3.4.16.tar.gz",
+  "archive_sha256": "fbe1213a23df988ff4baaa16e6d4576ad6e615fe6eaa6ff607f5a7f1fa13ada1",
+  "advisory": "https://github.com/AcademySoftwareFoundation/openexr/security/advisories/GHSA-7qg8-w3rj-qxx9"
+}
