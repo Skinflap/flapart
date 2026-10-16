@@ -78,6 +78,34 @@ def system_path(path):
  else:roots=['/usr/lib','/lib','/lib64']
  return any(path.is_relative_to(Path(root).resolve()) for root in roots)
 
+def validate_defender_attestation(record,path,sha):
+ require(record.get('path')==str(path) and record.get('sha256','').lower()==sha,'Defender attestation path/hash mismatch')
+ require(record.get('status')=='Valid' and record.get('signature_type') in ('Catalog','Authenticode'),'Defender signature is not trusted')
+ require(record.get('signer')=='CN=Microsoft Windows, O=Microsoft Corporation, L=Redmond, S=Washington, C=US','Unexpected Defender signer')
+ require(record.get('description')=='IOfficeAntiVirus Module' and re.fullmatch('[0-9A-Fa-f]{40}',record.get('thumbprint','')),'Unexpected Defender module identity')
+ return record
+
+def windows_defender_attestation(path):
+ if sys.platform!='win32' or Path(path).name.lower()!='mpoav.dll':return None
+ import uuid
+ from ctypes import wintypes
+ guid=(ctypes.c_ubyte*16).from_buffer_copy(uuid.UUID('905e63b6-c1bf-494e-b29c-65b732d3d21a').bytes_le)
+ shell=ctypes.WinDLL('shell32');ole=ctypes.WinDLL('ole32');value=ctypes.c_void_p()
+ shell.SHGetKnownFolderPath.argtypes=[ctypes.c_void_p,wintypes.DWORD,wintypes.HANDLE,ctypes.POINTER(ctypes.c_void_p)]
+ require(shell.SHGetKnownFolderPath(ctypes.byref(guid),0,None,ctypes.byref(value))==0,'Cannot identify canonical Program Files')
+ try:program_files=Path(ctypes.wstring_at(value))
+ finally:ole.CoTaskMemFree.argtypes=[ctypes.c_void_p];ole.CoTaskMemFree(value)
+ expected=program_files/'Windows Defender'/'MpOAV.dll';path=Path(path)
+ require(expected.resolve()==expected and path==expected,'Unexpected Defender module path or reparse point')
+ buf=ctypes.create_unicode_buffer(32768);require(ctypes.windll.kernel32.GetSystemDirectoryW(buf,len(buf)),'Cannot identify system tools')
+ ps=Path(buf.value)/'WindowsPowerShell/v1.0/powershell.exe';require(ps.is_file(),'Missing system signature verifier')
+ before=digest(path);env=dict(os.environ);env['FLAPART_ATTEST_FILE']=str(path);env['PSModulePath']=str(ps.parent/'Modules')
+ script="""$ErrorActionPreference='Stop'; $p=$env:FLAPART_ATTEST_FILE; $s=Microsoft.PowerShell.Security\\Get-AuthenticodeSignature -LiteralPath $p; $f=Microsoft.PowerShell.Management\\Get-Item -LiteralPath $p; $h=Microsoft.PowerShell.Utility\\Get-FileHash -LiteralPath $p -Algorithm SHA256; [ordered]@{path=$f.FullName;sha256=$h.Hash;status=[string]$s.Status;signature_type=[string]$s.SignatureType;signer=$s.SignerCertificate.Subject;issuer=$s.SignerCertificate.Issuer;thumbprint=$s.SignerCertificate.Thumbprint;description=$f.VersionInfo.FileDescription} | Microsoft.PowerShell.Utility\\ConvertTo-Json -Compress"""
+ result=subprocess.run([str(ps),'-NoLogo','-NoProfile','-NonInteractive','-Command',script],env=env,capture_output=True,text=True,timeout=60,check=True)
+ record=validate_defender_attestation(json.loads(result.stdout),path,before)
+ require(digest(path)==before,'Defender module changed during attestation')
+ return {**record,'verification':'Windows default-trust Get-AuthenticodeSignature','verifier_path':str(ps),'verifier_sha256':digest(ps)}
+
 def architecture():
  normalize=lambda a:{'AMD64':'x86_64','aarch64':'arm64','ARM64':'arm64'}.get(a,a)
  process=normalize(platform.machine());hardware=process;mode='native'
@@ -107,16 +135,33 @@ def module_role(path):
  if name=='python313.dll' or re.fullmatch(r'libpython3\.13(?:\.so(?:\.[0-9]+)*|\.dylib)',name) or name=='python' and 'Python.framework/Versions/3.13/Python' in Path(path).as_posix():return 'python'
  return None
 
+def windows_tls_backend_pair(role,first,second):
+ # Official CPython and MinGW Qt use distinct maintained OpenSSL DLL ABIs.
+ # Admit only this measured layout within the same packaged application.
+ if sys.platform!='win32' or role not in ('ssl','crypto'):return False
+ a=PurePosixPath(first);b=PurePosixPath(second)
+ if len(a.parts)<3 or len(b.parts)<3 or a.parents[1]!=b.parents[1]:return False
+ expected={('python','lib'+role+'-3.dll'),('bin','lib'+role+'-3-x64.dll')}
+ return {(a.parent.name,a.name),(b.parent.name,b.name)}==expected
+
 def mapped_receipt(paths,root,inventory,required=None):
  rows=[];system=[];roles={}
  for raw in sorted(set(paths)):
   path=Path(raw).resolve();role=module_role(path)
   if inside(path,root):
-   record=bound_file(path,root,inventory);record['loaded_path']=str(path);rows.append(record)
+   record=bound_file(path,root,inventory);record['loaded_path']=str(path)
    if role:
-    require(role not in roles or roles[role]['archive_path']==record['archive_path'],'Ambiguous loaded '+role+' library');roles[role]=dict(record,role=role)
+    record['role']=role
+    require(role not in roles or roles[role]['archive_path']==record['archive_path'] or windows_tls_backend_pair(role,roles[role]['archive_path'],record['archive_path']),'Ambiguous loaded '+role+' library')
+    if role not in roles:roles[role]=dict(record)
+   rows.append(record)
   else:
-   require(system_path(path) and role is None,'Host/SDK runtime dependency loaded: '+str(path));system.append({'path':str(path),'sha256':digest(path) if path.is_file() else None,'shared_cache_only':sys.platform=='darwin' and not path.is_file()})
+   require(role is None,'Host/SDK runtime dependency loaded: '+str(path))
+   if system_path(path):system.append({'path':str(path),'sha256':digest(path) if path.is_file() else None,'shared_cache_only':sys.platform=='darwin' and not path.is_file()})
+   else:
+    attestation=windows_defender_attestation(path)
+    require(attestation is not None,'Host/SDK runtime dependency loaded: '+str(path))
+    system.append({'path':str(path),'sha256':attestation['sha256'].lower(),'windows_security_module_attestation':attestation})
  require(({'ssl','crypto','python_ssl','qt_network','python'} if required is None else required)<=set(roles),'Missing mapped SSL/crypto/Python/Qt native libraries')
  return rows,system,roles
 
@@ -170,7 +215,7 @@ def main():
  tls=json.loads(raw.read_text());child=json.loads(maps.read_text());require(all(child[k]==arch[k] for k in arch),'TLS child architecture changed')
  rows,system,roles=mapped_receipt(child['paths'],root,inventory)
  parent_rows,parent_system,_=mapped_receipt(loaded_paths(),root,inventory,required=set())
- tls.update(common,loaded_libraries=[roles[k] for k in ('ssl','crypto','python_ssl','qt_network')],probe_sha256=digest(__file__),https_helper_sha256=digest(args.tls_helper),transport_proxy_explicit=bool(args.https_proxy))
+ tls.update(common,loaded_libraries=[row for row in rows if row.get('role') in ('ssl','crypto','python_ssl','qt_network')],probe_sha256=digest(__file__),https_helper_sha256=digest(args.tls_helper),transport_proxy_explicit=bool(args.https_proxy))
  version=platform.python_version();python={**common,'version':version,'abi':'cp'+str(sys.version_info.major)+str(sys.version_info.minor),'soabi':sysconfig.get_config_var('SOABI'),'passed':sys.version_info[:3]>=(3,13,16) and sys.version_info[:2]==(3,13),'extension_modules':{'baseline':names,'candidate':imported,'missing':[]},'interpreter_library':roles['python'],'baseline_manifest_sha256':args.baseline_extension_sha256,'native_plugin_imports_evidence':'Not measured here; requires separate application probe.'}
  for name,data in [('tls',tls),('python',python),('provenance',{'archive_sha256':common['payload_sha256'],'runtime_root':str(root),'loaded_binaries':rows,'system_libraries':system,'parent_loaded_binaries':parent_rows,'parent_system_libraries':parent_system,'app_probe_required':True,'release_qualified':False})]:(args.output/(name+'.json')).write_text(json.dumps(data,indent=2)+'\n')
  require(digest(args.archive)==common['payload_sha256'],'Archive changed during probe')
