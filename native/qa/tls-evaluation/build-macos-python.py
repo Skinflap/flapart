@@ -4,6 +4,25 @@ Chosen over a 3.13.5 _ssl-only rebuild because current CPython security fixes
 also affect SSLContext, hostname validation and the standard library.
 """
 import argparse,pathlib,platform,hashlib,json,tarfile,os,subprocess,shutil
+def sdk_smoke_environment(base, new_prefix, site_packages, openssl_prefix):
+ """Loader paths for the isolated SDK import smoke, never packaged-runtime QA."""
+ site_packages=pathlib.Path(site_packages).resolve(strict=True)
+ frameworks=[parent for parent in site_packages.parents if parent.name=='Python.framework']
+ if len(frameworks)!=1:raise ValueError('Expected framework-contained KDE site-packages')
+ sdk_lib=frameworks[0].parent
+ if not (sdk_lib/'QtCore.framework/Versions/5/QtCore').is_file():raise ValueError('Candidate SDK QtCore framework missing')
+ new_lib=pathlib.Path(new_prefix).resolve(strict=True)/'lib'
+ if not (new_lib/'Python.framework/Versions/3.13/Python').is_file():raise ValueError('New Python framework missing')
+ ssl_lib=pathlib.Path(openssl_prefix).resolve(strict=True)/'lib'
+ if not (ssl_lib/'libssl.3.dylib').is_file():raise ValueError('Candidate OpenSSL missing')
+ # Replace inherited loader overrides; old SDK Python must not outrank new Python.
+ result={key:value for key,value in base.items() if not key.startswith('DYLD_') and key not in ('PYTHONHOME','PYTHONPATH')}
+ result.update(PYTHONPATH=str(site_packages),PYTHONNOUSERSITE='1',
+  OPENSSL_MODULES=str(ssl_lib/'ossl-modules'),
+  DYLD_FRAMEWORK_PATH=os.pathsep.join(map(str,[new_lib,sdk_lib])),
+  DYLD_LIBRARY_PATH=os.pathsep.join(map(str,[ssl_lib,new_lib,sdk_lib])))
+ return result
+
 p=argparse.ArgumentParser();p.add_argument('--archive',type=pathlib.Path,required=True);p.add_argument('--openssl-prefix',type=pathlib.Path,required=True);p.add_argument('--old-framework',type=pathlib.Path,required=True);p.add_argument('--site-packages',type=pathlib.Path,required=True);p.add_argument('--work',type=pathlib.Path,required=True);p.add_argument('--prefix',type=pathlib.Path,required=True);p.add_argument('--jobs',type=int,default=3);p.add_argument('--deployment-target',default='11.0');a=p.parse_args()
 assert platform.system()=='Darwin','Native Apple runner required'
 assert 1<=a.jobs<=16
@@ -65,8 +84,18 @@ try:
   arches=subprocess.check_output(['lipo','-archs',str(f)],text=True);assert 'arm64' in arches and 'x86_64' in arches,(f,arches)
  for f in sslmods:
   loads=subprocess.check_output(['otool','-L',str(f)],text=True);assert '1.1.dylib' not in loads and '.3.dylib' in loads,loads
- runtime_env=dict(env,PYTHONPATH=str(a.site_packages),OPENSSL_MODULES=str(a.openssl_prefix/'lib/ossl-modules'))
- code='import ssl,hashlib,sys,json;from PyQt5.QtCore import QT_VERSION_STR;print(json.dumps(dict(python=sys.version,ssl=ssl.OPENSSL_VERSION,qt=QT_VERSION_STR,paths=ssl.get_default_verify_paths()._asdict())))'
- receipt['probe']=json.loads(subprocess.check_output([str(version/'bin/python3.13'),'-c',code],env=runtime_env,text=True));assert 'OpenSSL 3.5.9' in receipt['probe']['ssl'];receipt['compiled']=True
+ runtime_env=sdk_smoke_environment(env,a.prefix,a.site_packages,a.openssl_prefix)
+ receipt['smoke_loader']={'scope':'SDK build-time import smoke only; not relocated runtime qualification','framework_paths':runtime_env['DYLD_FRAMEWORK_PATH'].split(os.pathsep),'library_paths':runtime_env['DYLD_LIBRARY_PATH'].split(os.pathsep),'site_packages':str(a.site_packages)}
+ code="""import ssl,hashlib,sys,json,ctypes,os
+import PyQt5.QtCore as QtCore
+lib=ctypes.CDLL(None)
+lib._dyld_image_count.restype=ctypes.c_uint32
+lib._dyld_get_image_name.argtypes=[ctypes.c_uint32]
+lib._dyld_get_image_name.restype=ctypes.c_char_p
+images=[os.path.realpath(os.fsdecode(lib._dyld_get_image_name(i))) for i in range(lib._dyld_image_count())]
+python_frameworks=sorted(set(p for p in images if p.endswith('/Python.framework/Versions/3.13/Python')))
+print(json.dumps(dict(python=sys.version,python_version=list(sys.version_info[:3]),prefix=sys.prefix,python_frameworks=python_frameworks,pyqt_qtcore=os.path.realpath(QtCore.__file__),ssl=ssl.OPENSSL_VERSION,qt=QtCore.QT_VERSION_STR,paths=ssl.get_default_verify_paths()._asdict())))
+"""
+ receipt['probe']=json.loads(subprocess.check_output([str(version/'bin/python3.13'),'-c',code],env=runtime_env,text=True));assert 'OpenSSL 3.5.9' in receipt['probe']['ssl'];assert receipt['probe']['python_version']==[3,13,16];assert pathlib.Path(receipt['probe']['prefix']).resolve()==version.resolve();assert receipt['probe']['python_frameworks']==[str((version/'Python').resolve())];assert pathlib.Path(receipt['probe']['pyqt_qtcore']).is_relative_to(a.site_packages);receipt['compiled']=True
 finally:(a.work/'python-build-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
 print(json.dumps(receipt,indent=2))
