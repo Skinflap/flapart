@@ -1,0 +1,109 @@
+# REVIEW DRAFT ONLY. Not installed in .github/workflows and not dispatched.
+name: Verify exact private Mac candidate through installer
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_sha256:
+        description: Exact retained original candidate ZIP SHA256
+        required: true
+        type: string
+      candidate_bytes:
+        description: Exact original candidate ZIP bytes
+        required: true
+        type: string
+      inventory_sha256:
+        description: Exact original candidate inventory SHA256
+        required: true
+        type: string
+      manifest_sha256:
+        description: Exact original ci-candidate installer manifest SHA256
+        required: true
+        type: string
+      chain_sha256:
+        description: Independent original four-stage chain manifest SHA256
+        required: true
+        type: string
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: private-mac-candidate-${{ github.run_id }}-${{ github.run_attempt }}
+  cancel-in-progress: false
+jobs:
+  installer:
+    name: installer-${{ matrix.architecture }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            architecture: arm64
+          - runner: macos-15-intel
+            architecture: x86_64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 100
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      FLAPART_ARCHITECTURE: ${{ matrix.architecture }}
+      FLAPART_CANDIDATE_SHA256: ${{ inputs.candidate_sha256 }}
+      FLAPART_CANDIDATE_BYTES: ${{ inputs.candidate_bytes }}
+      FLAPART_INVENTORY_SHA256: ${{ inputs.inventory_sha256 }}
+      FLAPART_MANIFEST_SHA256: ${{ inputs.manifest_sha256 }}
+      FLAPART_CHAIN_SHA256: ${{ inputs.chain_sha256 }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Prepare authenticated ephemeral request
+        shell: bash
+        env:
+          FLAPART_EXCHANGE_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 native/qa/installer-followup/rendezvous/hosted_full.py prepare \
+            --root "$RUNNER_TEMP/full-chain-$FLAPART_ARCHITECTURE" \
+            --workspace "$GITHUB_WORKSPACE" --token-env FLAPART_EXCHANGE_TOKEN
+      - name: Retain public request only
+        id: request
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: rendezvous-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.architecture }}-request
+          path: |
+            ${{ runner.temp }}/full-chain-${{ matrix.architecture }}/public/request.json
+            ${{ runner.temp }}/full-chain-${{ matrix.architecture }}/public/recipient-public.asc
+          retention-days: 1
+          if-no-files-found: error
+      - name: Receive exact chain and run real installed-runtime journeys
+        shell: bash
+        env:
+          FLAPART_EXCHANGE_TOKEN: ${{ github.token }}
+          FLAPART_REQUEST_ARTIFACT_ID: ${{ steps.request.outputs.artifact-id }}
+        run: |
+          set -euo pipefail
+          python3 native/qa/installer-followup/rendezvous/hosted_full.py run \
+            --root "$RUNNER_TEMP/full-chain-$FLAPART_ARCHITECTURE" \
+            --workspace "$GITHUB_WORKSPACE" --token-env FLAPART_EXCHANGE_TOKEN
+      - name: Always remove owned ephemeral key
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 native/qa/installer-followup/rendezvous/hosted_full.py cleanup \
+            --root "$RUNNER_TEMP/full-chain-$FLAPART_ARCHITECTURE"
+      - name: Select bounded JSON evidence only
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence_root="$RUNNER_TEMP/full-chain-$FLAPART_ARCHITECTURE"
+          if [[ -d "$evidence_root" ]]; then
+            python3 native/qa/installer-followup/rendezvous/hosted_full.py collect --root "$evidence_root"
+          fi
+      - name: Retain selected bounded receipts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: full-chain-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.architecture }}-receipts
+          path: ${{ runner.temp }}/full-chain-${{ matrix.architecture }}/selected-json/*.json
+          retention-days: 7
+          if-no-files-found: warn
