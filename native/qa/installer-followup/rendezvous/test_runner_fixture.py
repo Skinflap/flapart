@@ -33,6 +33,17 @@ class RunnerTests(unittest.TestCase):
   value=p.read_metadata(self.state);value['request']['binding']['candidate_sha256']='f'*64;self.state.write_bytes(p.encode(value))
   with self.assertRaises(ValueError):r.receive(self.state,self.root/'out',object(),clock=lambda:200)
   self.assertFalse((self.root/'out').exists())
+ def test_incomplete_upload_expires_and_cleans_owned_key(self):
+  outer=self
+  class Client:
+   def json(self,path):
+    if '/assets?' in path:return [{'name':name,'uploader':{'id':30},'state':'starter','size':0,'digest':None} for name in ('candidate.gpg','response.json')]
+    return [{'id':60,'tag_name':r.g.draft_tag(outer.request)}]
+  now=[200];sleeps=[]
+  def wait(seconds):sleeps.append(seconds);now[0]=outer.request['expires']
+  with patch.object(r.g,'fetch_response',side_effect=AssertionError('must not fetch incomplete upload')) as fetch:
+   result=r.receive(self.state,self.root/'out',Client(),clock=lambda:now[0],sleep=wait)
+  fetch.assert_not_called();self.assertEqual(len(sleeps),1);self.assertFalse(result['passed']);self.assertTrue(result['ephemeral_home_removed']);self.assertFalse(self.home.exists());self.assertFalse((self.root/'out/candidate.gpg').exists())
  def test_actual_harmless_decrypt_after_incomplete_draft_wait(self):
   src=self.root/'src';src.mkdir();paths={}
   for name,data in fixture.payloads().items():paths[name]=src/name;paths[name].write_bytes(data)
@@ -44,13 +55,16 @@ class RunnerTests(unittest.TestCase):
    def json(self,path):
     if '/assets?' in path:
      self.calls+=1
-     return [] if self.calls==1 else [{'name':name,'uploader':{'id':30},'size':1024} for name in ('candidate.gpg','response.json')]
+     rows=[{'name':name,'uploader':{'id':30},'size':1024,'state':'uploaded'} for name in ('candidate.gpg','response.json')]
+     if self.calls==1:return []
+     if self.calls==2:rows[1].update(state='starter',size=0,digest=None)
+     return rows
     return [{'id':60,'tag_name':r.g.draft_tag(outer.request)}]
   def fetch(client,obj,release,destination,now):
    shutil.copyfile(cipher,destination);return {'response':p.response(obj,destination,50,60,now)}
   sleeps=[]
   with patch.object(r.g,'fetch_response',side_effect=fetch):result=r.receive(self.state,self.root/'out',Client(),clock=lambda:200,sleep=sleeps.append)
-  self.assertTrue(result['passed']);self.assertTrue(sleeps);self.assertFalse(result['native_executed']);self.assertFalse(result['release_qualified']);self.assertFalse(self.home.exists())
+  self.assertTrue(result['passed']);self.assertEqual(len(sleeps),2);self.assertFalse(result['native_executed']);self.assertFalse(result['release_qualified']);self.assertFalse(self.home.exists())
   for name,data in fixture.payloads().items():self.assertEqual((self.root/'out/recovered'/name).read_bytes(),data)
 
 if __name__=='__main__':unittest.main()

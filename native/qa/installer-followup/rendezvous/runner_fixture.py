@@ -92,7 +92,8 @@ def receive(state_path,output,client,clock=time.time,sleep=time.sleep):
     assets=client.json('/repos/'+request['binding']['repository']+f'/releases/{release}/assets?per_page=100')
     p.require(isinstance(assets,list) and len(assets)<=2 and all(isinstance(a,dict) and a.get('name') in ('candidate.gpg','response.json') and a.get('uploader',{}).get('id')==request['binding']['operator_id'] for a in assets),'unexpected exchange assets')
     names=[a['name'] for a in assets];p.require(len(set(names))==len(names),'duplicate exchange assets')
-    if set(names)=={'candidate.gpg','response.json'}:
+    p.require(all(a.get('state') in ('starter','uploaded') for a in assets),'unknown upload state')
+    if set(names)=={'candidate.gpg','response.json'} and all(a['state']=='uploaded' for a in assets):
      p.require(all(type(a.get('size')) is int and 0<a['size']<=FIXTURE_LIMIT for a in assets),'fixture asset bound');break
    sleep(min(10,max(1,request['expires']-int(clock()))))
   evidence['stage']='download';result=g.fetch_response(client,request,release,output/'candidate.gpg',int(clock()))
