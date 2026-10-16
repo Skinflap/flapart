@@ -17,6 +17,24 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
+      - name: Check local retention tooling and record build environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa-result
+          {
+            sw_vers
+            uname -m
+            xcodebuild -version
+            xcrun --show-sdk-path
+            xcrun clang --version
+            python3 --version
+            gpg --version
+            cmake --version
+            ninja --version
+            df -h .
+          } > qa-result/toolchain.log
+          python3 native/distribution/private-retention/test_retention.py -q
       - name: Prepare exact source and isolated SDK
         shell: bash
         run: |
@@ -48,7 +66,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 native/qa/macos-build/package-candidate.py --universal --source "$RUNNER_TEMP/flapart-upstream" --prefix "$RUNNER_TEMP/flapart-maintained/sdk" --maintained-work "$RUNNER_TEMP/flapart-maintained" --promotion-receipt qa-result/sdk-promotion.json --output "$RUNNER_TEMP/flapart-packaged" 2>&1 | tee qa-result/package.log
+          python3 native/qa/macos-build/package-candidate.py --universal --source "$RUNNER_TEMP/flapart-upstream" --prefix "$RUNNER_TEMP/flapart-maintained/sdk" --maintained-work "$RUNNER_TEMP/flapart-maintained" --promotion-receipt qa-result/sdk-promotion.json --output "$RUNNER_TEMP/flapart-packaged" --stage-evidence "$RUNNER_TEMP/flapart-package-stages" --retain-native-bytes 2>&1 | tee qa-result/package.log
           cp "$RUNNER_TEMP/flapart-packaged/candidate-inventory.json" qa-result/candidate-inventory.json
           cp "$RUNNER_TEMP/flapart-packaged/maintained-runtime.json" qa-result/maintained-runtime.json
           python3 native/qa/portable/test-relocated.py --candidate "$RUNNER_TEMP/flapart-packaged/Flapart Studio.app" --probe native/qa/portable --output qa-result/relocated-arm64 --previous-qualification qa-result/runtime/qualification.json --process-architecture arm64
@@ -58,6 +76,70 @@ jobs:
         run: |
           set -euo pipefail
           python3 native/qa/macos-build/test-packaged-runtime.py --candidate "$RUNNER_TEMP/flapart-packaged/Flapart Studio.app" --baseline qa-result/tls/python-build.json --output qa-result/packaged-runtime --archive-output "$RUNNER_TEMP/flapart-packaged/candidate.zip" --hide-build-prefix "$RUNNER_TEMP/flapart-sdk" --hide-build-prefix "$RUNNER_TEMP/flapart-maintained/sdk" --hide-build-prefix "$RUNNER_TEMP/flapart-maintained/python-stage" --hide-build-prefix "$RUNNER_TEMP/flapart-maintained/openssl"
+      - name: Verify and encrypt the exact private candidate
+        id: private_candidate
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! -f "$RUNNER_TEMP/flapart-packaged/candidate.zip" ]]; then
+            echo 'No candidate archive was produced; no native payload retained.'
+            exit 0
+          fi
+          qualifications=()
+          for entry in \
+            toolchain.log=qa-result/toolchain.log \
+            build.log=qa-result/build.log \
+            package.log=qa-result/package.log \
+            sdk-promotion.json=qa-result/sdk-promotion.json \
+            maintained-runtime.json=qa-result/maintained-runtime.json \
+            tls-build.json=qa-result/tls/native-ci-receipt.json \
+            python-build.json=qa-result/tls/python-build.json \
+            compiled-runtime.json=qa-result/runtime/qualification.json \
+            compiled-result.json=qa-result/runtime/result.json \
+            relocated-arm64.json=qa-result/relocated-arm64/runtime/qualification.json \
+            relocated-arm64-result.json=qa-result/relocated-arm64/runtime/result.json \
+            relocated-x86_64.json=qa-result/relocated-x86_64/runtime/qualification.json \
+            relocated-x86_64-result.json=qa-result/relocated-x86_64/runtime/result.json \
+            packaged-runtime.json=qa-result/packaged-runtime/qualification.json \
+            arm64-python.json=qa-result/packaged-runtime/arm64/python.json \
+            arm64-tls.json=qa-result/packaged-runtime/arm64/tls.json \
+            arm64-provenance.json=qa-result/packaged-runtime/arm64/provenance.json \
+            x86_64-python.json=qa-result/packaged-runtime/x86_64/python.json \
+            x86_64-tls.json=qa-result/packaged-runtime/x86_64/tls.json \
+            x86_64-provenance.json=qa-result/packaged-runtime/x86_64/provenance.json; do
+            file="${entry#*=}"
+            if [[ -f "$file" ]]; then qualifications+=(--qualification "$entry"); fi
+          done
+          python3 native/distribution/private-retention/prepare_candidate.py \
+            --candidate "$RUNNER_TEMP/flapart-packaged/candidate.zip" \
+            --inventory "$RUNNER_TEMP/flapart-packaged/candidate-inventory.json" \
+            --stage-evidence "$RUNNER_TEMP/flapart-package-stages" \
+            "${qualifications[@]}" --output "$RUNNER_TEMP/flapart-retention" \
+            > qa-result/private-preparation.json
+          python3 native/distribution/private-retention/retain.py encrypt \
+            --root "$RUNNER_TEMP/flapart-retention" \
+            --inventory "$RUNNER_TEMP/flapart-retention/inventory.json" \
+            --public-key native/distribution/private-retention/recipient-public.asc \
+            --recipient 1E85461C2AE3E8E2A9B5D8FD9EA298F52A95D899 \
+            --output "$RUNNER_TEMP/flapart-candidate.gpg" \
+            > qa-result/encrypted-retention.json
+          python3 - <<'PY'
+          import json, os, pathlib
+          p = pathlib.Path('qa-result/encrypted-retention.json')
+          data = json.loads(p.read_text())
+          data.update(commit=os.environ['GITHUB_SHA'], run_id=os.environ['GITHUB_RUN_ID'], run_attempt=os.environ['GITHUB_RUN_ATTEMPT'], repository=os.environ['GITHUB_REPOSITORY'])
+          p.write_text(json.dumps(data, indent=2) + '\n')
+          PY
+          echo 'available=true' >> "$GITHUB_OUTPUT"
+      - name: Retain encrypted candidate only
+        if: always() && steps.private_candidate.outputs.available == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: compiled-${{ matrix.runner }}-private-candidate
+          path: ${{ runner.temp }}/flapart-candidate.gpg
+          retention-days: 7
+          if-no-files-found: error
       - name: Retain source-build evidence only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -65,6 +147,9 @@ jobs:
           name: compiled-${{ matrix.runner }}-evidence
           path: |
             qa-result/build.log
+            qa-result/toolchain.log
+            qa-result/private-preparation.json
+            qa-result/encrypted-retention.json
             qa-result/tls/*.json
             qa-result/tls/*.log
             qa-result/sdk-promotion.json
