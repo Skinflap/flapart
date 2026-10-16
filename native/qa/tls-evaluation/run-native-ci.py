@@ -43,7 +43,7 @@ try:
   perl_paths=subprocess.check_output([str(perl),'-MFile::Spec','-e','print File::Spec->catfile("a","b")'],text=True).strip()
   assert perl_paths=='a/b',('OpenSSL MinGW requires Unix-path Perl',receipt['perl_os'],perl_paths)
   make=choose([llvm/'mingw32-make.exe','C:/Strawberry/c/bin/gmake.exe','C:/Strawberry/c/bin/mingw32-make.exe','mingw32-make.exe','gmake.exe'])
-  env['PATH']=os.pathsep.join(map(str,[candidate/'bin',llvm,perl.parent,make.parent]))+os.pathsep+env.get('PATH','')
+  env['PATH']=os.pathsep.join(map(str,[candidate/'bin',llvm.parent/'x86_64-w64-mingw32/bin',llvm,perl.parent,make.parent]))+os.pathsep+env.get('PATH','')
  else:
   perl=choose(['/usr/bin/perl','perl']);make=choose(['/usr/bin/make','make']);env['PATH']=str(candidate/'bin')+os.pathsep+env.get('PATH','')
  receipt['tools']={'perl':str(perl),'make':str(make)}
@@ -70,7 +70,7 @@ try:
   found=[f for base in search_roots for f in base.rglob('Qt5Network.dll') if f.is_file()];assert len(found)==1,found
   shutil.copy2(found[0],candidate/'bin/Qt5Network.dll')
   for f in (prefix/'bin').glob('*.dll'):shutil.copy2(f,candidate/'bin'/f.name)
-  env['FLAPART_DLL_DIRS']=os.pathsep.join(map(str,[candidate/'bin',prefix/'bin']))
+  env['FLAPART_DLL_DIRS']=os.pathsep.join(map(str,[candidate/'bin',prefix/'bin',llvm.parent/'x86_64-w64-mingw32/bin']))
   run('stage-python',[sys.executable,ROOT/'stage-windows-python.py','--downloads',downloads,'--old-python',original/'python','--destination',work/'python-new','--site-packages',candidate/'lib/site-packages'])
   old=candidate/'python';old.rename(work/'python-sdk-original');shutil.move(work/'python-new',old)
   # App DLL lookup must not pick an older duplicate Python runtime in bin.
