@@ -13,7 +13,7 @@ These helpers do not publish, modify the original SDK, install host packages, or
 
 ## Windows runner
 
-Provision exact LLVM-MinGW20251118 compiler bin, Perl and GNU make inside runner tools. Explicit paths avoid assumptions about shell/tool discovery. Use existing source/SDK qmake/private headers at Qt5.15.7.
+Provision exact LLVM-MinGW20251118 compiler bin. `run-native-ci.py` creates an isolated MSYS root from the 21 SHA256-pinned packages in `msys-tools.lock.json`, including compatible Perl, GNU make and POSIX utilities; it executes no package installation scripts and changes no host installation. Explicit paths avoid assumptions about shell/tool discovery. Use existing source/SDK qmake/private headers at Qt5.15.7.
 
 ```powershell
 python build-openssl.py --archive $SSL_ARCHIVE --work $WORK/ssl-build --prefix $WORK/ssl-stage --toolchain $LLVM_BIN --perl $PERL --make $MAKE --jobs 3

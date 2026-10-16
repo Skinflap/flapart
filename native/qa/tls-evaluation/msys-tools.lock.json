@@ -1,0 +1,246 @@
+{
+  "origin": "https://repo.msys2.org/msys/x86_64/msys.db",
+  "packages": [
+    {
+      "name": "bash",
+      "version": "5.3.20-2",
+      "file": "bash-5.3.20-2-x86_64.pkg.tar.zst",
+      "sha256": "0951e809c552dd7dd2835df1b2d590822187f14e717d809e942e4eb677d0adfd",
+      "url": "https://repo.msys2.org/msys/x86_64/bash-5.3.20-2-x86_64.pkg.tar.zst",
+      "bytes": 2579823,
+      "dependencies": []
+    },
+    {
+      "name": "coreutils",
+      "version": "8.32-5",
+      "file": "coreutils-8.32-5-x86_64.pkg.tar.zst",
+      "sha256": "62dfee1c39fd15f99c39802b35e82643bc14fffc16d6c76d4001caa385ec77e3",
+      "url": "https://repo.msys2.org/msys/x86_64/coreutils-8.32-5-x86_64.pkg.tar.zst",
+      "bytes": 2755209,
+      "dependencies": [
+        "gmp",
+        "libiconv",
+        "libintl"
+      ]
+    },
+    {
+      "name": "db",
+      "version": "6.2.32-6",
+      "file": "db-6.2.32-6-x86_64.pkg.tar.zst",
+      "sha256": "41bc94acad3b53eaa92227ec34412305f648848ffbc963bcad88274517e13e8d",
+      "url": "https://repo.msys2.org/msys/x86_64/db-6.2.32-6-x86_64.pkg.tar.zst",
+      "bytes": 49971,
+      "dependencies": [
+        "libdb=6.2.32"
+      ]
+    },
+    {
+      "name": "diffutils",
+      "version": "3.12-1",
+      "file": "diffutils-3.12-1-x86_64.pkg.tar.zst",
+      "sha256": "7902c8ce3d4dd69a0f5e98dc9d5c83c17b23314ba486169db57ef6e2835ce3b6",
+      "url": "https://repo.msys2.org/msys/x86_64/diffutils-3.12-1-x86_64.pkg.tar.zst",
+      "bytes": 394515,
+      "dependencies": [
+        "sh",
+        "libiconv",
+        "libintl"
+      ]
+    },
+    {
+      "name": "findutils",
+      "version": "4.11.0-2",
+      "file": "findutils-4.11.0-2-x86_64.pkg.tar.zst",
+      "sha256": "f19d3c6b1b073d4c5759ae83f5639d11a5f0227b772f7d86d600db573d9d5d32",
+      "url": "https://repo.msys2.org/msys/x86_64/findutils-4.11.0-2-x86_64.pkg.tar.zst",
+      "bytes": 582781,
+      "dependencies": [
+        "libiconv",
+        "libintl"
+      ]
+    },
+    {
+      "name": "gcc-libs",
+      "version": "15.3.0-1",
+      "file": "gcc-libs-15.3.0-1-x86_64.pkg.tar.zst",
+      "sha256": "0d99a122c453c05ae21ba3dcea910f2e0d93d38ae067c677a112a315b0f3cec5",
+      "url": "https://repo.msys2.org/msys/x86_64/gcc-libs-15.3.0-1-x86_64.pkg.tar.zst",
+      "bytes": 1082211,
+      "dependencies": []
+    },
+    {
+      "name": "gdbm",
+      "version": "1.26-1",
+      "file": "gdbm-1.26-1-x86_64.pkg.tar.zst",
+      "sha256": "1f8e949be2bbe488c5644132db78ecda288c9945922e7ed2447384734e2adba2",
+      "url": "https://repo.msys2.org/msys/x86_64/gdbm-1.26-1-x86_64.pkg.tar.zst",
+      "bytes": 212954,
+      "dependencies": [
+        "libgdbm=1.26"
+      ]
+    },
+    {
+      "name": "gmp",
+      "version": "6.3.0-2",
+      "file": "gmp-6.3.0-2-x86_64.pkg.tar.zst",
+      "sha256": "f84536138e618d47a1df2da83916cfebbd449f159ffad52f994a71060a41cf34",
+      "url": "https://repo.msys2.org/msys/x86_64/gmp-6.3.0-2-x86_64.pkg.tar.zst",
+      "bytes": 396914,
+      "dependencies": []
+    },
+    {
+      "name": "grep",
+      "version": "1~3.0-7",
+      "file": "grep-1~3.0-7-x86_64.pkg.tar.zst",
+      "sha256": "2909b3bbef8d33d66980339fb7bd2d3d9145bae0f04191e6671df39868aea427",
+      "url": "https://repo.msys2.org/msys/x86_64/grep-1~3.0-7-x86_64.pkg.tar.zst",
+      "bytes": 249241,
+      "dependencies": [
+        "libiconv",
+        "libintl",
+        "libpcre",
+        "sh"
+      ]
+    },
+    {
+      "name": "libdb",
+      "version": "6.2.32-6",
+      "file": "libdb-6.2.32-6-x86_64.pkg.tar.zst",
+      "sha256": "27a35786f3aab14e625c02df7bcd8a9dda0da782ce4f0549a427a21316b4d179",
+      "url": "https://repo.msys2.org/msys/x86_64/libdb-6.2.32-6-x86_64.pkg.tar.zst",
+      "bytes": 831918,
+      "dependencies": [
+        "gcc-libs"
+      ]
+    },
+    {
+      "name": "libgdbm",
+      "version": "1.26-1",
+      "file": "libgdbm-1.26-1-x86_64.pkg.tar.zst",
+      "sha256": "bb4b08b720dd3194db010589812e9c63bec3d29b32545e7cbd07b6443e51c5ed",
+      "url": "https://repo.msys2.org/msys/x86_64/libgdbm-1.26-1-x86_64.pkg.tar.zst",
+      "bytes": 32345,
+      "dependencies": [
+        "gcc-libs",
+        "libreadline",
+        "libiconv",
+        "libintl",
+        "ncurses"
+      ]
+    },
+    {
+      "name": "libiconv",
+      "version": "1.19-1",
+      "file": "libiconv-1.19-1-x86_64.pkg.tar.zst",
+      "sha256": "0fa55ea2a6ccf97cf8c58b24b2615815e15e16e6e4e888091c263c2c83c5313d",
+      "url": "https://repo.msys2.org/msys/x86_64/libiconv-1.19-1-x86_64.pkg.tar.zst",
+      "bytes": 718353,
+      "dependencies": [
+        "gcc-libs"
+      ]
+    },
+    {
+      "name": "libintl",
+      "version": "0.22.5-1",
+      "file": "libintl-0.22.5-1-x86_64.pkg.tar.zst",
+      "sha256": "336d66b9d95cf9c1804958f8e260762a3e83bf158ed5981f783bc772a31073cf",
+      "url": "https://repo.msys2.org/msys/x86_64/libintl-0.22.5-1-x86_64.pkg.tar.zst",
+      "bytes": 50537,
+      "dependencies": [
+        "gcc-libs",
+        "libiconv"
+      ]
+    },
+    {
+      "name": "libpcre",
+      "version": "8.45-5",
+      "file": "libpcre-8.45-5-x86_64.pkg.tar.zst",
+      "sha256": "b4dc2eb7795cbacaa683101d720fa67f536262497a1d89934a58f5dab8d17d17",
+      "url": "https://repo.msys2.org/msys/x86_64/libpcre-8.45-5-x86_64.pkg.tar.zst",
+      "bytes": 96135,
+      "dependencies": [
+        "gcc-libs"
+      ]
+    },
+    {
+      "name": "libreadline",
+      "version": "8.3.006-1",
+      "file": "libreadline-8.3.006-1-x86_64.pkg.tar.zst",
+      "sha256": "29e25c50bf6cd7a5e6f2253af76f54fe3c1a915313c7c18e98bedaa665c6adea",
+      "url": "https://repo.msys2.org/msys/x86_64/libreadline-8.3.006-1-x86_64.pkg.tar.zst",
+      "bytes": 388090,
+      "dependencies": [
+        "ncurses"
+      ]
+    },
+    {
+      "name": "libxcrypt",
+      "version": "4.5.2-1",
+      "file": "libxcrypt-4.5.2-1-x86_64.pkg.tar.zst",
+      "sha256": "e63db0aa2b708359e25f61f506e2d2c92c315febf5f88cc9f386e4ec0bdf4fa5",
+      "url": "https://repo.msys2.org/msys/x86_64/libxcrypt-4.5.2-1-x86_64.pkg.tar.zst",
+      "bytes": 87371,
+      "dependencies": []
+    },
+    {
+      "name": "make",
+      "version": "4.4.1-3",
+      "file": "make-4.4.1-3-x86_64.pkg.tar.zst",
+      "sha256": "af0bdba17f06fe037f0194069adaa31a8fe45f1a11381501896aea1fae37bd5d",
+      "url": "https://repo.msys2.org/msys/x86_64/make-4.4.1-3-x86_64.pkg.tar.zst",
+      "bytes": 514683,
+      "dependencies": [
+        "libintl",
+        "sh"
+      ]
+    },
+    {
+      "name": "ncurses",
+      "version": "6.6-2",
+      "file": "ncurses-6.6-2-x86_64.pkg.tar.zst",
+      "sha256": "828c92f09b17f00d3b49362fcfa4affa58e5e50e238f290ea36eb7a690da3acb",
+      "url": "https://repo.msys2.org/msys/x86_64/ncurses-6.6-2-x86_64.pkg.tar.zst",
+      "bytes": 1286284,
+      "dependencies": [
+        "gcc-libs"
+      ]
+    },
+    {
+      "name": "perl",
+      "version": "5.42.3-3",
+      "file": "perl-5.42.3-3-x86_64.pkg.tar.zst",
+      "sha256": "6a4dbc38cdcc53d16239904b5c87d2277cffc49ed92c6a7796f8bf6b49517d5b",
+      "url": "https://repo.msys2.org/msys/x86_64/perl-5.42.3-3-x86_64.pkg.tar.zst",
+      "bytes": 7532255,
+      "dependencies": [
+        "db",
+        "gdbm",
+        "libxcrypt",
+        "coreutils",
+        "sh"
+      ]
+    },
+    {
+      "name": "sed",
+      "version": "4.9-1",
+      "file": "sed-4.9-1-x86_64.pkg.tar.zst",
+      "sha256": "3748af28f69e946ec5a42e6670c9bbf6da7352dc93baaa537f69e99c5483b9fc",
+      "url": "https://repo.msys2.org/msys/x86_64/sed-4.9-1-x86_64.pkg.tar.zst",
+      "bytes": 249918,
+      "dependencies": [
+        "libintl",
+        "sh"
+      ]
+    },
+    {
+      "name": "msys2-runtime",
+      "version": "3.6.11-3",
+      "file": "msys2-runtime-3.6.11-3-x86_64.pkg.tar.zst",
+      "sha256": "b6478bd1b4cb4b2e07c45db725fee93f9424c19fa248240dcb7b7f4187cd92db",
+      "url": "https://repo.msys2.org/msys/x86_64/msys2-runtime-3.6.11-3-x86_64.pkg.tar.zst",
+      "bytes": 2069202,
+      "dependencies": []
+    }
+  ],
+  "database_sha256": "969004e6e9c09f1b023e6932ec3540a241ecceeb24ed1ec5dc11434ff562483b"
+}

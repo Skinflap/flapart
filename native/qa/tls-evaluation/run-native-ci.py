@@ -35,8 +35,10 @@ try:
  if system=='Windows':
   assert a.tools,'Windows requires --tools with pinned LLVM-MinGW20251118'
   llvm=a.tools.resolve()/'llvm-mingw-20251118-ucrt-x86_64/bin';assert (llvm/'x86_64-w64-mingw32-clang.exe').is_file()
-  perl=choose(['C:/msys64/usr/bin/perl.exe'])
-  ssl_make=choose(['C:/msys64/usr/bin/make.exe'])
+  msys=work/'msys'
+  run('prepare-msys',[sys.executable,ROOT/'prepare-msys.py','--destination',msys,'--cache',downloads/'msys'])
+  perl=choose([msys/'usr/bin/perl.exe'])
+  ssl_make=choose([msys/'usr/bin/make.exe'])
   assert subprocess.check_output([str(perl),'-e','print $^O'],text=True).strip()=='msys','OpenSSL MinGW requires Unix-path Perl'
   make=choose([llvm/'mingw32-make.exe','C:/Strawberry/c/bin/gmake.exe','C:/Strawberry/c/bin/mingw32-make.exe','mingw32-make.exe','gmake.exe'])
   env['PATH']=os.pathsep.join(map(str,[candidate/'bin',llvm,perl.parent,make.parent]))+os.pathsep+env.get('PATH','')
