@@ -40,8 +40,7 @@ class FlapartStudio(Extension):
 
     def createActions(self, window):
         action = window.createAction('flapart_studio', 'Flapart Studio', 'tools/scripts')
-        action.triggered.connect(lambda: self.show_studio(window))
-        action.setShortcut('Ctrl+Alt+F')
+        action.triggered.connect(self.welcome)
 
     def trigger(self, name):
         action = Krita.instance().action(name)

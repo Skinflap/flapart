@@ -52,8 +52,20 @@ def run():
         result['focus_hides_panels'] = all(not d.isVisible() for d in docks)
         studio.focus_canvas(w)
         result['focus_restores_panels'] = before == {d.objectName(): d.isVisible() for d in docks}
-        studio.show_studio(w)
-        result['action']=bool(k.action('flapart_studio'))
+        # Exercise the registered extension callback, never a freshly created callback.
+        from flapart.studio import FlapartStudio
+        registered=next(ext for ext in k.extensions() if isinstance(ext,FlapartStudio))
+        for dialog in list(registered.dialogs): dialog.close()
+        action=k.action('flapart_studio'); result['action']=bool(action)
+        result['shortcut']=action.shortcut().toString()
+        assert result['shortcut']=='Ctrl+Alt+F', 'Default Studio shortcut is unavailable'
+        action.trigger()
+        assert registered.dialogs and registered.dialogs[-1].isVisible(), 'Registered Studio action did not reopen'
+        registered.dialogs[-1].close()
+        action.trigger()
+        result['action_reopens']=bool(registered.dialogs and registered.dialogs[-1].isVisible())
+        assert result['action_reopens']
+        studio=registered
         QTimer.singleShot(700,lambda: finish(result,w,out,studio))
     except Exception:
         result['error']=traceback.format_exc()

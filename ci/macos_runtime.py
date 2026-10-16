@@ -23,6 +23,9 @@ pykrita=data/'pykrita';pykrita.mkdir(parents=True)
 for src in (root/'native/plugin').iterdir():
  if src.is_dir():shutil.copytree(src,pykrita/src.name,ignore=shutil.ignore_patterns('__pycache__'))
  elif src.suffix=='.desktop':shutil.copy2(src,pykrita/src.name)
+ elif src.suffix=='.action':
+  (data/'actions').mkdir(exist_ok=True)
+  shutil.copy2(src,data/'actions'/src.name)
 for src in (root/'native/qa/portable').iterdir():
  if src.is_dir():shutil.copytree(src,pykrita/src.name,ignore=shutil.ignore_patterns('__pycache__'))
  elif src.suffix=='.desktop':shutil.copy2(src,pykrita/src.name)
@@ -37,7 +40,9 @@ result=json.loads((output/'result.json').read_text())
 assert 'error' not in result, result.get('error')
 assert result['canvas']==[64,64] and result['round_trip']==[64,64,'Draw here']
 assert result['round_trip_pixel']==[70,110,191,255]
-assert all(result.get(key) is True for key in ('png','kra','batchmode_restored','focus_hides_panels','focus_restores_panels','action'))
+assert process.returncode==0
+assert all(result.get(key) is True for key in ('png','kra','batchmode_restored','focus_hides_panels','focus_restores_panels','action','action_reopens'))
+assert result['shortcut']=='Ctrl+Alt+F'
 assert result['browser_handoff']==['https://flaptown.com/flapart/?from=native&destination=profile']
 assert (output/'helper-export.png').read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
 (output/'provenance.json').write_text(json.dumps({'kind':'official Mac engine plus Studio plugin; not namespaced fork','upstream_url':url,'sha256':expected,'platform':platform.platform(),'passed':True},indent=2)+'\n')

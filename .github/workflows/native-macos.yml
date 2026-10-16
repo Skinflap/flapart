@@ -3,12 +3,16 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['native/**', 'ci/**', '.github/workflows/native-macos.yml']
+    paths: ['native/plugin/**', 'native/qa/portable/**', 'ci/**', '.github/workflows/native-macos.yml']
 permissions:
   contents: read
 jobs:
   official-engine-studio:
-    runs-on: macos-15-intel
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-15-intel, macos-15]
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -20,7 +24,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: native-macos-evidence
+          name: native-${{ matrix.runner }}-evidence
           path: qa-result/
           retention-days: 7
           if-no-files-found: warn
