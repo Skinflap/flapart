@@ -21,7 +21,7 @@ try:
  if platform.system()=='Windows':
   assert a.toolchain,'--toolchain must point to LLVM-MinGW20251118 bin'
   toolchain=a.toolchain.resolve();assert (toolchain/'x86_64-w64-mingw32-clang.exe').exists()
-  env=dict(os.environ,PATH=str(toolchain)+os.pathsep+os.environ['PATH'],CC='x86_64-w64-mingw32-clang',AR='llvm-ar',RANLIB='llvm-ranlib',RC='x86_64-w64-mingw32-windres')
+  env=dict(os.environ,PATH=str(toolchain)+os.pathsep+str(pathlib.Path(a.perl).parent)+os.pathsep+os.environ['PATH'],SHELL=str(pathlib.Path(a.perl).parent/'sh.exe'),CC='x86_64-w64-mingw32-clang',AR='llvm-ar',RANLIB='llvm-ranlib',RC='x86_64-w64-mingw32-windres')
   version=subprocess.check_output([str(toolchain/'x86_64-w64-mingw32-clang.exe'),'--version'],text=True);assert '21.1.6' in version,version
   receipt['compiler']=version;build('windows','mingw64',prefix,env)
  else:

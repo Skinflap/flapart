@@ -1,18 +1,19 @@
 name: Qualify maintained native TLS
 on:
   workflow_dispatch:
+    inputs:
+      platform:
+        description: Native platform to test
+        type: choice
+        default: all
+        options: [all, windows, macos]
 permissions:
   contents: read
 jobs:
   tls:
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - runner: macos-15
-            platform: macos
-          - runner: windows-2025
-            platform: windows
+      matrix: ${{ fromJSON(inputs.platform == 'windows' && '{"include":[{"runner":"windows-2025","platform":"windows"}]}' || inputs.platform == 'macos' && '{"include":[{"runner":"macos-15","platform":"macos"}]}' || '{"include":[{"runner":"macos-15","platform":"macos"},{"runner":"windows-2025","platform":"windows"}]}') }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 150
     steps:

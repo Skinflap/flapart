@@ -14,7 +14,7 @@ env=os.environ.copy();candidate=work/'sdk';downloads=work/'downloads';downloads.
 
 def run(stage,command,cwd=None,custom_env=None):
  global log_index
- receipt['stage']=stage;log_index+=1;command=list(map(str,command));receipt['commands'].append({'stage':stage,'command':command});print(stage,flush=True)
+ receipt['stage']=stage;log_index+=1;command=[x.as_posix() if isinstance(x,pathlib.Path) else str(x) for x in command];receipt['commands'].append({'stage':stage,'command':command});print(stage,flush=True)
  with (output/(f'{log_index:02d}-'+stage+'.log')).open('w',encoding='utf-8') as log:subprocess.run(command,cwd=cwd,env=custom_env or env,stdout=log,stderr=subprocess.STDOUT,check=True)
 
 def fetch(name,url,digest):
@@ -35,12 +35,15 @@ try:
  if system=='Windows':
   assert a.tools,'Windows requires --tools with pinned LLVM-MinGW20251118'
   llvm=a.tools.resolve()/'llvm-mingw-20251118-ucrt-x86_64/bin';assert (llvm/'x86_64-w64-mingw32-clang.exe').is_file()
-  perl=choose(['C:/Strawberry/perl/bin/perl.exe','perl.exe'])
+  perl=choose(['C:/msys64/usr/bin/perl.exe'])
+  ssl_make=choose(['C:/msys64/usr/bin/make.exe'])
+  assert subprocess.check_output([str(perl),'-e','print $^O'],text=True).strip()=='msys','OpenSSL MinGW requires Unix-path Perl'
   make=choose([llvm/'mingw32-make.exe','C:/Strawberry/c/bin/gmake.exe','C:/Strawberry/c/bin/mingw32-make.exe','mingw32-make.exe','gmake.exe'])
   env['PATH']=os.pathsep.join(map(str,[candidate/'bin',llvm,perl.parent,make.parent]))+os.pathsep+env.get('PATH','')
  else:
   perl=choose(['/usr/bin/perl','perl']);make=choose(['/usr/bin/make','make']);env['PATH']=str(candidate/'bin')+os.pathsep+env.get('PATH','')
  receipt['tools']={'perl':str(perl),'make':str(make)}
+ if system=='Windows':receipt['tools']['openssl_make']=str(ssl_make)
  run('perl-version',[perl,'-v']);run('make-version',[make,'--version'])
  ssl=fetch('openssl-3.5.9.tar.gz','https://github.com/openssl/openssl/releases/download/openssl-3.5.9/openssl-3.5.9.tar.gz','603f5602e2eef00d77fbd429d34dcd5822bb301757a1bc9cdb24c670f1eb859a')
  lock=json.loads((ROOT/'python.lock.json').read_text())
@@ -48,7 +51,7 @@ try:
  # Pin the exact gitlink, not a moving branch or guessed Qt release tag.
  qtbase=work/'qtbase';run('qtbase-init',['git','init',qtbase]);run('qtbase-remote',['git','remote','add','origin','https://invent.kde.org/szaman/qtbase.git'],qtbase);run('qtbase-fetch',['git','fetch','--depth','1','origin',receipt['qtbase']],qtbase);run('qtbase-checkout',['git','checkout','--detach','FETCH_HEAD'],qtbase)
  assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=qtbase,text=True).strip()==receipt['qtbase']
- prefix=work/'openssl';command=[sys.executable,ROOT/'build-openssl.py','--archive',ssl,'--work',work/'openssl-build','--prefix',prefix,'--perl',perl,'--make',make,'--jobs',a.jobs]
+ prefix=work/'openssl';command=[sys.executable,ROOT/'build-openssl.py','--archive',ssl,'--work',work/'openssl-build','--prefix',prefix,'--perl',perl,'--make',ssl_make if system=='Windows' else make,'--jobs',a.jobs]
  if system=='Windows':command+=['--toolchain',llvm]
  run('build-openssl',command)
  # syncqt prepares forwarding headers in our private source copy only.
