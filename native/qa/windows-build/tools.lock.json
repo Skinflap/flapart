@@ -1,0 +1,36 @@
+{
+  "tools": [
+    {
+      "name": "llvm-mingw-20251118-ucrt-x86_64.zip",
+      "url": "https://github.com/mstorsjo/llvm-mingw/releases/download/20251118/llvm-mingw-20251118-ucrt-x86_64.zip",
+      "bytes": 181190072,
+      "sha256": "d14a2022c095b83404b64a249406478d852821d31beaa32abe31c932832b3538"
+    },
+    {
+      "name": "cmake-3.31.8-windows-x86_64.zip",
+      "url": "https://github.com/Kitware/CMake/releases/download/v3.31.8/cmake-3.31.8-windows-x86_64.zip",
+      "bytes": 46709267,
+      "sha256": "81aa9964dbabd71fe02e7ec50472fd3ad56138c49944515ece9001efbff8d719"
+    },
+    {
+      "name": "ninja-win.zip",
+      "url": "https://github.com/ninja-build/ninja/releases/download/v1.13.1/ninja-win.zip",
+      "bytes": 289808,
+      "sha256": "26a40fa8595694dec2fad4911e62d29e10525d2133c9a4230b66397774ae25bf"
+    },
+    {
+      "name": "python-3.13.9-amd64.exe",
+      "url": "https://www.python.org/ftp/python/3.13.9/python-3.13.9-amd64.exe",
+      "bytes": 28761776,
+      "sha256": "200ddff856bbff949d2cc1be42e8807c07538abd6b6966d5113a094cf628c5c5"
+    },
+    {
+      "name": "python-3.13.9-embed-amd64.zip",
+      "url": "https://www.python.org/ftp/python/3.13.9/python-3.13.9-embed-amd64.zip",
+      "bytes": 10926675,
+      "sha256": "91d828c2da3a029b41699e918674a0cb379c02cf20dab9c501306885f837402a"
+    }
+  ],
+  "compiler_provenance": "https://invent.kde.org/sysadmin/ci-images/-/blob/master/krita-windows-clang21-twinpy/build-stage3.ps1",
+  "compiler_upstream_md5": "e1d6a0c135733bfabbb466a692f11ee7"
+}

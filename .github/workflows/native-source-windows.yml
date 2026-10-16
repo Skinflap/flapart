@@ -1,0 +1,58 @@
+name: Build and test native Windows source
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compiled-source:
+    runs-on: windows-2025
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13.9'
+          architecture: x64
+      - name: Prepare exact source and isolated SDK
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $env:PYTHONUTF8 = '1'
+          $python = (Get-Command python).Source
+          & $python -c 'import sys; assert sys.version_info[:2] == (3,13), sys.version; print(sys.version)'
+          if ($LASTEXITCODE -ne 0) { throw 'Python 3.13 with development headers required' }
+          git -c core.autocrlf=false init "$env:RUNNER_TEMP/flapart-upstream"
+          git -C "$env:RUNNER_TEMP/flapart-upstream" config core.autocrlf false
+          git -C "$env:RUNNER_TEMP/flapart-upstream" config core.longpaths true
+          git -C "$env:RUNNER_TEMP/flapart-upstream" fetch --depth=1 https://invent.kde.org/graphics/krita.git bd6e8d061d2f0388c5b10278786cf0fe62e3135f
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned upstream fetch failed' }
+          git -C "$env:RUNNER_TEMP/flapart-upstream" checkout --detach FETCH_HEAD
+          & $python native/scripts/prepare-fork.py "$env:RUNNER_TEMP/flapart-upstream"
+          if ($LASTEXITCODE -ne 0) { throw 'Source preparation failed' }
+          & $python native/qa/windows-build/fetch-dependencies.py --prefix "$env:RUNNER_TEMP/flapart-sdk" --cache "$env:RUNNER_TEMP/flapart-sdk-downloads"
+          if ($LASTEXITCODE -ne 0) { throw 'SDK preparation failed' }
+          & $python native/qa/windows-build/prepare-tools.py --cache "$env:RUNNER_TEMP/flapart-tool-downloads" --destination "$env:RUNNER_TEMP/flapart-tools"
+          if ($LASTEXITCODE -ne 0) { throw 'Tool preparation failed' }
+          Remove-Item -Recurse -Force "$env:RUNNER_TEMP/flapart-sdk-downloads", "$env:RUNNER_TEMP/flapart-tool-downloads"
+      - name: Compile full painting application
+        shell: pwsh
+        run: |
+          $env:PYTHONUTF8 = '1'
+          New-Item -ItemType Directory -Force qa-result | Out-Null
+          python native/qa/windows-build/build.py --source "$env:RUNNER_TEMP/flapart-upstream" --prefix "$env:RUNNER_TEMP/flapart-sdk" --build "$env:RUNNER_TEMP/flapart-build" --tools "$env:RUNNER_TEMP/flapart-tools" --jobs 4 2>&1 | Tee-Object qa-result/build.log
+          if ($LASTEXITCODE -ne 0) { throw 'Native build failed' }
+      - name: Verify native artwork and separate Krita settings
+        shell: pwsh
+        run: |
+          python native/qa/windows-build/test-compiled.py --prefix "$env:RUNNER_TEMP/flapart-sdk" --probe native/qa/portable --output qa-result/runtime
+          if ($LASTEXITCODE -ne 0) { throw 'Native runtime qualification failed' }
+      - name: Retain source-build evidence only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: compiled-windows-evidence
+          path: qa-result/
+          retention-days: 7
+          if-no-files-found: warn

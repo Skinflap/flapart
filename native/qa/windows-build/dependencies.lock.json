@@ -1,0 +1,1003 @@
+{
+  "platform": "windows",
+  "branch": "master (Qt5 stable)",
+  "cutoff": "2026-09-30T10:59:49Z",
+  "upstream_source_commit": "bd6e8d061d2f0388c5b10278786cf0fe62e3135f",
+  "packages": [
+    {
+      "name": "ext_boost",
+      "version": "master-1789993185",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_boost/master-1789993185/archive.tar",
+      "sha256": "82b917ee94ac26638469bd8e97442469ad7f7b63a2978993381e04475bb29166",
+      "bytes": 181657600,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_brotli",
+      "version": "master-1789993216",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_brotli/master-1789993216/archive.tar",
+      "sha256": "41091b57b870ba0bc4010c98018d5f4a11dcbeea37156a0fdde8cbaa92e48819",
+      "bytes": 1976320,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_dlfcn_win32",
+      "version": "master-1789994883",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_dlfcn_win32/master-1789994883/archive.tar",
+      "sha256": "411aaf87201b6b37063b4645b812d1f8149f080927037706bf10f1ebc9061996",
+      "bytes": 133120,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_drmingw",
+      "version": "master-1789994938",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_drmingw/master-1789994938/archive.tar",
+      "sha256": "1ccc4728dd6fdcd268de80ba3d9deed25f36d593e8f3cb98171158d20bd95afb",
+      "bytes": 8069120,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_eigen3",
+      "version": "master-1789993225",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_eigen3/master-1789993225/archive.tar",
+      "sha256": "4ebfc6035806ebc65e5461a82c99c71327deaa067f00b1f010e6672cfbd4bb2c",
+      "bytes": 11182080,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_exiv2",
+      "version": "master-1789995219",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_exiv2/master-1789995219/archive.tar",
+      "sha256": "839274fd53e384c925bdc67ca48efdf2e95fd5ad77ed4912dbc4718647a147f4",
+      "bytes": 12851200,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_expat": "master",
+        "ext_brotli": "master",
+        "ext_iconv": "master",
+        "ext_zlib": "master"
+      }
+    },
+    {
+      "name": "ext_expat",
+      "version": "master-1789993276",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_expat/master-1789993276/archive.tar",
+      "sha256": "9f2631d993a83a2345a61f7dda1e9efaba6ef16d1331c90861c2415ae9faae57",
+      "bytes": 819200,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_extra_cmake_modules",
+      "version": "master-1789993283",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_extra_cmake_modules/master-1789993283/archive.tar",
+      "sha256": "b75209602efda2afd1c6ecb7210027747965d650c9bd4efbebdd7f7edb826e83",
+      "bytes": 931840,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_ffmpeg",
+      "version": "master-1789997042",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_ffmpeg/master-1789997042/archive.tar",
+      "sha256": "5c992677a51aea8ae6efc3e919f816fbaa1a2045f001aabdf5b2fc264e3aee2b",
+      "bytes": 161423360,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_iconv": "master",
+        "ext_flac": "master",
+        "ext_opus": "master",
+        "ext_sdl2": "master",
+        "ext_vpx": "master",
+        "ext_libvorbis": "master",
+        "ext_libtheora": "master",
+        "ext_openh264": "master",
+        "ext_lame": "master",
+        "ext_libaom": "master",
+        "ext_webp": "master",
+        "ext_png": "master",
+        "ext_jpeg": "master",
+        "ext_pkgconfig": "master",
+        "ext_lzma": "master",
+        "ext_vpl": "master",
+        "ext_zlib": "master"
+      }
+    },
+    {
+      "name": "ext_fftw3",
+      "version": "master-1789993330",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_fftw3/master-1789993330/archive.tar",
+      "sha256": "f739e57ee8eb1951a44b75bb0f904d95c41e1e520680e653e684eba906e598d7",
+      "bytes": 3706880,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_flac",
+      "version": "master-1789995440",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_flac/master-1789995440/archive.tar",
+      "sha256": "9444d3a79cc3404340aa71bf249028ef7fb78e6eee1032932dda86b6e6f3bed0",
+      "bytes": 1996800,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_pkgconfig": "master",
+        "ext_libogg": "master"
+      }
+    },
+    {
+      "name": "ext_fontconfig",
+      "version": "master-1789997765",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_fontconfig/master-1789997765/archive.tar",
+      "sha256": "e46d3f7b475ea4df30ccd00d68f6e1458b97686b6113576eaa50daf88a3b7f67",
+      "bytes": 3379200,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_freetype": "master",
+        "ext_expat": "master",
+        "ext_gperf": "master",
+        "ext_pkgconfig": "master",
+        "ext_gettext": "master"
+      }
+    },
+    {
+      "name": "ext_freetype",
+      "version": "master-1789996101",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_freetype/master-1789996101/archive.tar",
+      "sha256": "ea80c632ac71a8983cbbbc6a50b51e95fb7a925734f20353e7910cecfdeea3ca",
+      "bytes": 91965440,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_png": "master",
+        "ext_icu": "master",
+        "ext_pkgconfig": "master"
+      }
+    },
+    {
+      "name": "ext_fribidi",
+      "version": "master-1789993407",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_fribidi/master-1789993407/archive.tar",
+      "sha256": "9effc9c5dacb1d509d967106697c0565d277637093f85d84928fe0402612c98e",
+      "bytes": 757760,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_gettext",
+      "version": "master-1789995071",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_gettext/master-1789995071/archive.tar",
+      "sha256": "bbc33765f36c017a94e01ae06c0b579725e358dad123f762bcfd18164d475b19",
+      "bytes": 43110400,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_iconv": "master"
+      }
+    },
+    {
+      "name": "ext_giflib",
+      "version": "master-1789993435",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_giflib/master-1789993435/archive.tar",
+      "sha256": "cd8eb3d6f55d45e57d11d09b85130abadacf2258c1e6e3d4a91d218eafe8a6b1",
+      "bytes": 204800,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_googleangle",
+      "version": "master-1789996012",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_googleangle/master-1789996012/archive.tar",
+      "sha256": "294207fa4424aaf2ebe4fc733bdc42a17abb50384cde9c14b0c0b63703ede709",
+      "bytes": 81070080,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_zlib": "master"
+      }
+    },
+    {
+      "name": "ext_gperf",
+      "version": "master-1789994975",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_gperf/master-1789994975/archive.tar",
+      "sha256": "362827e1af5d0754fd5ab61d1a21247d4be692c4ef11bf867ac547da0215fc20",
+      "bytes": 440320,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_gsl",
+      "version": "master-1789993468",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_gsl/master-1789993468/archive.tar",
+      "sha256": "f35884e279e14387505c70b1716aa8d93f71ec38a8425e3b5b21e98f93207165",
+      "bytes": 10997760,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_highway",
+      "version": "master-1789993598",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_highway/master-1789993598/archive.tar",
+      "sha256": "b75c1a37f9c6c02b1a74458fdcacf1546de62dfc26d55fd7ae875c507c158b4f",
+      "bytes": 73553920,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_iconv",
+      "version": "master-1789994388",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_iconv/master-1789994388/archive.tar",
+      "sha256": "e4a7a67d2e62470e178793443b2585899cc8e7a01df7a9cdf61bc20587e7dc37",
+      "bytes": 337920,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_icoutils",
+      "version": "master-1789996029",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_icoutils/master-1789996029/archive.tar",
+      "sha256": "414d552b7d6b9f359765ede4276d994c2ca023c7e42cc8787359c987f9f81b8a",
+      "bytes": 399360,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_png": "master"
+      }
+    },
+    {
+      "name": "ext_icu",
+      "version": "master-1789993827",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_icu/master-1789993827/archive.tar",
+      "sha256": "e9cbfd648efec7f8ca4140c2faa3bd62605112043df704e08e618b4a4f373cdc",
+      "bytes": 82810880,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_imath",
+      "version": "master-1789993855",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_imath/master-1789993855/archive.tar",
+      "sha256": "e2ff61c8d73fc633ab9127e06fbb65d0ec77b52438d95412cb5a5f414b86a879",
+      "bytes": 1167360,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_patch": "master"
+      }
+    },
+    {
+      "name": "ext_immer",
+      "version": "master-1789993872",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_immer/master-1789993872/archive.tar",
+      "sha256": "2f5c07a80fe60d7bcfe7463e8f98c497fe3c85977eb417e22f04992e2b169313",
+      "bytes": 1013760,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_jpeg",
+      "version": "master-1789993932",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_jpeg/master-1789993932/archive.tar",
+      "sha256": "be200c286873dc1881ca6aaf9faabbba4bbf60477df41151ce6ff0705e82714a",
+      "bytes": 7485440,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_jpegxl",
+      "version": "master-1789996155",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_jpegxl/master-1789996155/archive.tar",
+      "sha256": "3bffb62241c3c2bca7dae27176668af2a511b5128084298b1c1bfbbc160cce87",
+      "bytes": 25016320,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_highway": "master",
+        "ext_brotli": "master",
+        "ext_lcms2": "master",
+        "ext_jpeg": "master",
+        "ext_png": "master",
+        "ext_zlib": "master"
+      }
+    },
+    {
+      "name": "ext_json_c",
+      "version": "master-1789993975",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_json_c/master-1789993975/archive.tar",
+      "sha256": "879304beabff4774c7e3d5db2ccca7feefe716f6b1a90e22f463f7d84c4808db",
+      "bytes": 849920,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_patch": "master"
+      }
+    },
+    {
+      "name": "ext_karchive",
+      "version": "master-1789997825",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_karchive/master-1789997825/archive.tar",
+      "sha256": "3698a60d26c95f3177bf50c8e3ee07797cbb542b39a7bf1d962fcfc301fc4b09",
+      "bytes": 1136640,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master"
+      }
+    },
+    {
+      "name": "ext_kcompletion",
+      "version": "master-1789998474",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_kcompletion/master-1789998474/archive.tar",
+      "sha256": "175581475c99d92614ab99fb0b1c19120fbee81c05f0952a0cee87032c112d12",
+      "bytes": 2048000,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_extra_cmake_modules": "master",
+        "ext_qt": "master",
+        "ext_kconfig": "master",
+        "ext_kwidgetsaddons": "master"
+      }
+    },
+    {
+      "name": "ext_kconfig",
+      "version": "master-1789997906",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_kconfig/master-1789997906/archive.tar",
+      "sha256": "7d698944ae0a90e3c66c63c3910e332b15e8d7b90794a3046ceba51ebbb46f72",
+      "bytes": 6410240,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master"
+      }
+    },
+    {
+      "name": "ext_kcoreaddons",
+      "version": "master-1789997944",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_kcoreaddons/master-1789997944/archive.tar",
+      "sha256": "77bba2f175d90913fc4576b7d8e2b3a082e83f82c4d5d24b66a2d1ed765d7631",
+      "bytes": 5816320,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_extra_cmake_modules": "master",
+        "ext_qt": "master"
+      }
+    },
+    {
+      "name": "ext_kcrash",
+      "version": "master-1703165126",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_kcrash/master-1703165126/archive.tar",
+      "sha256": "a3a96a4773443a395ef09fcec4389f8cf5a14ba712435f2692de800af967a6ab",
+      "bytes": 215040,
+      "recipe_commit": "9f6163122bf5ce5581ef522a9b884a35481529e2",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master",
+        "ext_kcoreaddons": "master",
+        "ext_kwindowsystem": "master"
+      }
+    },
+    {
+      "name": "ext_kdcraw",
+      "version": "master-1789997130",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_kdcraw/master-1789997130/archive.tar",
+      "sha256": "b47f4f01890b78a0086b4490b76393f089b740b0d70f6279f2c7c23563f35aaf",
+      "bytes": 460800,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_libraw": "master",
+        "ext_extra_cmake_modules": "master",
+        "ext_qt": "master"
+      }
+    },
+    {
+      "name": "ext_kguiaddons",
+      "version": "master-1789997976",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_kguiaddons/master-1789997976/archive.tar",
+      "sha256": "0e3e6326b95e76d8e693cddc00fd6b1c8b6e70fd762b1593dbe4a653fabcfbdc",
+      "bytes": 952320,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master"
+      }
+    },
+    {
+      "name": "ext_ki18n",
+      "version": "master-1789998033",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_ki18n/master-1789998033/archive.tar",
+      "sha256": "6a97186fe48c4d53b23f2467060bad14134957edc5638cee9baf51d46179a6e0",
+      "bytes": 20797440,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master",
+        "ext_gettext": "master"
+      }
+    },
+    {
+      "name": "ext_kimageformats",
+      "version": "master-1789998073",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_kimageformats/master-1789998073/archive.tar",
+      "sha256": "008048ab43cd2f6cbfaed035237222155c879f8cac8912073057d01b8ae28832",
+      "bytes": 2109440,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master",
+        "ext_karchive": "master"
+      }
+    },
+    {
+      "name": "ext_kitemmodels",
+      "version": "master-1789998110",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_kitemmodels/master-1789998110/archive.tar",
+      "sha256": "c20ef5bc7d24551d06d621ed8837ce0ba5ef19abab8f1060a4bc4b777f021742",
+      "bytes": 2068480,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master"
+      }
+    },
+    {
+      "name": "ext_kitemviews",
+      "version": "master-1789998153",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_kitemviews/master-1789998153/archive.tar",
+      "sha256": "9da1606f4468ac82db9722e751025b784c4836294072761e400c37c73aefdb5e",
+      "bytes": 1853440,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master"
+      }
+    },
+    {
+      "name": "ext_kwidgetsaddons",
+      "version": "master-1789998197",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_kwidgetsaddons/master-1789998197/archive.tar",
+      "sha256": "7884e650c5b413e09ad0d2ac5aa8178d3feecf241623b0292d7ae27b097fa37b",
+      "bytes": 13004800,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master"
+      }
+    },
+    {
+      "name": "ext_kwindowsystem",
+      "version": "master-1789998229",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_kwindowsystem/master-1789998229/archive.tar",
+      "sha256": "da72aa06b612ee15b02be5bac1954bfdb2c69a22d67d4c4582b7a38963ac3fb1",
+      "bytes": 1536000,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master"
+      }
+    },
+    {
+      "name": "ext_lager",
+      "version": "master-1789995236",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_lager/master-1789995236/archive.tar",
+      "sha256": "d83001b5b4ce12666e2b273cd8126861ca3545d7bac4e3aca1cc3f7fc1ba4ea4",
+      "bytes": 419840,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_zug": "master",
+        "ext_immer": "master"
+      }
+    },
+    {
+      "name": "ext_lame",
+      "version": "master-1789995479",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_lame/master-1789995479/archive.tar",
+      "sha256": "23348f55c3a9b22e297aa63dc80124dcf79ae89e2823e5e38023ee41c82bcda6",
+      "bytes": 1669120,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_pkgconfig": "master"
+      }
+    },
+    {
+      "name": "ext_lcms2",
+      "version": "master-1789993998",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_lcms2/master-1789993998/archive.tar",
+      "sha256": "ec54ab8ca8434f94190f997ff1977c109eae8b613d0898a72adea8459fc54888",
+      "bytes": 2631680,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_libaom",
+      "version": "master-1789994357",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_libaom/master-1789994357/archive.tar",
+      "sha256": "8b564702aa90b71cc064bfcb2cfb3f9c6b6a3bc1c53a24a98645f595f007db3d",
+      "bytes": 15759360,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_libde265",
+      "version": "master-1789994668",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_libde265/master-1789994668/archive.tar",
+      "sha256": "e899febbcd62cba207f863bb0dfd59b737301ff881276f5b9a0f9b25f8a78834",
+      "bytes": 2949120,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_libheif",
+      "version": "master-1789997103",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_libheif/master-1789997103/archive.tar",
+      "sha256": "6904b0d87f81fe7bda68de7ec5908551a2553cc3ba16df0981b7f1b696e88002",
+      "bytes": 25415680,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_libaom": "master",
+        "ext_libde265": "master",
+        "ext_libx265": "master"
+      }
+    },
+    {
+      "name": "ext_libogg",
+      "version": "master-1789994144",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_libogg/master-1789994144/archive.tar",
+      "sha256": "16156ae9d9e3280fe4cbb90a7756c6f089980200972d4fc56a5f2c11ac841ea4",
+      "bytes": 768000,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_libraw",
+      "version": "master-1789995914",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_libraw/master-1789995914/archive.tar",
+      "sha256": "d8cc0c688ccaf847d84754fdf5b2c0b28f58e364f0f87a89fcd7f9e0aa69dde1",
+      "bytes": 6277120,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_lcms2": "master",
+        "ext_jpeg": "master",
+        "ext_zlib": "master"
+      }
+    },
+    {
+      "name": "ext_libtheora",
+      "version": "master-1789995533",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_libtheora/master-1789995533/archive.tar",
+      "sha256": "ab3d2074ae45a300ea397c6e1edc5cf28ae38f3000f1e142cf6b276a63b84dac",
+      "bytes": 2611200,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_libogg": "master",
+        "ext_libvorbis": "master",
+        "ext_png": "master",
+        "ext_pkgconfig": "master"
+      }
+    },
+    {
+      "name": "ext_libvorbis",
+      "version": "master-1789994162",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_libvorbis/master-1789994162/archive.tar",
+      "sha256": "8bb60be157f1a1cd6468f0ff0a487bd492c4b73d4141f261c3b9569e5de89e1f",
+      "bytes": 2273280,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_libogg": "master"
+      }
+    },
+    {
+      "name": "ext_libx265",
+      "version": "master-1789995823",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_libx265/master-1789995823/archive.tar",
+      "sha256": "cad476b0b7a3aef82c7eaf766a3729f829624f8403a43c74b57c4e43d10d260e",
+      "bytes": 64276480,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_libx265_12bit": "master"
+      }
+    },
+    {
+      "name": "ext_libx265_10bit",
+      "version": "master-1789994728",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_libx265_10bit/master-1789994728/archive.tar",
+      "sha256": "81e2d66448584dfca4f918f1c78b31d402c5550a3d329ff9b159f3934ef42e2e",
+      "bytes": 10106880,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_libx265_12bit",
+      "version": "master-1789994790",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_libx265_12bit/master-1789994790/archive.tar",
+      "sha256": "e813b947e8d7b2a39c967d86bd4157ceea67a48ab6807c252ed438ab230376ab",
+      "bytes": 10004480,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_libx265_10bit": "master"
+      }
+    },
+    {
+      "name": "ext_lzma",
+      "version": "master-1789994486",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_lzma/master-1789994486/archive.tar",
+      "sha256": "c8e364de7f100a124199e0458078ef870c885a28bafce30f966d1f3ebbe5c242",
+      "bytes": 3031040,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_meson",
+      "version": "master-1744743954",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_meson/master-1744743954/archive.tar",
+      "sha256": "4eb892db3b776381920175df3da6468096d81d11e6e9349c5e21cb82c84976a5",
+      "bytes": 4536320,
+      "recipe_commit": "243a18ec65aefa41292215a020726faeabf37792",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_mlt",
+      "version": "master-1789998264",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_mlt/master-1789998264/archive.tar",
+      "sha256": "e55f53dffdf421e58b35ceb929ace59d90f92a1023ecbf529ea217ef25d0d7a0",
+      "bytes": 4679680,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_ffmpeg": "master",
+        "ext_sdl2": "master",
+        "ext_libvorbis": "master",
+        "ext_fftw3": "master",
+        "ext_fontconfig": "master",
+        "ext_dlfcn_win32": "master"
+      }
+    },
+    {
+      "name": "ext_mypaint",
+      "version": "master-1789994015",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_mypaint/master-1789994015/archive.tar",
+      "sha256": "9814470af9ff33140b837a2c98134025305833c8318cd5214ef4067972afad3a",
+      "bytes": 491520,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_json_c": "master",
+        "ext_extra_cmake_modules": "master"
+      }
+    },
+    {
+      "name": "ext_nasm",
+      "version": "master-1789993041",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_nasm/master-1789993041/archive.tar",
+      "sha256": "63d5994ba605425feccca782f2fac2f6cfed01dc232c437e8b37021c36fe0664",
+      "bytes": 2816000,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_ocio",
+      "version": "master-1789994631",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_ocio/master-1789994631/archive.tar",
+      "sha256": "9c9641a7720c453cb2ea9ec2a4599d073d8bc00a46a9c2088d97c43a05861810",
+      "bytes": 40458240,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_openexr": "master"
+      }
+    },
+    {
+      "name": "ext_openexr",
+      "version": "master-1789994065",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_openexr/master-1789994065/archive.tar",
+      "sha256": "8f197b5175ddd70566c01baeee9b2085f0fc50a46bf16fa88ecac03324b3dd52",
+      "bytes": 16947200,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_imath": "master"
+      }
+    },
+    {
+      "name": "ext_openh264",
+      "version": "master-1789995590",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_openh264/master-1789995590/archive.tar",
+      "sha256": "47068bd13ab524130147feeb8cc9aeabc2b860e7b12a506f4385893920209c15",
+      "bytes": 4925440,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_pkgconfig": "master"
+      }
+    },
+    {
+      "name": "ext_openjpeg",
+      "version": "master-1789994093",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_openjpeg/master-1789994093/archive.tar",
+      "sha256": "df270b876b13091ab1f889ef4768b173d30a74bc6574089f2579122d3ca0dfbe",
+      "bytes": 2734080,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_lcms2": "master"
+      }
+    },
+    {
+      "name": "ext_openssl",
+      "version": "master-1789995098",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_openssl/master-1789995098/archive.tar",
+      "sha256": "6f0da19443d5e55985dc57845aa7143f0e7a329772dadf7ba9064beb9ad26848",
+      "bytes": 8140800,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_opus",
+      "version": "master-1789994193",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_opus/master-1789994193/archive.tar",
+      "sha256": "dd8a5175355cde6419342126327c87fe1a3daea576a85f47e37372a1badd25b7",
+      "bytes": 1280000,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_patch",
+      "version": "master-1789992974",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_patch/master-1789992974/archive.tar",
+      "sha256": "a6f764d743f869a2f69582277ff6a500140ba70d635b871ffc316636ffce8786",
+      "bytes": 133120,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_pkgconfig",
+      "version": "master-1789995133",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_pkgconfig/master-1789995133/archive.tar",
+      "sha256": "f8f1664829b186e668a362876b111f121e77ee4f98e26457c4445299f12e7795",
+      "bytes": 686080,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_poppler",
+      "version": "master-1789998399",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_poppler/master-1789998399/archive.tar",
+      "sha256": "e7a7702fb85c1b90d5d8b4b83d1c0535b6fe8e26334e59806606b21606c23e10",
+      "bytes": 70993920,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_freetype": "master",
+        "ext_fontconfig": "master",
+        "ext_qt": "master",
+        "ext_jpeg": "master",
+        "ext_png": "master",
+        "ext_tiff": "master",
+        "ext_boost": "master",
+        "ext_lcms2": "master",
+        "ext_iconv": "master"
+      }
+    },
+    {
+      "name": "ext_pyqt-builder",
+      "version": "master-1789997165",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_pyqt-builder/master-1789997165/archive.tar",
+      "sha256": "fe6c8799ea717afeeb011a901f2c630c21e1bdb01ef736d47aa01ec8895bb384",
+      "bytes": 9994240,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_python": "master",
+        "ext_qt": "master"
+      }
+    },
+    {
+      "name": "ext_pyqt5",
+      "version": "master-1789997634",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_pyqt5/master-1789997634/archive.tar",
+      "sha256": "d99cc42a2ece5dad4c459b641cf5103dc99a88df4ef4c2dd008d9b0cee36bd62",
+      "bytes": 19251200,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_python": "master",
+        "ext_qt": "master",
+        "ext_pyqt-builder": "master",
+        "ext_sip": "master"
+      }
+    },
+    {
+      "name": "ext_pyqt5-sip",
+      "version": "master-1789997696",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_pyqt5-sip/master-1789997696/archive.tar",
+      "sha256": "a6342ab53f1841c02bef79e41ee4277c937df13ebbc13807860df187dccd96d1",
+      "bytes": 174080,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_python": "master",
+        "ext_sip": "master",
+        "ext_qt": "master",
+        "ext_pyqt5": "master"
+      }
+    },
+    {
+      "name": "ext_python",
+      "version": "master-1789994840",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_python/master-1789994840/archive.tar",
+      "sha256": "987d9c23a49a98938290eda9d7af70720cb31a527701165c7840d79afbf71c3c",
+      "bytes": 27586560,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_python-modules",
+      "version": "master-1705338335",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_python-modules/master-1705338335/archive.tar",
+      "sha256": "af3b5a116336abee06c4f56470426cfc30d492029238af4d541979965650426b",
+      "bytes": 6799360,
+      "recipe_commit": "f493b59f3e5a446a9a50ed996b03fbcba4c51687",
+      "dependencies": {
+        "ext_python": "master"
+      }
+    },
+    {
+      "name": "ext_python-openvino",
+      "version": "master-1789735184",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_python-openvino/master-1789735184/archive.tar",
+      "sha256": "024cdbe62dc0e7b4c44bfc6001b220cf7eb163907c6868300a4bc409cc51ca73",
+      "bytes": 331212800,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_python": "master"
+      }
+    },
+    {
+      "name": "ext_qt",
+      "version": "master-1790326547",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_qt/master-1790326547/archive.tar",
+      "sha256": "119d8ef9c1305607ae6d94e0a9ecf296d112649c19a564bef65c9560d321db22",
+      "bytes": 344678400,
+      "recipe_commit": "7eab9569cb65fe8422224fc1de644a169fd8b0f4",
+      "dependencies": {
+        "ext_icu": "master",
+        "ext_freetype": "master",
+        "ext_png": "master",
+        "ext_jpeg": "master",
+        "ext_googleangle": "master",
+        "ext_openssl": "master",
+        "ext_zlib": "master"
+      }
+    },
+    {
+      "name": "ext_qt-quickcontrols2",
+      "version": "master-1716378873",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_qt-quickcontrols2/master-1716378873/archive.tar",
+      "sha256": "20645dd2a0670c98d55a231423274a99d5ef9df8af416a0d276e065421564de7",
+      "bytes": 322232320,
+      "recipe_commit": "a3d879b835353cc731660180ed78d01b4fed4c70",
+      "dependencies": {
+        "ext_icu": "master",
+        "ext_freetype": "master",
+        "ext_png": "master",
+        "ext_jpeg": "master",
+        "ext_patch": "master",
+        "ext_googleangle": "master",
+        "ext_strawberryperl": "master",
+        "ext_openssl": "master",
+        "ext_zlib": "master"
+      }
+    },
+    {
+      "name": "ext_quazip",
+      "version": "master-1789996875",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_quazip/master-1789996875/archive.tar",
+      "sha256": "7e131ef711556f4d27ff8968e2f1b4f18668935a22d0bc84f005502dca16fc6d",
+      "bytes": 1105920,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_zlib": "master"
+      }
+    },
+    {
+      "name": "ext_sdl2",
+      "version": "master-1789994287",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_sdl2/master-1789994287/archive.tar",
+      "sha256": "b808e782bf0ec0d8ecff3e29c83cc666e019f84b88b3033871ac54940f143aae",
+      "bytes": 7096320,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_seexpr",
+      "version": "master-1789998293",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_seexpr/master-1789998293/archive.tar",
+      "sha256": "492ccf003502b28d91c1165494618a59edeaabe7a999492d06c11bc4b37d7336",
+      "bytes": 6461440,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_qt": "master",
+        "ext_extra_cmake_modules": "master",
+        "ext_ki18n": "master"
+      }
+    },
+    {
+      "name": "ext_sip",
+      "version": "master-1789994864",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_sip/master-1789994864/archive.tar",
+      "sha256": "2da398f27d5552571a3e56a08b52e2dd162c7203e624040f032673a9493e78af",
+      "bytes": 14325760,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_python": "master"
+      }
+    },
+    {
+      "name": "ext_strawberryperl",
+      "version": "master-1789993020",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_strawberryperl/master-1789993020/archive.tar",
+      "sha256": "80e2f55e63891bb2481ccdb0a9560816eb0f4063da893bff2ae4a6c1c63cfb91",
+      "bytes": 198389760,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_unibreak",
+      "version": "master-1789994101",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_unibreak/master-1789994101/archive.tar",
+      "sha256": "77b7caf196aa4722a9c4b7e8bb79312a570a4fc611fac228d91c7134a187a162",
+      "bytes": 266240,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_vpl",
+      "version": "master-1789994822",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_vpl/master-1789994822/archive.tar",
+      "sha256": "e1436a69d101bf87927cccb661bb730980572c471d11c0602ad6dc6adc94e160",
+      "bytes": 22046720,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_vpx",
+      "version": "master-1789995661",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_vpx/master-1789995661/archive.tar",
+      "sha256": "74c2414f06b1f80cfd6afc57eca90d6ddc1a5792dd51a00f2f06dfaad5d5d587",
+      "bytes": 14950400,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_pkgconfig": "master"
+      }
+    },
+    {
+      "name": "ext_webp",
+      "version": "master-1789995392",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_webp/master-1789995392/archive.tar",
+      "sha256": "6bd2109eb77f8452dc2ca63f3b2bbb7981687ace9b06969641785bc2486060a9",
+      "bytes": 3901440,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {
+        "ext_png": "master",
+        "ext_jpeg": "master",
+        "ext_tiff": "master",
+        "ext_giflib": "master",
+        "ext_zlib": "master"
+      }
+    },
+    {
+      "name": "ext_xsimd",
+      "version": "master-1789994111",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_xsimd/master-1789994111/archive.tar",
+      "sha256": "3875fadf36944b65bb80cff2d22cdf8de192c5fe8eb2105596b75e46a9806a9a",
+      "bytes": 1966080,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_zlib",
+      "version": "master-1789995003",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_zlib/master-1789995003/archive.tar",
+      "sha256": "e0000164d53e2b8c1b2032460f0944c635ccc733287ec540a16ef8ff6fe24c4f",
+      "bytes": 1546240,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    },
+    {
+      "name": "ext_zug",
+      "version": "master-1789994121",
+      "url": "https://invent.kde.org/api/v4/projects/teams%2Fci-artifacts%2Fkrita-windows/packages/generic/ext_zug/master-1789994121/archive.tar",
+      "sha256": "078f18aab8235074aa496e3dfc53c0a919c4801ba9741b86b8efda5119691378",
+      "bytes": 368640,
+      "recipe_commit": "0fd95c4efca2e5b5024121bb0ccae5b353956cd9",
+      "dependencies": {}
+    }
+  ]
+}
