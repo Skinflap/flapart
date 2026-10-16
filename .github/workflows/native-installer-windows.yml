@@ -1,0 +1,16 @@
+name: Check Windows installer entry point
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  installer-smoke:
+    runs-on: windows-2025
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Compile installer and refuse unqualified release
+        shell: pwsh
+        run: native/installers/windows-online/Test-Installer.ps1

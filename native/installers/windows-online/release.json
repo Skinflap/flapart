@@ -1,0 +1,9 @@
+{
+  "status": "blocked",
+  "kind": "namespaced-compiled-fork",
+  "platform": "windows-x86_64",
+  "profileNamespace": "flapart-native",
+  "reason": "Awaiting actual namespaced runtime packaging, native profile-isolation tests and source closure. Official runtime wrappers cannot isolate settings on this OS.",
+  "studioPluginSha256": "7401d694e5a0b408663f87548cc856f7f39de2790bbdc9f19021e6610e5094c2",
+  "studioPluginVersion": "0.1.1"
+}
