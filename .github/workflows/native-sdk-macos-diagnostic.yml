@@ -1,0 +1,35 @@
+name: Diagnose Mac SDK preparation
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sdk-diagnostic:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Fetch exact isolated SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa-result
+          sw_vers > qa-result/platform.txt
+          python3 native/qa/macos-build/fetch-dependencies.py --prefix "$RUNNER_TEMP/flapart-sdk" --cache "$RUNNER_TEMP/flapart-sdk-downloads"
+      - name: Build maintained TLS and Python in a private SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa-result
+          python3 native/qa/tls-evaluation/run-native-ci.py --sdk "$RUNNER_TEMP/flapart-sdk" --work "$RUNNER_TEMP/flapart-maintained" --output qa-result/tls --jobs 2
+          python3 native/qa/tls-evaluation/promote-macos-sdk.py --work "$RUNNER_TEMP/flapart-maintained" --evidence qa-result/tls --output qa-result/sdk-promotion.json
+      - name: Retain SDK diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: macos-sdk-diagnostic-evidence
+          path: qa-result/
+          retention-days: 7
+          if-no-files-found: error
