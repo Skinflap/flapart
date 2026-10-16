@@ -144,6 +144,25 @@ jobs:
           path: ${{ runner.temp }}/flapart-candidate.gpg
           retention-days: 7
           if-no-files-found: error
+      - name: Preserve packaging diagnostics even without a candidate
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PYDIAG'
+          import os, pathlib, shutil
+          source = pathlib.Path(os.environ['RUNNER_TEMP']) / 'flapart-package-stages'
+          target = pathlib.Path('qa-result/package-stages')
+          for stage in ('collector', 'completion', 'codesign', 'verify'):
+              for name in ('receipt.json', 'stdout.log', 'stderr.log'):
+                  path = source / stage / name
+                  if not path.exists():
+                      continue
+                  if source.is_symlink() or path.parent.is_symlink() or path.is_symlink() or not path.is_file():
+                      raise ValueError('Packaging diagnostic must be a regular file')
+                  destination = target / stage / name
+                  destination.parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copyfile(path, destination)
+          PYDIAG
       - name: Retain source-build evidence only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -159,6 +178,8 @@ jobs:
             qa-result/tls/*.log
             qa-result/sdk-promotion.json
             qa-result/package.log
+            qa-result/package-stages/*/*.json
+            qa-result/package-stages/*/*.log
             qa-result/candidate-inventory.json
             qa-result/maintained-runtime.json
             qa-result/runtime/*
