@@ -111,6 +111,14 @@ class RecorderTests(unittest.TestCase):
         self.assertTrue(result['passed'])
         self.assertNotIn('SOME_PRIVATE_CREDENTIAL', result['environment'])
         self.assertNotIn('not-for-the-child', (self.evidence / 'receipt.json').read_text())
+    def test_explicit_no_bytecode_environment_prevents_child_cache(self):
+        module = self.base / 'sdk_query_fixture.py'
+        module.write_text('VALUE = 42\n')
+        env = dict(os.environ, PYTHONDONTWRITEBYTECODE='1')
+        result = self.run_stage('import sys, sdk_query_fixture; assert sys.dont_write_bytecode; assert sdk_query_fixture.VALUE == 42', source_env=env)
+        self.assertTrue(result['passed'])
+        self.assertEqual(result['environment']['PYTHONDONTWRITEBYTECODE'], '1')
+        self.assertFalse((self.base / '__pycache__').exists())
     def test_nested_evidence_refused_before_execution(self):
         self.evidence = self.tree / 'evidence'
         with self.assertRaisesRegex(ValueError, 'contain one another'): self.run_stage('raise RuntimeError("must not run")')
