@@ -2,6 +2,9 @@
 // Compile on Windows CI with .NET Framework csc; no PowerShell required on user PCs.
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
@@ -60,7 +63,21 @@ static class FlapartInstaller {
             }
         }
     }
-    static string ReadZone(string path) { try { return File.ReadAllText(path+":Zone.Identifier"); } catch(IOException) { return null; } }
+    // .NET Framework path validation rejects ADS colons; use Windows handles directly.
+    [DllImport("kernel32.dll", CharSet=CharSet.Unicode, SetLastError=true)]
+    static extern SafeFileHandle CreateFileW(string name,uint access,uint share,IntPtr security,uint disposition,uint attributes,IntPtr template);
+    static string ReadZone(string path) {
+        using(var handle=CreateFileW(Path.GetFullPath(path)+":Zone.Identifier",0x80000000,7,IntPtr.Zero,3,0x80,IntPtr.Zero)) {
+            if(handle.IsInvalid) { int error=Marshal.GetLastWin32Error();if(error==2||error==3)return null;throw new Win32Exception(error,"Could not read download provenance."); }
+            using(var stream=new FileStream(handle,FileAccess.Read))using(var reader=new StreamReader(stream))return reader.ReadToEnd();
+        }
+    }
+    static void WriteZone(string path,string value) {
+        using(var handle=CreateFileW(Path.GetFullPath(path)+":Zone.Identifier",0x40000000,7,IntPtr.Zero,2,0x80,IntPtr.Zero)) {
+            if(handle.IsInvalid)throw new Win32Exception(Marshal.GetLastWin32Error(),"Could not preserve download provenance.");
+            using(var stream=new FileStream(handle,FileAccess.Write))using(var writer=new StreamWriter(stream,new UTF8Encoding(false)))writer.Write(value);
+        }
+    }
     static void WriteJson(string path,Dictionary<string,object> data) { File.WriteAllText(path,Json.Serialize(data),new UTF8Encoding(false)); }
     static void Install(string destination,string archiveInput,bool shortcut,Action<string> progress) {
         Check(Environment.Is64BitOperatingSystem,"This package needs 64-bit Windows.");var release=Release();destination=Path.GetFullPath(destination);NoLinks(destination);
@@ -79,10 +96,10 @@ static class FlapartInstaller {
                 File.Copy(Assembly.GetExecutingAssembly().Location,Path.Combine(payload,"Flapart Studio.exe"));
                 string font=Path.Combine(Source,"SyneMono-Regular.ttf");if(File.Exists(font))File.Copy(font,Path.Combine(payload,"SyneMono-Regular.ttf"));
                 // Mark the downloaded engine for standard Windows user review. No SmartScreen override.
-                string zone=Path.Combine(payload,executable)+":Zone.Identifier";
+                string zone=Path.Combine(payload,executable);
                 if(ReadZone(Path.Combine(payload,executable))==null) {
-                    if(archiveInput==null)File.WriteAllText(zone,"[ZoneTransfer]\r\nZoneId=3\r\nHostUrl="+Text(release,"url")+"\r\n");
-                    else { string archiveZone=ReadZone(archiveInput);if(archiveZone!=null)File.WriteAllText(zone,archiveZone); }
+                    if(archiveInput==null)WriteZone(zone,"[ZoneTransfer]\r\nZoneId=3\r\nHostUrl="+Text(release,"url")+"\r\n");
+                    else { string archiveZone=ReadZone(archiveInput);if(archiveZone!=null)WriteZone(zone,archiveZone); }
                 }
                 Directory.Move(payload,final);
                 var record=new Dictionary<string,object>{{"product","Flapart Studio"},{"version",Text(release,"version")},{"release",releaseId},{"executable",executable},{"sha256",Text(release,"sha256")},{"profileNamespace","flapart-native"}};
