@@ -3,7 +3,9 @@
 Usage: python https-validation-probe.py --openssl /path/to/openssl --output receipt.json
 The openssl CLI generates disposable CA/server keys only in TemporaryDirectory.
 """
-import argparse,datetime,http.server,json,pathlib,ssl,subprocess,tempfile,threading,urllib.request
+import argparse,datetime,http.server,json,pathlib,ssl,subprocess,tempfile,threading,urllib.request,sys
+sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent))
+from tls_fixture import command as fixture_command
 p=argparse.ArgumentParser();p.add_argument('--openssl',required=True);p.add_argument('--output',required=True);p.add_argument('--minimum',default='3.5.9');p.add_argument('--official-url',default='https://www.python.org/');a=p.parse_args()
 from PyQt5.QtCore import QCoreApplication,QEventLoop,QTimer,QUrl
 from PyQt5.QtNetwork import QNetworkAccessManager,QNetworkRequest,QSslConfiguration,QSslCertificate,QSslSocket,QSslError
@@ -19,7 +21,7 @@ try:
   version=tuple(map(int,result[name].split()[1].split('.')));assert version>=minimum,(name,result[name])
  with tempfile.TemporaryDirectory(prefix='flapart-tls-test-') as tmp:
   root=pathlib.Path(tmp)
-  def command(*args):subprocess.run([a.openssl,*args],cwd=root,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE,check=True)
+  def command(*args):fixture_command(a.openssl,root,*args)
   command('req','-x509','-newkey','rsa:2048','-nodes','-keyout','ca.key','-out','ca.pem','-days','2','-subj','/CN=Flapart disposable QA CA','-addext','basicConstraints=critical,CA:TRUE','-addext','keyUsage=critical,keyCertSign,cRLSign')
   command('req','-newkey','rsa:2048','-nodes','-keyout','server.key','-out','server.csr','-subj','/CN=localhost')
   (root/'extensions').write_text('subjectAltName=DNS:localhost\nbasicConstraints=CA:FALSE\nkeyUsage=digitalSignature,keyEncipherment\nextendedKeyUsage=serverAuth\n')
