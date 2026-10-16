@@ -1,0 +1,46 @@
+{
+  "version": "26.04.0",
+  "archive_sha256": "b0955163114af96bc0106f68cb24daf973a629462453d8b82775f81b0d4e0693",
+  "patch_sha256": "94e3322b57ce84f7c168e90364a602b8c49c83913bafa7469658c64ec83eb7a5",
+  "changes": [
+    {
+      "path": "poppler/Decrypt.cc",
+      "before_sha256": "fa64e7b510dd556b45fd340dc7495580269fbaec139a91f2138f1af655cb4dec",
+      "after_sha256": "f78797ec646436c17567a835166a81d78d524f0f748004595f672593190fc02b"
+    },
+    {
+      "path": "poppler/ImageEmbeddingUtils.cc",
+      "before_sha256": "698ba757f4bc99d184cfac0360f2bdec6c78dc98b4c7ebf97ae0f33b2e18895d",
+      "after_sha256": "6d6d0ed390dfd6348ef8e26cdeebe269719953698a9fda7ff0f42a30e635d671"
+    },
+    {
+      "path": "poppler/SplashOutputDev.cc",
+      "before_sha256": "7eba7954971c6764e0ffbecb55137acfa72aaaf247797ed7932c4df18be35229",
+      "after_sha256": "c7fa1127eedb5012c3dccc8516870575d2e0d936f480d8520e4cca82fce131fd"
+    },
+    {
+      "path": "poppler/XRef.cc",
+      "before_sha256": "0195a4191b194aec7fcbfad7e9ae735686b231214b3a867fdbc9d440d81f43c2",
+      "after_sha256": "ebeca925de6ceab9ceebdf8ba541ebbb95780b74c1d2645d519562c11fc65edb"
+    },
+    {
+      "path": "splash/Splash.h",
+      "before_sha256": "3ae3e7f5fc93047543068f305913141bb2199d1a27d98a683e9f5f556ac53955",
+      "after_sha256": "dc5fc7cdd848c6741e7e6f5fbeeafecc7e1d5ecdd87be681895bc496901ced4f"
+    },
+    {
+      "path": "splash/SplashClip.cc",
+      "before_sha256": "f938787a0c747253fb43baae8388d9fbf4e821a99b8264d5ab284dc4a7c86541",
+      "after_sha256": "ac2eca67106670177cf81700f4f2496d41784ef7557afa2c517cc48ab3abc3c6"
+    }
+  ],
+  "upstream_commits": [
+    "81ed6a3899786a8eddd251aed8c0ca8750555a8e",
+    "2ec4523b1675a2723ca634eed2adf71197580062",
+    "323c91036d99926a8b90dc14329f7b40aece22f8",
+    "60e19a30152560fcccfb2ae7f7559eda560c0160"
+  ],
+  "platform_patch": "Krita dependency recipe missing stdio.h include",
+  "password_patch_adaptation": "Unchanged context only: C cast vs static_cast",
+  "broader_security_review_complete": false
+}
