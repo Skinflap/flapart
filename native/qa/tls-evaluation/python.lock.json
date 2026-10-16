@@ -1,0 +1,23 @@
+{
+  "version": "3.13.16",
+  "artifacts": [
+    {
+      "name": "Python-3.13.16.tar.xz",
+      "url": "https://www.python.org/ftp/python/3.13.16/Python-3.13.16.tar.xz",
+      "bytes": 23225704,
+      "sha256": "f4b1bfb3c79b5bb11b8d228a12504163b4c0dab4d679828d8f5f26b6cb6ab35d",
+      "sigstore_digest_matched": true,
+      "signature_verified": false,
+      "provenance": "official HTTPS + published Sigstore digest; full signature verification remains CI gate"
+    },
+    {
+      "name": "python-3.13.16-embed-amd64.zip",
+      "url": "https://www.python.org/ftp/python/3.13.16/python-3.13.16-embed-amd64.zip",
+      "bytes": 11439094,
+      "sha256": "97dae5274cc54867065e8d5a3226e48c35017ed332a0fdb0e27d5b5821961297",
+      "sigstore_digest_matched": true,
+      "signature_verified": false,
+      "provenance": "official HTTPS + published Sigstore digest; full signature verification remains CI gate"
+    }
+  ]
+}

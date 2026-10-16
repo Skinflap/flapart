@@ -1,0 +1,70 @@
+name: Qualify maintained native TLS
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tls:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            platform: macos
+          - runner: windows-2025
+            platform: windows
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        if: runner.os == 'Windows'
+        with:
+          python-version: '3.13.9'
+          architecture: x64
+      - name: Prepare isolated macOS SDK
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 native/qa/macos-build/fetch-dependencies.py --prefix "$RUNNER_TEMP/tls-sdk" --cache "$RUNNER_TEMP/tls-downloads"
+          python3 -c 'import os,pathlib,shutil;shutil.rmtree(pathlib.Path(os.environ["RUNNER_TEMP"])/"tls-downloads")'
+      - name: Prepare isolated Windows SDK and compiler
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $env:PYTHONUTF8 = '1'
+          git config --global core.longpaths true
+          python native/qa/windows-build/fetch-dependencies.py --prefix "$env:RUNNER_TEMP/tls-sdk" --cache "$env:RUNNER_TEMP/tls-downloads"
+          if ($LASTEXITCODE -ne 0) { throw 'SDK preparation failed' }
+          python native/qa/windows-build/prepare-tools.py --cache "$env:RUNNER_TEMP/tls-tool-downloads" --destination "$env:RUNNER_TEMP/tls-tools"
+          if ($LASTEXITCODE -ne 0) { throw 'Tool preparation failed' }
+          Remove-Item -Recurse -Force "$env:RUNNER_TEMP/tls-downloads", "$env:RUNNER_TEMP/tls-tool-downloads"
+      - name: Build and probe macOS TLS
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa-tls
+          python3 native/qa/tls-evaluation/run-native-ci.py --sdk "$RUNNER_TEMP/tls-sdk" --work "$RUNNER_TEMP/tls-work" --output qa-tls --jobs 3 2>&1 | tee qa-tls/orchestration.log
+      - name: Build and probe Windows TLS
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:PYTHONUTF8 = '1'
+          New-Item -ItemType Directory -Force qa-tls | Out-Null
+          python native/qa/tls-evaluation/run-native-ci.py --sdk "$env:RUNNER_TEMP/tls-sdk" --tools "$env:RUNNER_TEMP/tls-tools" --work "$env:RUNNER_TEMP/tls-work" --output qa-tls --jobs 3 2>&1 | Tee-Object qa-tls/orchestration.log
+          if ($LASTEXITCODE -ne 0) { throw 'Native TLS build or validation failed' }
+      - name: Retain evidence only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: tls-${{ matrix.platform }}-evidence
+          path: |
+            qa-tls/*.log
+            qa-tls/*.json
+          retention-days: 7
+          if-no-files-found: warn
