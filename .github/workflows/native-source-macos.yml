@@ -34,7 +34,8 @@ jobs:
             ninja --version
             df -h .
           } > qa-result/toolchain.log
-          python3 native/distribution/private-retention/test_retention.py -q
+          python3 -m unittest discover -s native/distribution/private-retention -p 'test_*.py' -q
+          python3 native/qa/retention-capacity/test_admission.py -q
       - name: Prepare exact source and isolated SDK
         shell: bash
         run: |
@@ -87,6 +88,7 @@ jobs:
             exit 0
           fi
           qualifications=()
+          measured=(--input "$RUNNER_TEMP/flapart-packaged/candidate.zip" --input "$RUNNER_TEMP/flapart-packaged/candidate-inventory.json" --input "$RUNNER_TEMP/flapart-package-stages")
           for entry in \
             toolchain.log=qa-result/toolchain.log \
             build.log=qa-result/build.log \
@@ -109,9 +111,11 @@ jobs:
             x86_64-tls.json=qa-result/packaged-runtime/x86_64/tls.json \
             x86_64-provenance.json=qa-result/packaged-runtime/x86_64/provenance.json; do
             file="${entry#*=}"
-            if [[ -f "$file" ]]; then qualifications+=(--qualification "$entry"); fi
+            if [[ -f "$file" ]]; then qualifications+=(--qualification "$entry"); measured+=(--input "$file"); fi
           done
-          python3 native/distribution/private-retention/prepare_candidate.py \
+          python3 native/qa/retention-capacity/admission.py --transport-v2 \
+            "${measured[@]}" --filesystem "$RUNNER_TEMP" --output qa-result/retention-capacity.json
+          python3 native/distribution/private-retention/prepare_candidate.py --transport-v2 \
             --candidate "$RUNNER_TEMP/flapart-packaged/candidate.zip" \
             --inventory "$RUNNER_TEMP/flapart-packaged/candidate-inventory.json" \
             --stage-evidence "$RUNNER_TEMP/flapart-package-stages" \
@@ -149,6 +153,7 @@ jobs:
             qa-result/build.log
             qa-result/toolchain.log
             qa-result/private-preparation.json
+            qa-result/retention-capacity.json
             qa-result/encrypted-retention.json
             qa-result/tls/*.json
             qa-result/tls/*.log
