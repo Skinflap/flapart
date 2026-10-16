@@ -133,6 +133,13 @@ class RecorderTests(unittest.TestCase):
         self.assertIsNone(result['returncode'])
         self.assertFalse(result['comparison_complete'])
         self.assertTrue((self.evidence / 'receipt.json').is_file())
+    def test_broken_alias_identifies_relative_path_without_running_command(self):
+        (self.tree / 'missing alias').symlink_to('missing-target')
+        result = self.run_stage('raise RuntimeError("must not run")')
+        self.assertFalse(result['passed'])
+        self.assertIsNone(result['returncode'])
+        self.assertIn('Captured tree contains a broken symlink: "missing alias"', result['errors'])
+
     def test_confined_alias_and_directory_alias_retained(self):
         (self.tree / 'libalias.dylib').symlink_to('library.dylib')
         directory = self.tree / 'real'; directory.mkdir()

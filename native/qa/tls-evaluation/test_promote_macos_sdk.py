@@ -153,4 +153,13 @@ class Promotion(unittest.TestCase):
   result=self.f.run();self.assertTrue(result['promoted']);self.assertTrue((self.f.sdk/'lib/forward/alias-0.dylib').is_symlink());self.assertEqual((self.f.sdk/'lib/forward/alias-0.dylib').read_bytes(),(directory/'provider.dylib').read_bytes())
  def test_new_openssl_cli_old_ssl_import_refused(self):
   self.f.write(self.f.ssl/'bin/openssl',macho(imports=('@rpath/libssl.1.1.dylib',)));self.refused_without_mutation()
+class LinkAudit(unittest.TestCase):
+ def test_valid_broken_external_and_looped_links(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   root=Path(tmp)/'sdk';root.mkdir();(root/'file').write_text('fixture')
+   (root/'valid').symlink_to('file');(root/'broken').symlink_to('absent')
+   (root/'external').symlink_to(Path(tmp));(root/'loop').symlink_to('loop')
+   rows={row['path']:row['status'] for row in m.sdk_link_audit(root)}
+   self.assertEqual(rows,{'valid':'ok','broken':'broken-or-looping','external':'escaping','loop':'broken-or-looping'})
+
 if __name__=='__main__':unittest.main()

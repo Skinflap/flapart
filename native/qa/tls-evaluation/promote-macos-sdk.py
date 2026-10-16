@@ -95,6 +95,20 @@ def universal_static_archive(data):
                        'dependencies': sorted(deps), 'objects': objects})
     return metadata.combine('static-archive', slices)
 
+def sdk_link_audit(sdk):
+    root = sdk.resolve()
+    rows = []
+    for path in sorted(sdk.rglob('*')):
+        if path.is_symlink():
+            try:
+                resolved = path.resolve(strict=True)
+                status = 'ok' if resolved.is_relative_to(root) else 'escaping'
+            except (OSError, RuntimeError):
+                status = 'broken-or-looping'
+            rows.append({'path': path.relative_to(sdk).as_posix(),
+                         'target': str(path.readlink()), 'status': status})
+    return rows
+
 def native(path):
     with path.open('rb') as stream:
         if stream.read(4) not in MAGIC:
@@ -227,6 +241,10 @@ def promote(work, evidence, output):
         if engines.exists():
             engines.rmdir()
         assert '3.5.9' in (sdk / 'include/openssl/opensslv.h').read_text()
+        result['sdk_links'] = sdk_link_audit(sdk)
+        invalid = [row['path'] for row in result['sdk_links'] if row['status'] != 'ok']
+        if invalid:
+            raise ValueError('Invalid SDK links after promotion: ' + json.dumps(invalid))
         result.update(promoted=True, checked_native_consumers=scanned)
     finally:
         output.parent.mkdir(parents=True, exist_ok=True)

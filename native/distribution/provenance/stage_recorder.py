@@ -176,7 +176,7 @@ def snapshot(root, blob_dir=None):
     for path in sorted(root.rglob('*')):
         resolved = path.resolve()
         require(resolved.is_relative_to(canonical), 'Captured tree contains an escaping symlink')
-        require(path.exists(), 'Captured tree contains a broken symlink')
+        require(path.exists(), 'Captured tree contains a broken symlink: ' + json.dumps(path.relative_to(root).as_posix()))
         mode = path.lstat().st_mode
         require(stat.S_ISLNK(mode) or stat.S_ISREG(mode) or stat.S_ISDIR(mode), 'Unsupported filesystem entry in captured tree')
         if path.is_dir():
