@@ -10,6 +10,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -73,6 +74,13 @@ def build(prepared, original_sdk, work, jobs, reviewed_text=None):
     if 'Version: 1.6.0' not in [line.strip() for line in pc]:
         raise ValueError('System WebP 1.6.0 SDK required')
     work.mkdir(parents=True)
+    # Git exports intentionally contain no .git marker. Qt's configure otherwise
+    # assumes release-tarball forwarding headers already exist. Generate those
+    # with upstream syncqt in a new build-owned source copy, preserving the
+    # hash-bound prepared export and avoiding synthetic Git provenance.
+    copied_source = work / 'source'
+    shutil.copytree(source, copied_source, symlinks=True)
+    source = copied_source
     sdk = work / 'sdk'
     shutil.copytree(original_sdk, sdk, symlinks=True)
     evidence = work / 'evidence'
@@ -100,6 +108,18 @@ def build(prepared, original_sdk, work, jobs, reviewed_text=None):
             raise RuntimeError('Stage failed: ' + name + '; inspect its retained log')
 
     try:
+        header_inputs = []
+        for module_source in sorted(source.iterdir()):
+            if not module_source.is_dir() or not (module_source / 'sync.profile').is_file():
+                continue
+            run('headers-' + module_source.name,
+                ['perl', str(source / 'qtbase/bin/syncqt.pl'), '-version', '5.15.7',
+                 '-outdir', str(module_source), str(module_source)], work)
+            header_inputs.append({'module': module_source.name,
+                                  'profile_sha256': sha(module_source / 'sync.profile')})
+        if not (source / 'qtbase/include/QtCore/qglobal.h').is_file():
+            raise ValueError('Qt bootstrap forwarding header generation failed')
+        (evidence / 'generated-header-inputs.json').write_text(json.dumps(header_inputs, indent=2) + '\n')
         for arch in ('arm64', 'x86_64'):
             directory = work / ('build-' + arch)
             directory.mkdir()
@@ -138,6 +158,13 @@ def build(prepared, original_sdk, work, jobs, reviewed_text=None):
                     required = prefix / ('lib/Qt' + module + '.framework/Versions/5/Qt' + module + suffix)
                     if not required.is_file():
                         raise ValueError('Missing installed framework variant: ' + str(required))
+                    if module in ('Qml', 'Quick'):
+                        name = arch + '-' + module.lower() + (suffix or '-release') + '-exports'
+                        run(name, ['xcrun', 'nm', '-arch', arch, '-gU', str(required)], work)
+                        symbols = (evidence / (name + '.log')).read_text()
+                        pattern = r'\bT\s+_+Z[0-9]+qml_register_types_Qt' + module + r'v$'
+                        if not re.search(pattern, symbols, re.MULTILINE):
+                            raise ValueError('Required QML registration function is not exported: ' + str(required))
             for suffix in ('', '_debug'):
                 if not (prefix / ('plugins/imageformats/libqwebp' + suffix + '.dylib')).is_file():
                     raise ValueError('Missing installed WebP plugin variant: ' + arch)

@@ -51,9 +51,12 @@ def run(args):
                 '--original-source', str(source), '--work', str(work / 'prepared')])
         result['prepared'] = True
         if not args.prepare_only:
-            command('qt-build', [sys.executable, str(ROOT / 'build-macos.py'),
+            argv = [sys.executable, str(ROOT / 'build-macos.py'),
                     '--prepared', str(work / 'prepared'), '--maintained-sdk', str(args.maintained_sdk.absolute()),
-                    '--work', str(work / 'build'), '--jobs', str(args.jobs)])
+                    '--work', str(work / 'build'), '--jobs', str(args.jobs)]
+            if args.reviewed_text:
+                argv += ['--reviewed-text', str(args.reviewed_text.absolute())]
+            command('qt-build', argv)
             built = json.loads((work / 'build/evidence/result.json').read_text())
             result.update(compiled=built['compiled'], universal_assembled=built['universal_assembled'])
     finally:
@@ -90,6 +93,8 @@ if __name__ == '__main__':
     parser.add_argument('--original-source', type=Path)
     parser.add_argument('--jobs', type=int, default=2)
     parser.add_argument('--prepare-only', action='store_true')
+    parser.add_argument('--reviewed-text', type=Path,
+                        help='Exact-hash reviewed architecture metadata differences, never inferred automatically')
     args = parser.parse_args()
     if not args.prepare_only and not args.maintained_sdk:
         parser.error('--maintained-sdk is required for native builds')

@@ -60,7 +60,18 @@ class Assembly(unittest.TestCase):
         (self.arm / 'qconfig.h').write_text('arm\n')
         (self.intel / 'qconfig.h').write_text('intel\n')
         self.refused()
-        self.assertTrue(json.loads((self.root / 'receipt.json').read_text())['conflicts'])
+        conflict = json.loads((self.root / 'receipt.json').read_text())['conflicts'][0]
+        self.assertEqual(conflict['metadata']['arm64']['text'], 'arm\n')
+        self.assertEqual(conflict['metadata']['x86_64']['text'], 'intel\n')
+        self.assertEqual(conflict['metadata']['arm64']['sha256'], merge.sha(self.arm / 'qconfig.h'))
+
+    def test_large_or_binary_metadata_not_retained(self):
+        p = self.root / 'large.pri'; p.write_text('a' * 131073)
+        self.assertFalse(merge.metadata_diagnostic(p)['retained'])
+        p.write_bytes(b'\xff\x00')
+        self.assertFalse(merge.metadata_diagnostic(p)['retained'])
+        p.write_bytes(b'valid UTF-8 with\x00NUL')
+        self.assertFalse(merge.metadata_diagnostic(p)['retained'])
 
     def test_exact_reviewed_metadata_selection(self):
         for value, directory in [('arm', self.arm), ('intel', self.intel)]:

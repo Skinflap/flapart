@@ -46,6 +46,24 @@ def archs(lipo, path):
     return set(subprocess.check_output([lipo, '-archs', str(path)], text=True).split())
 
 
+def metadata_diagnostic(path):
+    """Retain bounded generated text for review, never native payload bytes."""
+    if path.suffix not in {'.pri', '.prl', '.pc', '.cmake', '.h', '.conf', '.pro', '.json', '.txt'}:
+        return {'retained': False, 'reason': 'not selected build metadata'}
+    if path.is_symlink() or not path.is_file():
+        return {'retained': False, 'reason': 'not a regular file'}
+    if path.stat().st_size > 131072:
+        return {'retained': False, 'reason': 'metadata exceeds 128 KiB bound'}
+    raw = path.read_bytes()
+    try:
+        text = raw.decode('utf-8')
+    except UnicodeDecodeError:
+        return {'retained': False, 'reason': 'not UTF-8 metadata'}
+    if '\0' in text:
+        return {'retained': False, 'reason': 'binary metadata'}
+    return {'retained': True, 'sha256': hashlib.sha256(raw).hexdigest(), 'text': text}
+
+
 def merge(arm, intel, output, evidence, lipo, review=None):
     arm, intel, output, evidence = (p.absolute() for p in (arm, intel, output, evidence))
     if output.exists() or output.is_symlink() or evidence.exists() or evidence.is_symlink():
@@ -77,7 +95,11 @@ def merge(arm, intel, output, evidence, lipo, review=None):
                 (arm / name).read_text(); (intel / name).read_text()
                 used.add(name)
             else:
-                conflicts.append({'path': name, 'reason': 'unreviewed non-native difference', 'arm64': x, 'x86_64': y})
+                conflict = {'path': name, 'reason': 'unreviewed non-native difference', 'arm64': x, 'x86_64': y}
+                if x['kind'] == 'file':
+                    conflict['metadata'] = {'arm64': metadata_diagnostic(arm / name),
+                                            'x86_64': metadata_diagnostic(intel / name)}
+                conflicts.append(conflict)
     if used != set(reviewed):
         conflicts.append({'reason': 'unused or stale review entries', 'paths': sorted(set(reviewed) - used)})
     result = {'assembled': False, 'runtime_qualified': False, 'release_qualified': False,
