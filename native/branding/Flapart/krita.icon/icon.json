@@ -1,0 +1,24 @@
+{
+  "fill": {
+    "solid": "srgb:0.12157,0.12941,0.15686,1.00000"
+  },
+  "groups": [
+    {
+      "name": "Flapart",
+      "layers": [
+        {
+          "image-name": "flapart.svg",
+          "name": "Flaptown sigil"
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.15
+      },
+      "specular": false
+    }
+  ],
+  "supported-platforms": {
+    "squares": "shared"
+  }
+}

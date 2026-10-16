@@ -1,0 +1,27 @@
+{
+  "overlay_version": 1,
+  "files": {
+    "Flapart/1024-apps-krita.png": "64976c2cbecfeecc1c992251d12bc5d1bb6d40e8f5747bdfd0a36b9621579160",
+    "Flapart/128-apps-krita.png": "86917984e262825efa5aa71c345be8cdd6ae5b2f68ae4361fe8d72ed1e437ca0",
+    "Flapart/16-apps-krita.png": "7b532c37811d7856c0f56953b4e0f6f5e09e8421b2ea9e9e4069f84352dcc03b",
+    "Flapart/22-apps-krita.png": "d560fc47a47fea7e81a87ee88a8a5cdbac74292e015e7f6372f4c4cefe7ed616",
+    "Flapart/24-apps-krita.png": "3837c897638dfad5bb1f8e72c826bfe3a803104d712194fc5847b705ffef6bd3",
+    "Flapart/256-apps-krita.png": "5cdfaa7c97d810ec187d8ac542e4d47d3a83d3055f8ea279172905aaddea959b",
+    "Flapart/32-apps-krita.png": "6191dc208ae196b0d0a8e7699ebdd09a80f9b38cc3dea5d1225a7a97526bd489",
+    "Flapart/48-apps-krita.png": "9c36a168f9567252a4fa9f9c0b188917ed307983dcfa1450472f73a20e0058c4",
+    "Flapart/512-apps-krita.png": "b69374fa8949d3ea0c3c0a9e60458bb30ab1100d02f5c05f528f15d8cd428d2f",
+    "Flapart/64-apps-krita.png": "71afb9b140287c6d67829f9ea7a394b127005e879c9cade19ba37b1b3ea3cff5",
+    "Flapart/CMakeLists.txt": "cad9ae29da6c99feeb3b93d152e0117df85edc9c7ab0822046908d1ee010592a",
+    "Flapart/branding.qrc": "4282b4dcd3aae7e6507c2970f37bf47dd5673c260977b5f9026c21334c6d5efc",
+    "Flapart/flapart-icon.svg": "10ce0b67786ffe5d05ee3fc3ec1f4d0460fa229a8f5c6584cfaf20722bee0f34",
+    "Flapart/krita.icon/Assets/flapart.svg": "38a98b63a12dab40e450a253f7cdc2bd412ab656d8b99b7725bf7e44a11a7dbc",
+    "Flapart/krita.icon/icon.json": "40e627ab92409148a4d8b131ed34fe3d7781134ef9cebadea6fc68c0fbaa5a0f",
+    "Flapart/sc-apps-krita.svgz": "533dcf4632a111d13a0889fe981c43a75c0154c7f9a5ec80275fcbe6f798a85b",
+    "README.md": "2d71458a2a840ba37f4de10df4085d6c8b59f990dfda5bf6ccbc8c0590ac7cf5",
+    "apply-branding.py": "0614e6d1553657dd5bcdde456ab1957bd0f3c8433b24e888a9847d2a1114f797",
+    "banner.svg": "6de7fc35c0fd4dccc71668eaf7d3525b5479a6c292e1382764fe92a01cfe81d1",
+    "build-assets.py": "20c36cde77fb9efa270b5b837903e0ba917041bb791bd58afae9c4e56fccaa2f",
+    "flapart-splash.png": "67589ee557ba6aabb721b2a18f0ea26d63a62ab8ba4038a57fffb1a57a9115fa",
+    "splash.svg": "3949697d9bf740055f28dc29bc7e10f7bd6822144964abdc0abbdfc00b8b21d8"
+  }
+}

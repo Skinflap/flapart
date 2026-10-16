@@ -31,6 +31,8 @@ jobs:
           git -C "$env:RUNNER_TEMP/flapart-upstream" checkout --detach FETCH_HEAD
           & $python native/scripts/prepare-fork.py "$env:RUNNER_TEMP/flapart-upstream"
           if ($LASTEXITCODE -ne 0) { throw 'Source preparation failed' }
+          & $python native/branding/apply-branding.py "$env:RUNNER_TEMP/flapart-upstream"
+          if ($LASTEXITCODE -ne 0) { throw 'Branding preparation failed' }
           & $python native/qa/windows-build/fetch-dependencies.py --prefix "$env:RUNNER_TEMP/flapart-sdk" --cache "$env:RUNNER_TEMP/flapart-sdk-downloads"
           if ($LASTEXITCODE -ne 0) { throw 'SDK preparation failed' }
           & $python native/qa/windows-build/prepare-tools.py --cache "$env:RUNNER_TEMP/flapart-tool-downloads" --destination "$env:RUNNER_TEMP/flapart-tools"

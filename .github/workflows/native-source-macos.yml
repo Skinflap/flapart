@@ -9,8 +9,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: macos-15-intel
-            jobs: 3
           - runner: macos-15
             jobs: 2
     runs-on: ${{ matrix.runner }}
@@ -28,6 +26,7 @@ jobs:
           git -C "$RUNNER_TEMP/flapart-upstream" fetch --depth=1 https://invent.kde.org/graphics/krita.git bd6e8d061d2f0388c5b10278786cf0fe62e3135f
           git -C "$RUNNER_TEMP/flapart-upstream" checkout --detach FETCH_HEAD
           python3 native/scripts/prepare-fork.py "$RUNNER_TEMP/flapart-upstream"
+          python3 native/branding/apply-branding.py "$RUNNER_TEMP/flapart-upstream"
           python3 native/qa/macos-build/fetch-dependencies.py --prefix "$RUNNER_TEMP/flapart-sdk" --cache "$RUNNER_TEMP/flapart-sdk-downloads"
           python3 -c 'import os, pathlib, shutil; p=pathlib.Path(os.environ["RUNNER_TEMP"])/"flapart-sdk-downloads"; shutil.rmtree(p)'
       - name: Compile full painting application
@@ -35,7 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p qa-result
-          python3 native/qa/macos-build/build.py --source "$RUNNER_TEMP/flapart-upstream" --prefix "$RUNNER_TEMP/flapart-sdk" --build "$RUNNER_TEMP/flapart-build" --jobs ${{ matrix.jobs }} 2>&1 | tee qa-result/build.log
+          python3 native/qa/macos-build/build.py --source "$RUNNER_TEMP/flapart-upstream" --prefix "$RUNNER_TEMP/flapart-sdk" --build "$RUNNER_TEMP/flapart-build" --universal --jobs ${{ matrix.jobs }} 2>&1 | tee qa-result/build.log
       - name: Verify native artwork and separate Krita settings
         run: python3 native/qa/macos-build/test-compiled.py --prefix "$RUNNER_TEMP/flapart-sdk" --probe native/qa/portable --output qa-result/runtime
       - name: Package and test relocation without SDK fallback
