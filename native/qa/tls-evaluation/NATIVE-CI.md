@@ -64,3 +64,11 @@ replaced. Newly compiled plugin imports must reject OpenSSL1.1. The complete
 native run remains the required validation; these audits are not binary release
 qualification. One Mac-only consolidated run was authorized after notification
 triage; failures require review and are not automatically retried.
+
+## CPython installation staging correction (local evidence)
+
+Run 38895455354 built universal OpenSSL, QtNetwork, both bearer variants, and CPython (76 shared modules, zero import failures). CPython `make install` then failed while removing/copying the optional `/Applications/Python 3.13/Python Launcher.app`. `FRAMEWORKINSTALLLAST` is substituted by configure into Makefile targets, so make-variable overrides did not suppress these targets. Permission-denied logs do not prove that every outside-prefix write was prevented; the disposable runner has no before/after filesystem snapshot.
+
+The corrected helper uses `make install DESTDIR=<fresh install-root>` and copies only the configured private prefix subtree. Staged Applications tools are omitted. Absolute or escaping symlinks in the promoted subtree are rejected. The pinned KDE recipe's relative unix-tool links and portable python-config shebang patches are applied with exact context and recorded before/after hashes.
+
+Audit of pinned CPython 3.13.16 `Makefile.pre.in` framework targets, `Mac/Makefile.in` application/unix-tool/IDLE targets, and `Mac/PythonLauncher/Makefile.in` install target confirms destination paths include DESTDIR (local build-tree compilation remains separate). `python-destdir-fixture.json` records a full copied Linux CPython build's successful staged install and the exact Mac launcher install recipe executed with a fixture payload under a staged Applications directory. This is local install-path evidence, **not native macOS qualification**. The next native run must retain extension, architecture, TLS, and relocation gates.

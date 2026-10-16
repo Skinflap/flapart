@@ -18,8 +18,31 @@ env=dict(os.environ,SDKROOT=sdk,MACOSX_DEPLOYMENT_TARGET=a.deployment_target,LDF
 receipt={'compiled':False,'version':'3.13.16','ssl_target':'3.5.9','sdk':sdk,'commands':[],'full_framework_reason':'Includes maintained CPython SSLContext/hostname/stdlib security fixes; retains cp313 ABI','runtime_qualified':False}
 def run(cmd):receipt['commands'].append(list(map(str,cmd)));subprocess.run(list(map(str,cmd)),cwd=build,env=env,check=True)
 try:
+ # Match the pinned KDE recipe's relocatable links and script shebangs.
+ patches=[('Mac/Makefile.in','BINDIR=\t\t@bindir@',"BINDIR=$(shell perl -le 'use File::Spec; print File::Spec->abs2rel(@ARGV)' @bindir@ $(FRAMEWORKUNIXTOOLSPREFIX)/bin)"),('Misc/python-config.in','#!@EXENAME@','#!/usr/bin/env python3')]
+ receipt['source_patches']=[]
+ for rel,before,after in patches:
+  path=source/rel;original=path.read_bytes();text=original.decode();assert text.count(before)==1,(rel,'source context changed')
+  path.write_text(text.replace(before,after));receipt['source_patches'].append({'path':rel,'before_sha256':hashlib.sha256(original).hexdigest(),'after_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'recipe_commit':'0fd95c4efca2e5b5024121bb0ccae5b353956cd9'})
  run([source/'configure','--prefix='+str(a.prefix),'--enable-framework='+str(a.prefix/'lib'),'--enable-universalsdk='+sdk,'--with-universal-archs=universal2','--with-openssl='+str(a.openssl_prefix),'--with-openssl-rpath='+str(a.openssl_prefix/'lib'),'--without-ensurepip','--without-static-libpython','--with-readline=editline'])
- run(['make','-j'+str(a.jobs)]);run(['make','install','FRAMEWORKINSTALLLAST=frameworkinstallmaclib','FRAMEWORKALTINSTALLLAST=frameworkinstallmaclib'])
+ run(['make','-j'+str(a.jobs)])
+ # CPython substitutes FRAMEWORKINSTALLLAST at configure time; overriding it
+ # on the make command line does not suppress /Applications tools. Stage ALL
+ # install targets, then promote only the configured private prefix.
+ destdir=a.work/'install-root';destdir.mkdir()
+ run(['make','install','DESTDIR='+str(destdir)])
+ staged_prefix=destdir/a.prefix.relative_to(a.prefix.anchor)
+ assert staged_prefix.is_dir() and staged_prefix.resolve().is_relative_to(destdir.resolve()) and not a.prefix.exists()
+ receipt['install_staging']={'destdir':str(destdir),'promoted_prefix':str(staged_prefix),'optional_applications_promoted':False}
+ # No staged symlink may point outside the configured candidate prefix.
+ links=[]
+ for path in staged_prefix.rglob('*'):
+  if path.is_symlink():
+   target=os.readlink(path);assert not os.path.isabs(target),(path,target)
+   resolved=(path.parent/target).resolve();assert resolved.is_relative_to(staged_prefix.resolve()),(path,target)
+   links.append({'path':str(path.relative_to(staged_prefix)),'target':target})
+ receipt['install_staging']['relative_symlinks']=links
+ shutil.copytree(staged_prefix,a.prefix,symlinks=True)
  framework=a.prefix/'lib/Python.framework';version=framework/'Versions/3.13';site=version/'lib/python3.13/site-packages';site.mkdir(exist_ok=True)
  preserved=[]
  for rel in ['Versions/3.13/lib/python3.13/sitecustomize.py','Versions/3.13/lib/python3.13/site-packages/sitecustomize.py','Versions/3.13/lib/python3.13/site-packages/usercustomize.py']:

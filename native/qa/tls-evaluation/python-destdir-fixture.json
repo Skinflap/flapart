@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "scope": "Linux full CPython make install staging plus exact Mac launcher install recipe with fixture payload; no native macOS execution",
+  "python_version": "3.13.16",
+  "full_linux_install_exit": 0,
+  "linux_files": 7981,
+  "linux_prefix": "/usr",
+  "linux_destdir": "install-root",
+  "mac_launcher_exact_recipe_sha256": "0a91dc65d0f174ecd0bb23a32e2be4729573b1bcbb269abea71180ec486def79",
+  "mac_launcher_install_exit": 0,
+  "mac_launcher_destination": "root/Applications/Python 3.13/Python Launcher.app",
+  "production_change": "make install DESTDIR, promote only private prefix, reject absolute/escaping symlinks",
+  "failed_ci_write_audit": "Denied rm/cp under /Applications observed; no pre/post snapshot, cannot prove no successful outside-prefix writes on that disposable runner",
+  "source_files": {
+    "Makefile.pre.in": "c36d7a9f7df3711cf61714a7a8799c4161a4f17dbec93f51a4cefa2808d51d01",
+    "Mac/Makefile.in": "5fff78dda0bc4b88c225ec48dc74ee48d660b91ae83edea630476f67abc3210c",
+    "Mac/PythonLauncher/Makefile.in": "873e78882b32098f4a25e085952769f57397d90ce49874d4e4057a1f313342ec"
+  },
+  "mac_unix_tools_exact_patched_makefile_exit": 0,
+  "mac_unix_tools_links": {
+    "python3-config": "../lib/Python.framework/Versions/3.13/bin/python3-config",
+    "python3": "../lib/Python.framework/Versions/3.13/bin/python3",
+    "idle3": "../lib/Python.framework/Versions/3.13/bin/idle3",
+    "pydoc3": "../lib/Python.framework/Versions/3.13/bin/pydoc3",
+    "pip3": "../lib/Python.framework/Versions/3.13/bin/pip3"
+  }
+}
