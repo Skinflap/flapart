@@ -9,6 +9,10 @@ if subprocess.check_output(['git','-C',str(r),'rev-parse','HEAD'],text=True).str
     raise SystemExit('Refusing: checkout does not match the pinned upstream commit.')
 if subprocess.check_output(['git','-C',str(r),'status','--porcelain'],text=True).strip():
     raise SystemExit('Refusing: checkout is not clean; preserve existing changes.')
+# Preserve stable Exiv2 path references and support read-only artwork imports.
+metadata_patch=own/'patches/metadata-readonly.patch'
+subprocess.run(['git','-C',str(r),'apply','--check',str(metadata_patch)],check=True)
+subprocess.run(['git','-C',str(r),'apply',str(metadata_patch)],check=True)
 f=r/'krita/main.cc'; text=f.read_text()
 old='KAboutData aboutData("krita",\n                            "Krita",'
 assert text.count(old)==1

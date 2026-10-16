@@ -1,0 +1,52 @@
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/impex/raw/kis_raw_import.cpp:20:#include <KisExiv2IODevice.h>
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/impex/raw/kis_raw_import.cpp:230:                KisExiv2IODevice::ptr_type basicIoDevice(new KisExiv2IODevice(filename()));
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/impex/tiff/kis_tiff_export.cc:32:#include <KisExiv2IODevice.h>
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/impex/tiff/kis_tiff_export.cc:206:            KisExiv2IODevice::ptr_type basicIoDevice(new KisExiv2IODevice(filename()));
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/impex/tiff/kis_tiff_import.cc:32:#include <KisExiv2IODevice.h>
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/impex/tiff/kis_tiff_import.cc:1876:            KisExiv2IODevice::ptr_type basicIoDevice(new KisExiv2IODevice(filename()));
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/CMakeLists.txt:2:    KisExiv2IODevice.cpp
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:7:#include "KisExiv2IODevice.h"
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:12:KisExiv2IODevice::KisExiv2IODevice(QString path)
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:18:KisExiv2IODevice::~KisExiv2IODevice()
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:23:int KisExiv2IODevice::open()
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:33:int KisExiv2IODevice::close()
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:43:size_t KisExiv2IODevice::write(const Exiv2::byte *data, size_t wcount)
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:45:long KisExiv2IODevice::write(const Exiv2::byte *data, long wcount)
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:49:        qWarning() << "KisExiv2IODevice: File not open for writing.";
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:61:size_t KisExiv2IODevice::write(Exiv2::BasicIo &src)
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:63:long KisExiv2IODevice::write(Exiv2::BasicIo &src)
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:73:        qWarning() << "KisExiv2IODevice: File not open for writing.";
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:86:int KisExiv2IODevice::putb(Exiv2::byte data)
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:89:        qWarning() << "KisExiv2IODevice: File not open for writing.";
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:100:Exiv2::DataBuf KisExiv2IODevice::read(size_t rcount)
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:102:Exiv2::DataBuf KisExiv2IODevice::read(long rcount)
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:117:size_t KisExiv2IODevice::read(Exiv2::byte *buf, size_t rcount)
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:119:long KisExiv2IODevice::read(Exiv2::byte *buf, long rcount)
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:126:        qWarning() << "KisExiv2IODevice: Couldn't read file:" << m_file.errorString();
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:132:int KisExiv2IODevice::getb()
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:142:void KisExiv2IODevice::transfer(Exiv2::BasicIo &src)
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:144:    bool isFileBased = (dynamic_cast<Exiv2::FileIo *>(&src) || dynamic_cast<KisExiv2IODevice *>(&src));
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:159:            qWarning() << "KisExiv2IODevice::transfer: Couldn't open src file" << QString::fromStdString(src.path());
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:164:            qWarning() << "KisExiv2IODevice::transfer: Couldn't open dest file" << filePathQString();
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:179:int KisExiv2IODevice::seek(int64_t offset, Exiv2::BasicIo::Position position)
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:181:int KisExiv2IODevice::seek(long offset, Exiv2::BasicIo::Position position)
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:199:Exiv2::byte *KisExiv2IODevice::mmap(bool isWriteable)
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:204:        qWarning() << "KisExiv2IODevice::mmap: Couldn't unmap the mapped file";
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:211:        qWarning() << "KisExiv2IODevice::mmap: Couldn't map the file" << m_file.fileName();
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:216:int KisExiv2IODevice::munmap()
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:227:void KisExiv2IODevice::populateFakeData()
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:234:size_t KisExiv2IODevice::tell() const
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:236:long KisExiv2IODevice::tell() const
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:242:size_t KisExiv2IODevice::size() const
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:250:bool KisExiv2IODevice::isopen() const
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:255:int KisExiv2IODevice::error() const
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:261:bool KisExiv2IODevice::eof() const
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:267:const std::string& KisExiv2IODevice::path() const noexcept
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:269:std::string KisExiv2IODevice::path() const
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:275:bool KisExiv2IODevice::open(QFile::OpenMode mode)
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:283:bool KisExiv2IODevice::renameToCurrent(const QString srcPath)
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:291:        qWarning() << "KisExiv2IODevice:renameToCurrent Couldn't copy file from" << srcPath << "to" << filePathQString();
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.cpp:297:QString KisExiv2IODevice::filePathQString() const
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.h:18:class KRITAEXIFCOMMON_EXPORT KisExiv2IODevice : public Exiv2::BasicIo
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.h:27:    KisExiv2IODevice(QString path);
+bd6e8d061d2f0388c5b10278786cf0fe62e3135f:plugins/metadata/common/KisExiv2IODevice.h:28:    ~KisExiv2IODevice() override;

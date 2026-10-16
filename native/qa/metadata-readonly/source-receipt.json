@@ -1,0 +1,23 @@
+{
+  "source_commit": "bd6e8d061d2f0388c5b10278786cf0fe62e3135f",
+  "files": [
+    {
+      "path": "plugins/metadata/common/KisExiv2IODevice.h",
+      "before_sha256": "e1a1e0824442b412a5232b02da9f6413b72a66ec5b1c37128617044a52592947",
+      "after_sha256": "3507c6f483cbc9d50c4e292b9de4485c87888a5ebe4a61568a9081e06d2d5957"
+    },
+    {
+      "path": "plugins/metadata/common/KisExiv2IODevice.cpp",
+      "before_sha256": "3eca64611fef540021ce4943b4aaa461a0507058054ea447a34d891070454b77",
+      "after_sha256": "d52b1b4924b052574d5574780188cab6461eb8ebc083770704501c65ab2f089c"
+    }
+  ],
+  "rebuild_required": [
+    "kritaexifcommon",
+    "krita_raw_import",
+    "krita_tiff_import",
+    "krita_tiff_export"
+  ],
+  "release_qualified": false,
+  "consumer_audit": "All pinned git-tracked files, no extension filter; RAW and TIFF direct constructors require matching class layout."
+}

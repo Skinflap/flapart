@@ -1,0 +1,41 @@
+--- a/plugins/metadata/common/KisExiv2IODevice.h
++++ b/plugins/metadata/common/KisExiv2IODevice.h
+@@ -76,6 +76,7 @@
+     QString filePathQString() const;
+ 
+     mutable QFile m_file;
++    const std::string m_path;
+ 
+     Exiv2::byte *m_mappedArea;
+ };
+--- a/plugins/metadata/common/KisExiv2IODevice.cpp
++++ b/plugins/metadata/common/KisExiv2IODevice.cpp
+@@ -11,6 +11,7 @@
+ 
+ KisExiv2IODevice::KisExiv2IODevice(QString path)
+     : m_file(path)
++    , m_path(filePathQString().toStdString())
+     , m_mappedArea(nullptr)
+ {
+ }
+@@ -27,7 +28,10 @@
+     }
+ 
+     // return zero if successful
+-    return !m_file.open(QFile::ReadWrite);
++    if (m_file.open(QFile::ReadWrite)) {
++        return 0;
++    }
++    return !m_file.open(QFile::ReadOnly);
+ }
+ 
+ int KisExiv2IODevice::close()
+@@ -269,7 +273,7 @@
+ std::string KisExiv2IODevice::path() const
+ #endif
+ {
+-    return filePathQString().toStdString();
++    return m_path;
+ }
+ 
+ bool KisExiv2IODevice::open(QFile::OpenMode mode)
