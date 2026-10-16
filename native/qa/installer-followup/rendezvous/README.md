@@ -137,3 +137,60 @@ octet-stream. The adapter now distinguishes these endpoints and tests both heade
 That observation establishes the tested artifact download behavior only, not a live
 rendezvous/draft exchange or native execution. Run authentication also requires the
 API's triggering_actor ID, so a different rerun operator is not silently accepted.
+
+## Harmless runner harness (not dispatched)
+
+`fixture.py` is the shared deterministic payload contract: `payloads()` returns a
+ZIP containing only a fixed README and two fixture JSON files; `pins()` returns
+its exact SHA/size bindings. It contains no native executable or private candidate.
+`runner_fixture.py` accepts only these pins, never arbitrary candidate files.
+
+Proposed step boundaries, for a separately reviewed workflow:
+
+```text
+python runner_fixture.py prepare --binding <identity-only.json> \
+  --state <private-path>/state.json --public-root <fresh-artifact-root>
+# Upload ONLY public-root/request.json and public-root/recipient-public.asc.
+python runner_fixture.py receive --state <private-path>/state.json \
+  --output <fresh-private-evidence> --token-env FLAPART_GITHUB_TOKEN
+# In an always/finally step, run cleanup if state still exists:
+python runner_fixture.py cleanup --state <private-path>/state.json
+```
+
+Binding JSON contains only repository, workflow, run_id, attempt, commit, job_id,
+architecture and operator_id. Candidate pins are generated internally. Paths must
+be absolute/canonical; canonicalize known `/tmp` aliases when selecting paths on
+Mac. The state file is mode0600 outside the explicitly public root. GPG lives in a
+separate short mode0700 canonical `/tmp/flprun-*` directory, with a random ownership
+marker and recorded device/inode. Cleanup checks owner, mode, path, marker and inode
+before stopping only that GPG home's agents/removing it. Never upload state, key
+home, whole checkout or recursive output glob. Hard cancellation still requires
+best-effort cleanup and eventual hosted-VM destruction; no secure erase is claimed.
+
+Prepare creates a disposable rsa2048 encryption key expiring after one day; request
+admission expires after 45 minutes. This key protects only the harmless fixture.
+No private key export or long-lived key is used. Receive consumes the explicitly
+named environment token into memory and removes that variable. All subprocesses
+receive only a small environment allowlist with no GitHub token/GPG search/injection
+variables. The parent coordinator retains its own token locally; it is never part
+of exchange files or child environment.
+
+Receive polls exact authenticated draft tag every at most ten seconds until the
+request expires. An incomplete draft waits for both exact expected assets rather
+than failing during coordinator upload. Unexpected assets/operator/duplicates fail.
+It then uses the read-only adapter, runs existing retention decryption in a separate
+sanitized child, validates the original request and all exact fixture bytes, and
+emits fixture-evidence.json. Harmless ciphertext/asset sizes are capped at128 KiB;
+that child also lowers retention's payload limit to128 KiB and file count to four,
+without modifying the shared retention helper. The helper's existing bounded tar
+padding allowance remains. No native application is launched. Evidence always keeps
+native_executed:false and release_qualified:false. Failures emit only stage/type,
+not raw exceptions, URLs, key material or environment. Private recovered harmless
+files remain available for local exact-byte inspection; upload only the explicitly
+reviewed bounded evidence file in the future workflow.
+
+`test_runner_fixture.py` uses real ephemeral GPG preparation and decryption with
+mocked draft GETs/download admission. It checks exact payload recovery, incomplete
+upload polling, expiry/failure evidence, ownership-marker cleanup refusal and token
+exclusion. This proves local harness mechanics, not GitHub draft access or hosted
+native behavior. A workflow and real harmless handshake remain unexecuted.

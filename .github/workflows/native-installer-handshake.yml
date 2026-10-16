@@ -1,0 +1,101 @@
+name: Verify harmless private installer exchange
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  handshake:
+    name: installer-${{ matrix.architecture }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            architecture: arm64
+          - runner: macos-15-intel
+            architecture: x86_64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Verify local harmless exchange helpers
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s native/qa/installer-followup/rendezvous -p 'test_*.py' -q
+      - name: Create exact run binding and ephemeral public request
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_ARCHITECTURE: ${{ matrix.architecture }}
+          EXPECTED_OPERATOR_ID: ${{ github.actor_id }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess
+          base = pathlib.Path(os.environ['RUNNER_TEMP']).resolve()
+          repo = os.environ['GITHUB_REPOSITORY']
+          run = int(os.environ['GITHUB_RUN_ID'])
+          attempt = int(os.environ['GITHUB_RUN_ATTEMPT'])
+          arch = os.environ['EXPECTED_ARCHITECTURE']
+          endpoint = f'repos/{repo}/actions/runs/{run}/attempts/{attempt}/jobs?per_page=100'
+          result = subprocess.run(['gh', 'api', endpoint], capture_output=True, text=True)
+          if result.returncode:
+              raise SystemExit('Authenticated job lookup failed; diagnostics withheld')
+          data = json.loads(result.stdout)
+          assert len(data['jobs']) == data['total_count'] <= 100
+          matches = [job for job in data['jobs'] if job['name'] == 'installer-' + arch and job['status'] == 'in_progress']
+          assert len(matches) == 1
+          job = matches[0]
+          assert job['run_id'] == run
+          binding = dict(repository=repo, workflow='.github/workflows/native-installer-handshake.yml',
+                         run_id=run, attempt=attempt, commit=os.environ['GITHUB_SHA'],
+                         job_id=job['id'], architecture=arch, operator_id=int(os.environ['EXPECTED_OPERATOR_ID']))
+          with (base / 'fixture-binding.json').open('x') as stream:
+              json.dump(binding, stream)
+          PY
+          exchange_root="$(python3 -c 'import os,pathlib; print(pathlib.Path(os.environ["RUNNER_TEMP"]).resolve())')"
+          python3 native/qa/installer-followup/rendezvous/runner_fixture.py prepare \
+            --binding "$exchange_root/fixture-binding.json" \
+            --state "$exchange_root/fixture-private-state.json" \
+            --public-root "$exchange_root/fixture-public-request"
+      - name: Retain public request only
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: rendezvous-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.architecture }}-request
+          path: |
+            ${{ runner.temp }}/fixture-public-request/request.json
+            ${{ runner.temp }}/fixture-public-request/recipient-public.asc
+          retention-days: 1
+          if-no-files-found: error
+      - name: Receive and verify harmless encrypted fixture
+        shell: bash
+        env:
+          FLAPART_EXCHANGE_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          exchange_root="$(python3 -c 'import os,pathlib; print(pathlib.Path(os.environ["RUNNER_TEMP"]).resolve())')"
+          python3 native/qa/installer-followup/rendezvous/runner_fixture.py receive \
+            --state "$exchange_root/fixture-private-state.json" \
+            --output "$exchange_root/fixture-result" --token-env FLAPART_EXCHANGE_TOKEN
+      - name: Remove owned ephemeral key on interruption
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          exchange_root="$(python3 -c 'import os,pathlib; print(pathlib.Path(os.environ["RUNNER_TEMP"]).resolve())')"
+          if [[ -f "$exchange_root/fixture-private-state.json" ]]; then
+            python3 native/qa/installer-followup/rendezvous/runner_fixture.py cleanup \
+              --state "$exchange_root/fixture-private-state.json"
+          fi
+      - name: Retain bounded harmless result only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: rendezvous-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.architecture }}-result
+          path: ${{ runner.temp }}/fixture-result/fixture-evidence.json
+          retention-days: 1
+          if-no-files-found: warn
