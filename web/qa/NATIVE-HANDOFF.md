@@ -45,3 +45,10 @@ handler reloads inside the existing dialog so its busy guard does not block it.
 
 Local browser qualification is not a claim of live deployment. Source/publication
 pins remain unchanged until the parent completes separate release qualification.
+
+Cross-browser replay uses `FLAPART_QA_BROWSER=firefox` or
+`FLAPART_QA_BROWSER=webkit` with the same test command. Each engine writes to a
+separate evidence directory. Both passed the full local handoff assertions on
+2026-10-16, including recovered-art replacement, transparency, undo, failed
+imports, explicit combined-canvas choice and zero account writes. Linux WebKit
+is not a claim of native Safari or physical iOS device qualification.

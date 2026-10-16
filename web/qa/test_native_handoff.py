@@ -2,6 +2,7 @@
 import functools
 import http.server
 import json
+import os
 from pathlib import Path
 import struct
 import threading
@@ -25,13 +26,15 @@ def main():
     server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(Handler, directory=str(ROOT / 'web')))
     thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
     base = 'http://127.0.0.1:' + str(server.server_port)
-    evidence = ROOT / 'evidence/native-handoff-local'; evidence.mkdir(parents=True, exist_ok=True)
+    engine = os.environ.get('FLAPART_QA_BROWSER', 'chromium')
+    assert engine in ('chromium', 'firefox', 'webkit')
+    evidence = ROOT / ('evidence/native-handoff-local' + ('' if engine == 'chromium' else '-' + engine)); evidence.mkdir(parents=True, exist_ok=True)
     errors, calls, checks = [], [], []
     auth = {'authenticated': True}
     try:
         with sync_playwright() as p:
             chrome = Path.home() / '.cache/ms-playwright/chromium-1234/chrome-linux64/chrome'
-            browser = p.chromium.launch(headless=True, **({'executable_path': str(chrome)} if chrome.exists() else {}))
+            browser = getattr(p, engine).launch(headless=True, **({'executable_path': str(chrome)} if engine == 'chromium' and chrome.exists() else {}))
             def new(query='', width=1440):
                 context = browser.new_context(viewport={'width': width, 'height': 1000 if width > 500 else 844})
                 context.route('https://accounts.flaptown.com/**', account)
