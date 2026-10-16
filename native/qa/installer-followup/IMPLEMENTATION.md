@@ -1,7 +1,6 @@
 # Scoped installer evidence implementation
 
-Local implementation only; no CI, native execution, secret enrollment, transfer,
-release freeze or publication. The private exact-candidate transfer design remains
+Installer journeys remain unqualified; no secret enrollment, candidate transfer, release freeze or publication was performed by this implementation. The actual Linux child-identity hook check is recorded below. The private exact-candidate transfer design remains
 in `PROPOSAL.md`. No Windows installer/launcher implementation or binary changed.
 The parent authorized the small portable child-probe identity hook and its owner
 confirmed no conflicting edits.
@@ -93,3 +92,7 @@ checks are unchanged. No synthetic receipt is native qualification.
   Gatekeeper/SmartScreen bypass or automatic approval has been added.
 - Native TLS/Python receipts and source closure remain separate requirements. The
   current retained candidate is not made public or release-qualified by these edits.
+
+## Actual Linux hook check
+
+`../compiled-identity-20261016/qualification.json` records a passing run of the child-image observation hook inside the existing compiled Linux Qt6 application, with exit code 0, observed child exit, preserved sentinels and prior evidence, and an isolated display. This confirms the Linux hook only. Its receipt explicitly marks `installer_qualified`, `mac_windows_tested` and `release_qualified` false. Mac/Windows installer journeys and child-image APIs still require their actual platform runs. No retained Mac candidate is established at this snapshot.

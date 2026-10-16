@@ -33,7 +33,7 @@ for path in list((dest/'lib/pkgconfig').glob('*.pc'))+list((dest/'lib/cmake').rg
     if updated!=text:path.write_text(updated,encoding='utf-8')
 # The experiment copied the rebuilt DLL; retain its matching linker archive.
 archives=[f for base in (work/'network-build',work/'qtbase') for f in base.rglob('libQt5Network.a') if f.is_file()]
-assert len(archives)==1,('Expected one rebuilt QtNetwork import archive',archives)
+assert archives and len({sha(f) for f in archives})==1,('Different rebuilt QtNetwork import archives',archives)
 replace(archives[0],dest/'lib/libQt5Network.a')
 pth=dest/'python/python313._pth';paths=relocated_lines(pth.read_text(encoding='utf-8'),original)
 for line in paths:
