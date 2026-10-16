@@ -1,4 +1,4 @@
-FLAPART STUDIO — LINUX ONLINE INSTALLER 0.1.2
+FLAPART STUDIO — LINUX ONLINE INSTALLER 0.1.3
 Flaptown Advancements · https://flaptown.com/flapsoft/
 
 A full native drawing and painting application using the official Krita 5.3.4.1
@@ -13,11 +13,13 @@ INSTALL
 2. Open a terminal in that folder and run: sh install.sh
 3. Open Flapart Studio from your applications menu.
 
-Linux x86_64, Python 3.9 or later, an X11/XWayland graphical session, and an internet
-connection are required. The installer downloads about 366 MiB directly from
-KDE and Ubuntu and verifies pinned SHA-256 hashes before extraction. It refreshes
+Linux x86_64 with glibc 2.35 or later, Python 3.9 or later, an X11/XWayland graphical session, and an internet
+connection are required. The installer downloads about 399 MiB directly from
+KDE, Ubuntu and Flaptown and verifies pinned SHA-256 hashes before extraction. It refreshes
 the engine’s TLS libraries using Ubuntu jammy-security libssl3 3.0.2-0ubuntu1.30.
-Allow 1.5 GiB free space.
+It also refreshes the embedded interpreter and standard library to CPython 3.13.16,
+built on Ubuntu 22.04 from verified official source; Krita’s PyQt/SIP integration
+is preserved. Allow 2 GiB free space.
 It needs no administrator password. Afterwards, drawing and export work offline.
 Your browser and a connection are required for Flaptown account features.
 
@@ -55,7 +57,14 @@ license and exact package provenance are retained under third-party/ubuntu-opens
 in the installation. Source: https://launchpad.net/ubuntu/+source/openssl/3.0.2-0ubuntu1.30
 The launcher uses your distribution’s maintained system certificate bundle and
 preserves an explicit SSL_CERT_FILE override. No private trust store is installed.
-The receipt distinguishes the original engine from this library refresh. Krita license/source: https://krita.org/en/about/license/
+The receipt distinguishes the original engine from both security refreshes.
+CPython is PSF-licensed; its LICENSE and exact source/build provenance are retained
+under third-party/cpython. Full source and build recipe:
+https://accounts.flaptown.com/flapsoft/downloads/flapart-python-3.13.16-linux-source.zip
+Official source: https://www.python.org/downloads/release/python-31316/
+For offline setup, supply --appimage-file, --tls-package-file and
+--python-package-file to install.py; each still requires its pinned checksum.
+ Krita license/source: https://krita.org/en/about/license/
 Exact engine source: https://download.kde.org/stable/krita/6.0.4.1/krita-6.0.4.1.tar.xz
 (The upstream source has both Qt5/Krita 5.3.4.1 and Qt6/Krita 6.0.4.1 versions.)
 The official engine retains its upstream credits, notices, and licenses.
