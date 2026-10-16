@@ -2,3 +2,15 @@
 @media(max-width:760px){.actions>*{flex:1 1 160px;min-width:140px}.actions a.button{white-space:normal}#reports article{padding:18px;border:1px solid var(--line);margin:12px 0}}
 
 .comparison{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem}.comparison>div{min-width:0}.comparison pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:32rem;overflow:auto;padding:1rem;border:1px solid var(--line,#49433e)}#suggestion-files details{margin:1rem 0}#suggestion-files summary{overflow-wrap:anywhere}#suggest-dialog{max-width:36rem}@media(max-width:700px){.comparison{grid-template-columns:minmax(0,1fr)}}
+
+/* Keep large projects easy to browse without stretching the entire page. */
+.source-workspace>div{min-width:0}
+#file-label{overflow-wrap:anywhere}
+#file-search{min-width:0}
+.file-filter-status{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;margin:-6px 0 8px}
+.file-filter-status p{margin:0}
+.source-workspace aside .file-filter-status button{width:auto;text-align:center;margin:0;padding:6px 10px;flex-shrink:0}
+.source-workspace aside #files{display:block;max-height:min(28rem,55vh);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;padding:3px 5px 3px 3px;margin:0 0 12px}
+.source-workspace aside #files button{display:block;min-width:0;width:100%;margin:0 0 6px;white-space:normal;overflow-wrap:anywhere}
+#file-no-match{margin:0 0 18px;line-height:1.6}
+@media(max-width:760px){.source-workspace aside #files{display:block;max-height:14rem}.source-workspace aside #files button{min-width:0}.file-filter-status{margin-bottom:8px}}
