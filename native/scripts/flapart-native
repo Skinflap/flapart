@@ -1,0 +1,11 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Launcher for a compiled Flapart Native prefix. Does not run an upstream test AppImage.
+set -eu
+FLAPART_PREFIX=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+export FLAPART_NATIVE=1
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/flapart-native"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/flapart-native"
+export XDG_DATA_DIRS="$FLAPART_PREFIX/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+export LD_LIBRARY_PATH="$FLAPART_PREFIX/lib:${LD_LIBRARY_PATH:-}"
+exec "$FLAPART_PREFIX/bin/krita" "$@"

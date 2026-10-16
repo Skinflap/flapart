@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=Krita/PythonPlugin
+X-KDE-Library=flapart_probe
+X-Python-2-Compatible=false
+Name=Flapart isolated QA probe

@@ -1,0 +1,23 @@
+{
+  "version": "0.1.2",
+  "downloads": [
+    {
+      "title": "Flapart Studio for Linux",
+      "description": "Installs the full Krita painting engine with guided Flapart Studio controls and a separate settings folder. Download once, then draw offline. Requires Linux x86_64, Python 3 and X11 or XWayland.",
+      "status": "Online installer \u00b7 about 364 MiB runtime download",
+      "url": "/flapsoft/downloads/flapart-studio-0.1.0-linux-online-installer.zip"
+    },
+    {
+      "title": "Source code",
+      "description": "Browser editor, account modules, tests, native overlay, and build instructions. GPL v3; font licenses included.",
+      "status": "Source package \u00b7 requires development tools",
+      "url": "/flapsoft/downloads/flapart-source-0.1.2.zip"
+    },
+    {
+      "title": "Flapart Studio for Krita",
+      "description": "Guided native painting controls with Krita's full tools available. Requires Krita with Python plugins.",
+      "status": "Plugin \u00b7 Linux runtime tested; Windows/macOS untested",
+      "url": "/flapsoft/downloads/flapart-studio-0.1.0-krita-plugin.zip"
+    }
+  ]
+}

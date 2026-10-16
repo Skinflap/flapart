@@ -1,0 +1,515 @@
+diff --git a/cmake/modules/SIPMacros.cmake b/cmake/modules/SIPMacros.cmake
+index 113a3b3..32d6e98 100644
+--- a/cmake/modules/SIPMacros.cmake
++++ b/cmake/modules/SIPMacros.cmake
+@@ -159,6 +159,10 @@ else()
+             set(sip_disabled_features "[]")
+         endif()
+ 
++        if (FLAPART_SIP_ABI_VERSION)
++            set(abi_version "${FLAPART_SIP_ABI_VERSION}")
++        endif()
++
+         set(module_tags)
+         if (QT_MAJOR_VERSION STREQUAL "5")
+             foreach(_tag ${SIP_TAGS})
+diff --git a/krita/main.cc b/krita/main.cc
+index dd8b580..f10c884 100644
+--- a/krita/main.cc
++++ b/krita/main.cc
+@@ -34,6 +34,7 @@
+ #include <QImageReader>
+ 
+ #include <kaboutdata.h>
++#include <KConfig>
+ 
+ #include <KisApplication.h>
+ #include <KisMainWindow.h>
+@@ -121,7 +122,7 @@ void tryInitDrMingw()
+     }
+ 
+     // Set the log file path to %LocalAppData%\kritacrash.log
+-    const QString logFile = QDir(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)).absoluteFilePath("kritacrash.log");
++    const QString logFile = QDir(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)).absoluteFilePath("flapart-native-crash.log");
+     const QByteArray logFilePath = QDir::toNativeSeparators(logFile).toLocal8Bit();
+     myExcHndlSetLogFileNameA(logFilePath.data());
+ }
+@@ -174,7 +175,7 @@ Java_org_krita_android_JNIWrappers_saveState(JNIEnv* /*env*/,
+     }
+ 
+     const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-    QSettings kritarc(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++    QSettings kritarc(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+     kritarc.setValue("canvasState", "OPENGL_SUCCESS");
+ }
+ 
+@@ -216,6 +217,10 @@ Java_org_krita_android_JNIWrappers_openFileFromIntent(JNIEnv* /*env*/,
+ 
+ extern "C" MAIN_EXPORT int MAIN_FN(int argc, char **argv)
+ {
++    qputenv("FLAPART_NATIVE", "1");
++    // Set identity before QApplication/OpenGL probes and KConfig initialization.
++    QCoreApplication::setApplicationName(QStringLiteral("flapart-native"));
++    KConfig::setMainConfigName(QStringLiteral("flapartnativerc"));
+ #ifdef Q_OS_ANDROID
+     KisAndroidUtils::performInitialSetup();
+ #endif
+@@ -243,7 +248,7 @@ extern "C" MAIN_EXPORT int MAIN_FN(int argc, char **argv)
+     qputenv("QT_BEARER_POLL_TIMEOUT", QByteArray::number(-1));
+ 
+     // A per-user unique string, without /, because QLocalServer cannot use names with a / in it
+-    QString key = "Krita5" + QStandardPaths::writableLocation(QStandardPaths::HomeLocation).replace("/", "_");
++    QString key = "FlapartNative0" + QStandardPaths::writableLocation(QStandardPaths::HomeLocation).replace("/", "_");
+     key = key.replace(":", "_").replace("\\","_");
+ 
+     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts, true);
+@@ -360,7 +365,7 @@ extern "C" MAIN_EXPORT int MAIN_FN(int argc, char **argv)
+ #endif
+ 
+     const QDir configPath(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation));
+-    QSettings kritarc(configPath.absoluteFilePath("kritadisplayrc"), QSettings::IniFormat);
++    QSettings kritarc(configPath.absoluteFilePath("flapartnativedisplayrc"), QSettings::IniFormat);
+ 
+     // KFI18N is broken on Android. See kswitchlanguagedialog_p.cpp for details.
+     // If/when removing this, also remove the matching logic from there!
+@@ -715,14 +720,14 @@ if (!qEnvironmentVariableIsEmpty("KRITA_OPENGL_DEBUG")) {
+ 
+     /// Initialize application info, it will be used by both, Qt and
+     /// DrKonqi of the host system
+-    KAboutData aboutData("krita",
+-                            "Krita",
+-                            KritaVersionWrapper::versionString(true),
+-                            "", // TODO: "short description" needs new string exception
++    KAboutData aboutData("flapart-native",
++                            "Flapart Native",
++                            QStringLiteral("0.1.0-preview (Krita ") + KritaVersionWrapper::versionString(true) + QStringLiteral(")"),
++                            "Flaptown Advancements native painting studio",
+                             KAboutLicense::GPL,
+                             i18nc("@info:credit", "© 1999–2026 The Krita Developers"));
+-    aboutData.setHomepage(QStringLiteral("https://krita.org"));
+-    aboutData.setOrganizationDomain("krita.org");
++    aboutData.setHomepage(QStringLiteral("https://flaptown.com/flapsoft/"));
++    aboutData.setOrganizationDomain("flaptown.com");
+ 
+     // this call sets corresponding fields of QApplication as well
+     KAboutData::setApplicationData(aboutData);
+@@ -874,7 +879,7 @@ if (!qEnvironmentVariableIsEmpty("KRITA_OPENGL_DEBUG")) {
+     int state = KisApplication::exec();
+ 
+     {
+-        QSettings kritarc(configPath.absoluteFilePath("kritadisplayrc"), QSettings::IniFormat);
++        QSettings kritarc(configPath.absoluteFilePath("flapartnativedisplayrc"), QSettings::IniFormat);
+         kritarc.setValue("canvasState", "OPENGL_SUCCESS");
+     }
+ 
+diff --git a/libs/global/KisAndroidCrashHandler.cpp b/libs/global/KisAndroidCrashHandler.cpp
+index 2c9229f..68a98bd 100644
+--- a/libs/global/KisAndroidCrashHandler.cpp
++++ b/libs/global/KisAndroidCrashHandler.cpp
+@@ -32,7 +32,7 @@ static QMap<int, struct sigaction> g_old_actions;
+ 
+ // we need to have keep this object alive
+ static const std::string path =
+-    QString(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/kritacrashlog.txt").toStdString();
++    QString(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/flapart-native-crashlog.txt").toStdString();
+ static const char *crashlog_path = path.c_str();
+ 
+ static bool g_handling_crash = false;
+diff --git a/libs/global/KisUsageLogger.cpp b/libs/global/KisUsageLogger.cpp
+index b864316..c2520c3 100644
+--- a/libs/global/KisUsageLogger.cpp
++++ b/libs/global/KisUsageLogger.cpp
+@@ -60,8 +60,8 @@ KisUsageLogger::KisUsageLogger()
+     if (!QFileInfo(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation)).exists()) {
+         QDir().mkpath(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation));
+     }
+-    d->logFile.setFileName(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/krita.log");
+-    d->sysInfoFile.setFileName(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/krita-sysinfo.log");
++    d->logFile.setFileName(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/flapart-native.log");
++    d->sysInfoFile.setFileName(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/flapart-native-sysinfo.log");
+ 
+     QFileInfo fi(d->logFile.fileName());
+     if (fi.size() > 100 * 1000 * 1000) { // 100 mb seems a reasonable max
+@@ -332,7 +332,7 @@ void KisUsageLogger::rotateLog()
+         QString log = QString::fromUtf8(d->logFile.readAll());
+         if (!log.split(s_sectionHeader).last().contains("CLOSING SESSION")) {
+             log.append("\nKRITA DID NOT CLOSE CORRECTLY\n");
+-            QString crashLog = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + QStringLiteral("/kritacrash.log");
++            QString crashLog = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + QStringLiteral("/flapart-native-crash.log");
+             QFile f(crashLog);
+             if (f.open(QFile::ReadOnly)) {
+                 QString crashes = QString::fromUtf8(f.readAll());
+diff --git a/libs/ui/KisApplication.cpp b/libs/ui/KisApplication.cpp
+index 2550218..01ae9d1 100644
+--- a/libs/ui/KisApplication.cpp
++++ b/libs/ui/KisApplication.cpp
+@@ -1282,7 +1282,7 @@ void KisApplication::resetConfig()
+     
+     // find user settings file
+     const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-    QString kritarcPath = configPath + QStringLiteral("/kritarc");
++    QString kritarcPath = configPath + QStringLiteral("/flapartnativerc");
+     
+     QFile kritarcFile(kritarcPath);
+     
+diff --git a/libs/ui/KisMainWindow.cpp b/libs/ui/KisMainWindow.cpp
+index d611b3a..9de4fe7 100644
+--- a/libs/ui/KisMainWindow.cpp
++++ b/libs/ui/KisMainWindow.cpp
+@@ -376,7 +376,7 @@ KisMainWindow::KisMainWindow(QUuid uuid)
+     d->viewManager = new KisViewManager(this, actionCollection());
+     KConfigGroup group( KSharedConfig::openConfig(), "theme");
+ #ifndef Q_OS_HAIKU
+-    d->themeManager = new Digikam::ThemeManager(group.readEntry("Theme", "Krita dark"), this);
++    d->themeManager = new Digikam::ThemeManager(group.readEntry("Theme", "Flaptown"), this);
+ #endif
+     d->windowStateConfig = KSharedConfig::openConfig()->group("MainWindow");
+ 
+@@ -2910,7 +2910,7 @@ void KisMainWindow::configChanged()
+ 
+     KConfigGroup group( KSharedConfig::openConfig(), "theme");
+ #ifndef Q_OS_HAIKU
+-    d->themeManager->setCurrentTheme(group.readEntry("Theme", "Krita dark"));
++    d->themeManager->setCurrentTheme(group.readEntry("Theme", "Flaptown"));
+ #endif
+     d->actionManager()->updateGUI();
+ 
+diff --git a/libs/ui/KoDocumentInfo.cpp b/libs/ui/KoDocumentInfo.cpp
+index f49e2b4..471befa 100644
+--- a/libs/ui/KoDocumentInfo.cpp
++++ b/libs/ui/KoDocumentInfo.cpp
+@@ -247,7 +247,7 @@ void KoDocumentInfo::updateParameters()
+         return;
+     }
+ 
+-    KConfig config("kritarc");
++    KConfig config("flapartnativerc");
+     config.reparseConfiguration();
+     KConfigGroup appAuthorGroup(&config, "Author");
+     QString profile = appAuthorGroup.readEntry("active-profile", "");
+diff --git a/libs/ui/dialogs/KisDlgCustomTabletResolution.cpp b/libs/ui/dialogs/KisDlgCustomTabletResolution.cpp
+index db2313d..8d44edc 100644
+--- a/libs/ui/dialogs/KisDlgCustomTabletResolution.cpp
++++ b/libs/ui/dialogs/KisDlgCustomTabletResolution.cpp
+@@ -77,7 +77,7 @@ KisDlgCustomTabletResolution::KisDlgCustomTabletResolution(QWidget *parent) :
+ void KisDlgCustomTabletResolution::accept()
+ {
+     const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-    QSettings cfg(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++    QSettings cfg(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+ 
+     if (ui->radioMapAsWintab->isChecked()) {
+         cfg.setValue("wintabResolutionMode", "wintab");
+@@ -120,7 +120,7 @@ QRect KisDlgCustomTabletResolution::calcNativeScreenRect()
+ KisDlgCustomTabletResolution::Mode KisDlgCustomTabletResolution::getTabletMode(QRect *customRect)
+ {
+     const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-    QSettings cfg(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++    QSettings cfg(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+ 
+     const QString mode = cfg.value("wintabResolutionMode", QString("wintab")).toString();
+     Mode modeValue = USE_WINTAB;
+diff --git a/libs/ui/dialogs/kis_dlg_preferences.cc b/libs/ui/dialogs/kis_dlg_preferences.cc
+index f047a8b..3bdffba 100644
+--- a/libs/ui/dialogs/kis_dlg_preferences.cc
++++ b/libs/ui/dialogs/kis_dlg_preferences.cc
+@@ -368,7 +368,7 @@ GeneralTab::GeneralTab(QWidget *_parent, const char *_name)
+     m_chkCanvasMessages->setChecked(cfg.showCanvasMessages());
+ 
+     const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-    QSettings kritarc(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++    QSettings kritarc(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+     m_chkHiDPI->setChecked(kritarc.value("EnableHiDPI", true).toBool());
+ #if defined(Q_OS_WIN) && defined(HAVE_HIGH_DPI_SCALE_FACTOR_ROUNDING_POLICY)
+     m_chkHiDPIFractionalScaling->setChecked(kritarc.value("EnableHiDPIFractionalScaling", false).toBool());
+@@ -2923,7 +2923,7 @@ bool KisDlgPreferences::editPreferences(std::optional<PageDesc>page)
+         cfg.setPasteFormat(m_general->m_pasteFormatGroup.checkedId());
+ 
+         const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-        QSettings kritarc(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++        QSettings kritarc(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+         kritarc.setValue("EnableHiDPI", m_general->m_chkHiDPI->isChecked());
+ #if defined(Q_OS_WIN) && defined(HAVE_HIGH_DPI_SCALE_FACTOR_ROUNDING_POLICY)
+         kritarc.setValue("EnableHiDPIFractionalScaling", m_general->m_chkHiDPIFractionalScaling->isChecked());
+diff --git a/libs/ui/kis_config.cc b/libs/ui/kis_config.cc
+index fc5db2a..c652725 100644
+--- a/libs/ui/kis_config.cc
++++ b/libs/ui/kis_config.cc
+@@ -752,14 +752,14 @@ void KisConfig::setCanvasSurfaceBitDepthMode(QSettings *settings, CanvasSurfaceB
+ KisConfig::CanvasSurfaceBitDepthMode KisConfig::canvasSurfaceBitDepthMode(bool defaultValue) const
+ {
+     const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-    QSettings kritarc(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++    QSettings kritarc(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+     return canvasSurfaceBitDepthMode(&kritarc, defaultValue);
+ }
+ 
+ void KisConfig::setCanvasSurfaceBitDepthMode(CanvasSurfaceBitDepthMode value)
+ {
+     const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-    QSettings kritarc(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++    QSettings kritarc(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+     setCanvasSurfaceBitDepthMode(&kritarc, value);
+ }
+ 
+@@ -1021,7 +1021,7 @@ bool KisConfig::useOpenGL(bool defaultValue) const
+     }
+ 
+     const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-    QSettings kritarc(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++    QSettings kritarc(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+ 
+     return kritarc.value("OpenGLRenderer", "auto").toString() != "none";
+ }
+@@ -1029,7 +1029,7 @@ bool KisConfig::useOpenGL(bool defaultValue) const
+ void KisConfig::disableOpenGL() const
+ {
+     const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-    QSettings kritarc(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++    QSettings kritarc(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+ 
+     kritarc.setValue("OpenGLRenderer", "none");
+ }
+@@ -1072,14 +1072,14 @@ bool KisConfig::preferXcbEglProvider(const QSettings *settings, bool defaultValu
+ bool KisConfig::preferXcbEglProvider(bool defaultValue) const
+ {
+     const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-    QSettings kritarc(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++    QSettings kritarc(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+     return preferXcbEglProvider(&kritarc, defaultValue);
+ }
+ 
+ void KisConfig::setPreferXcbEglProvider(bool value)
+ {
+     const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-    QSettings kritarc(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++    QSettings kritarc(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+     kritarc.setValue("preferXcbEglProvider", value);
+ }
+ 
+@@ -1513,7 +1513,7 @@ void KisConfig::setShowFilterGalleryLayerMaskDialog(bool showFilterGallery) cons
+ QString KisConfig::canvasState(bool defaultValue) const
+ {
+     const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-    QSettings kritarc(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++    QSettings kritarc(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+     return (defaultValue ? "OPENGL_NOT_TRIED" : kritarc.value("canvasState", "OPENGL_NOT_TRIED").toString());
+ }
+ 
+@@ -1525,7 +1525,7 @@ void KisConfig::setCanvasState(const QString& state) const
+     }
+     if (acceptableStates.contains(state)) {
+         const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-        QSettings kritarc(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++        QSettings kritarc(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+         kritarc.setValue("canvasState", state);
+     }
+ }
+@@ -1577,7 +1577,7 @@ bool KisConfig::useWin8PointerInput(bool defaultValue) const
+ {
+ #ifdef Q_OS_WIN
+     const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-    QSettings kritarc(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++    QSettings kritarc(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+ 
+     return useWin8PointerInputNoApp(&kritarc, defaultValue);
+ #else
+@@ -1594,7 +1594,7 @@ void KisConfig::setUseWin8PointerInput(bool value)
+     // I don't want it to be set if the user hasn't touched it
+     if (useWin8PointerInput() != value) {
+         const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-        QSettings kritarc(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++        QSettings kritarc(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+         setUseWin8PointerInputNoApp(&kritarc, value);
+     }
+ 
+@@ -2801,7 +2801,7 @@ void KisConfig::setSelectionActionBarOrientation(KisConfig::SelectionActionsBarO
+ KisConfig::RootSurfaceFormat KisConfig::rootSurfaceFormat(bool defaultValue) const
+ {
+     const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-    QSettings kritarc(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++    QSettings kritarc(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+ 
+     return rootSurfaceFormat(&kritarc, defaultValue);
+ }
+@@ -2809,7 +2809,7 @@ KisConfig::RootSurfaceFormat KisConfig::rootSurfaceFormat(bool defaultValue) con
+ void KisConfig::setRootSurfaceFormat(KisConfig::RootSurfaceFormat value)
+ {
+     const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-    QSettings kritarc(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++    QSettings kritarc(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+ 
+     setRootSurfaceFormat(&kritarc, value);
+ }
+diff --git a/libs/ui/opengl/kis_opengl.cpp b/libs/ui/opengl/kis_opengl.cpp
+index 9b1c48a..8c784b9 100644
+--- a/libs/ui/opengl/kis_opengl.cpp
++++ b/libs/ui/opengl/kis_opengl.cpp
+@@ -460,14 +460,14 @@ KisOpenGL::OpenGLRenderers KisOpenGL::getSupportedOpenGLRenderers()
+ KisOpenGL::OpenGLRenderer KisOpenGL::getUserPreferredOpenGLRendererConfig()
+ {
+     const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-    QSettings kritarc(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++    QSettings kritarc(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+     return convertConfigToOpenGLRenderer(kritarc.value("OpenGLRenderer", "auto").toString());
+ }
+ 
+ void KisOpenGL::setUserPreferredOpenGLRendererConfig(KisOpenGL::OpenGLRenderer renderer)
+ {
+     const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-    QSettings kritarc(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++    QSettings kritarc(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+     kritarc.setValue("OpenGLRenderer", KisOpenGL::convertOpenGLRendererToConfig(renderer));
+ }
+ 
+diff --git a/libs/widgetutils/kis_action_registry.cpp b/libs/widgetutils/kis_action_registry.cpp
+index a9c97ad..9953da2 100644
+--- a/libs/widgetutils/kis_action_registry.cpp
++++ b/libs/widgetutils/kis_action_registry.cpp
+@@ -152,7 +152,7 @@ public:
+     // This is the main place containing ActionInfoItems.
+     QMap<QString, ActionInfoItem> actionInfoList;
+     void loadActionFiles();
+-    void loadCustomShortcuts(QString filename = QStringLiteral("kritashortcutsrc"));
++    void loadCustomShortcuts(QString filename = QStringLiteral("flapartnativeshortcutsrc"));
+ 
+     // XXX: this adds a default item for the given name to the list of actionInfo objects!
+     ActionInfoItem &actionInfo(const QString &name) {
+diff --git a/libs/widgetutils/xmlgui/KisShortcutsEditor.cpp b/libs/widgetutils/xmlgui/KisShortcutsEditor.cpp
+index ffb0723..7ce23c2 100644
+--- a/libs/widgetutils/xmlgui/KisShortcutsEditor.cpp
++++ b/libs/widgetutils/xmlgui/KisShortcutsEditor.cpp
+@@ -223,7 +223,7 @@ void KisShortcutsEditor::saveShortcuts(KConfigGroup *config) const
+     // This is a horrible mess with pointers...
+     KConfigGroup cg;
+     if (config == 0) {
+-        cg = KConfigGroup(KSharedConfig::openConfig("kritashortcutsrc"),
++        cg = KConfigGroup(KSharedConfig::openConfig("flapartnativeshortcutsrc"),
+                           QStringLiteral("Shortcuts"));
+         config = &cg;
+     }
+diff --git a/libs/widgetutils/xmlgui/kbugreport.cpp b/libs/widgetutils/xmlgui/kbugreport.cpp
+index 29c94d4..93550aa 100644
+--- a/libs/widgetutils/xmlgui/kbugreport.cpp
++++ b/libs/widgetutils/xmlgui/kbugreport.cpp
+@@ -169,7 +169,7 @@ KisKBugReport::KisKBugReport(const KAboutData &aboutData, QWidget *_parent)
+     lay->addSpacing(10);
+ 
+     QByteArray additionalInformation;
+-    QFile sysinfo(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/krita-sysinfo.log");
++    QFile sysinfo(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/flapart-native-sysinfo.log");
+     if (sysinfo.open(QFile::ReadOnly)) {
+         additionalInformation += sysinfo.readAll();
+         sysinfo.close();
+@@ -177,7 +177,7 @@ KisKBugReport::KisKBugReport(const KAboutData &aboutData, QWidget *_parent)
+ 
+     additionalInformation += "\n---------------------\n";
+ 
+-    QFile log(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/krita.log");
++    QFile log(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/flapart-native.log");
+     if (log.open(QFile::ReadOnly)) {
+         additionalInformation += log.readAll();
+         log.close();
+@@ -185,7 +185,7 @@ KisKBugReport::KisKBugReport(const KAboutData &aboutData, QWidget *_parent)
+ 
+     additionalInformation += "\n---------------------\n";
+ 
+-    QFile crashes(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/kritacrash.log");
++    QFile crashes(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/flapart-native-crash.log");
+     if (crashes.open(QFile::ReadOnly)) {
+         additionalInformation += crashes.readAll();
+         crashes.close();
+diff --git a/plugins/dockers/advancedcolorselector/kis_color_selector_triangle.cpp b/plugins/dockers/advancedcolorselector/kis_color_selector_triangle.cpp
+index c4bc7e9..c79ad1a 100644
+--- a/plugins/dockers/advancedcolorselector/kis_color_selector_triangle.cpp
++++ b/plugins/dockers/advancedcolorselector/kis_color_selector_triangle.cpp
+@@ -156,8 +156,10 @@ KoColor KisColorSelectorTriangle::colorAt(float x, float y) const
+ 
+     qreal relativeX = x-horizontalLineStart;
+ 
+-    qreal value = (y)/qreal(triangleHeight);
+-    qreal saturation = relativeX/qreal(horizontalLineLength);
++    // The triangle apex has a zero-length horizontal line. Avoid NaN HSV
++    // components: Qt6 rejects invalid colors and KoColor asserts on them.
++    qreal value = triangleHeight > 0 ? y / qreal(triangleHeight) : 0.0;
++    qreal saturation = horizontalLineLength > 0 ? relativeX / qreal(horizontalLineLength) : 0.0;
+ 
+     return m_parent->converter()->fromHsvF(m_hue, saturation, value);
+ }
+diff --git a/plugins/extensions/buginfo/DlgCrashLog.cpp b/plugins/extensions/buginfo/DlgCrashLog.cpp
+index 8664f57..ce4cc97 100644
+--- a/plugins/extensions/buginfo/DlgCrashLog.cpp
++++ b/plugins/extensions/buginfo/DlgCrashLog.cpp
+@@ -22,7 +22,7 @@ QString DlgCrashLog::originalFileName()
+     return QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation).replace(L'/', L'\\')
+          + QStringLiteral("\\kritacrash.log");
+ #elif defined(Q_OS_ANDROID)
+-    return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/kritacrashlog.txt";
++    return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/flapart-native-crashlog.txt";
+ #else
+     // since we only have crash log for windows and android
+     return QString();
+diff --git a/plugins/extensions/buginfo/DlgKritaLog.cpp b/plugins/extensions/buginfo/DlgKritaLog.cpp
+index 5c5e32d..e151409 100644
+--- a/plugins/extensions/buginfo/DlgKritaLog.cpp
++++ b/plugins/extensions/buginfo/DlgKritaLog.cpp
+@@ -15,7 +15,7 @@ DlgKritaLog::DlgKritaLog(QWidget *parent)
+ 
+ QString DlgKritaLog::originalFileName()
+ {
+-    return QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/krita.log";
++    return QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/flapart-native.log";
+ }
+ 
+ QString DlgKritaLog::captionText()
+diff --git a/plugins/extensions/buginfo/DlgSysInfo.cpp b/plugins/extensions/buginfo/DlgSysInfo.cpp
+index c6b95ab..826f1d4 100644
+--- a/plugins/extensions/buginfo/DlgSysInfo.cpp
++++ b/plugins/extensions/buginfo/DlgSysInfo.cpp
+@@ -15,7 +15,7 @@ DlgSysInfo::DlgSysInfo(QWidget *parent)
+ 
+ QString DlgSysInfo::originalFileName()
+ {
+-    return QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/krita-sysinfo.log";
++    return QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/flapart-native-sysinfo.log";
+ }
+ 
+ QString DlgSysInfo::captionText()
+diff --git a/plugins/extensions/buginfo/dlg_buginfo.cpp b/plugins/extensions/buginfo/dlg_buginfo.cpp
+index 08eba0c..7ec7bb8 100644
+--- a/plugins/extensions/buginfo/dlg_buginfo.cpp
++++ b/plugins/extensions/buginfo/dlg_buginfo.cpp
+@@ -64,7 +64,7 @@ void DlgBugInfo::initialize()
+ void DlgBugInfo::initializeText()
+ {
+     const QString configPath = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+-    QSettings kritarc(configPath + QStringLiteral("/kritadisplayrc"), QSettings::IniFormat);
++    QSettings kritarc(configPath + QStringLiteral("/flapartnativedisplayrc"), QSettings::IniFormat);
+ 
+     QString info = infoText(kritarc);
+ 
+diff --git a/plugins/extensions/pykrita/plugin/PythonPluginManager.cpp b/plugins/extensions/pykrita/plugin/PythonPluginManager.cpp
+index 730c0f2..8311797 100644
+--- a/plugins/extensions/pykrita/plugin/PythonPluginManager.cpp
++++ b/plugins/extensions/pykrita/plugin/PythonPluginManager.cpp
+@@ -298,7 +298,7 @@ void PythonPluginManager::scanPlugins()
+ 
+             verifyDependenciesSetStatus(plugin);
+ 
+-            plugin.m_enabled = pluginSettings.readEntry(QString("enable_") + plugin.moduleName(), false);
++            plugin.m_enabled = pluginSettings.readEntry(QString("enable_") + plugin.moduleName(), plugin.moduleName() == "flapart");
+ 
+             m_plugins.append(plugin);
+         }
+diff --git a/plugins/python/CMakeLists.txt b/plugins/python/CMakeLists.txt
+index 4260fa1..5db53d2 100644
+--- a/plugins/python/CMakeLists.txt
++++ b/plugins/python/CMakeLists.txt
+@@ -101,3 +101,7 @@ install(
+         PATTERN "*.py"
+         PATTERN "__pycache__*" EXCLUDE
+   )
++
++# Flaptown Advancements: GPLv3 native workspace overlay.
++install_pykrita_plugin(flapart PATTERNS "*.ttf" "*.txt" "*.svg")
++install(FILES flapart/Flaptown.colors DESTINATION ${KDE_INSTALL_DATADIR}/color-schemes)

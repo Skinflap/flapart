@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#1f2327" />
+    <title>flapart · flaptown</title>
+    <link rel="stylesheet" href="./app.css" />
+    <link rel="stylesheet" href="./integration.css" />
+  </head>
+  <body>
+    <header>
+      <a href="/" class="brand"
+        ><img src="./sigil.svg" alt="flaptown" width="28" height="28" />
+        flapart</a
+      ><span class="tag">a little room to make things</span>
+      <nav>
+        <a href="/flapsoft/">flapsoft</a><a href="/forum/">townhall</a
+        ><button id="help">help</button>
+      </nav>
+    </header>
+    <main>
+      <div class="filebar">
+        <label class="name"
+          >creation
+          <input
+            id="name"
+            value="untitled"
+            maxlength="100"
+            aria-label="Creation name" /></label
+        ><button id="new">new</button><button id="open">open project</button
+        ><button id="import">add image</button
+        ><button id="save">save project</button
+        ><button id="export" class="primary">export image</button
+        ><button id="account-save">save to profile</button
+        ><button id="account-post">post to townhall</button
+        ><input
+          id="project-file"
+          type="file"
+          accept=".flapart,application/json"
+          hidden
+        /><input
+          id="image-file"
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/gif"
+          hidden
+        />
+      </div>
+      <div class="workspace">
+        <aside class="tools" aria-label="Drawing tools">
+          <div id="tools"></div>
+          <label
+            >brush preset<select id="preset">
+              <option value="ink">ink</option>
+              <option value="pencil">pencil</option>
+              <option value="soft">soft paint</option>
+              <option value="spray">spray</option>
+              <option value="block">block</option>
+            </select></label
+          ><label>color<input type="color" id="color" value="#c39a93" /></label
+          ><label
+            >size <output id="size-value">16</output
+            ><input
+              id="size"
+              type="range"
+              min="1"
+              max="250"
+              value="16" /></label
+          ><label
+            >opacity <output id="opacity-value">100%</output
+            ><input id="opacity" type="range" min="1" max="100" value="100"
+          /></label>
+          <details>
+            <summary>tool settings</summary>
+            <label
+              >brush<select id="brush">
+                <option value="round">round</option>
+                <option value="soft">soft</option>
+                <option value="square">square</option>
+                <option value="spray">spray</option>
+              </select></label
+            ><label
+              >edge hardness <output id="hardness-value">100%</output
+              ><input
+                id="hardness"
+                type="range"
+                min="0"
+                max="100"
+                value="100" /></label
+            ><label
+              >paint flow <output id="flow-value">100%</output
+              ><input
+                id="flow"
+                type="range"
+                min="1"
+                max="100"
+                value="100" /></label
+            ><label
+              >stamp spacing <output id="spacing-value">12%</output
+              ><input
+                id="spacing"
+                type="range"
+                min="5"
+                max="100"
+                value="12" /></label
+            ><label><input id="mirror" type="checkbox" /> mirror drawing</label
+            ><label
+              ><input type="checkbox" id="pressure" checked /> pen
+              pressure</label
+            ><label
+              >fill tolerance<input
+                id="tolerance"
+                type="range"
+                min="0"
+                max="100"
+                value="20" /></label
+            ><label><input id="shape-fill" type="checkbox" /> fill shapes</label
+            ><label
+              >gradient end<input
+                type="color"
+                id="color-secondary"
+                value="#d7c8ab" /></label
+            ><label
+              >gradient<select id="gradient-kind">
+                <option value="linear">linear</option>
+                <option value="radial">radial</option>
+              </select></label
+            ><label
+              >text size<input
+                id="text-size"
+                type="number"
+                min="8"
+                max="500"
+                value="48" /></label
+            ><label
+              >text<input
+                id="text"
+                maxlength="1000"
+                placeholder="hello, flaptown"
+            /></label>
+          </details>
+          <div class="swatches" id="swatches"></div>
+        </aside>
+        <section class="studio" aria-label="Canvas workspace">
+          <div class="canvasbar">
+            <button id="undo" title="Undo (Ctrl+Z)">undo</button
+            ><button id="redo" title="Redo (Ctrl+Shift+Z)">redo</button
+            ><button id="zoom-out" aria-label="Zoom out">−</button
+            ><output id="zoom">100%</output
+            ><button id="zoom-in" aria-label="Zoom in">+</button
+            ><button id="fit">fit</button><button id="actual">1:1</button
+            ><span id="dimensions"></span>
+          </div>
+          <div
+            id="viewport"
+            tabindex="0"
+            aria-label="Drawing canvas. Choose a tool then draw. Space and drag to pan."
+          >
+            <div id="canvas-wrap">
+              <canvas id="canvas" aria-label="Your painting"></canvas
+              ><canvas id="overlay" aria-hidden="true"></canvas>
+            </div>
+          </div>
+          <div class="status">
+            <span id="status" role="status" aria-live="polite"
+              >ready to make something</span
+            ><span id="save-status">local recovery ready</span>
+          </div>
+        </section>
+        <aside class="layers-panel">
+          <div class="panel-title">
+            layers <button id="layer-add" title="Add layer">+</button>
+          </div>
+          <p class="hint">top layers sit above the others</p>
+          <div id="layers" aria-label="Layers"></div>
+          <label
+            >layer opacity
+            <input
+              id="layer-opacity"
+              type="range"
+              min="0"
+              max="100"
+              value="100" /></label
+          ><label
+            >blend<select id="blend">
+              <option value="source-over">normal</option>
+              <option>multiply</option>
+              <option>screen</option>
+              <option>overlay</option>
+              <option>darken</option>
+              <option>lighten</option>
+            </select></label
+          >
+          <div class="layer-actions">
+            <button id="layer-up">up</button
+            ><button id="layer-down">down</button
+            ><button id="layer-duplicate">duplicate</button
+            ><button id="layer-delete">delete</button
+            ><button id="layer-clear">clear</button>
+          </div>
+          <details>
+            <summary>canvas & selection</summary>
+            <button id="select-all">select all</button
+            ><button id="deselect">deselect</button
+            ><button id="delete-selection">erase selection</button
+            ><button id="flip-h">flip layer ↔</button
+            ><button id="flip-v">flip layer ↕</button
+            ><button id="rotate-layer">rotate layer 90°</button
+            ><button id="resize-image">resize image</button
+            ><button id="resize-canvas">resize canvas</button
+            ><button id="crop">crop to selection</button
+            ><button id="filters">adjust color</button
+            ><label><input id="grid" type="checkbox" /> show grid</label>
+          </details>
+          <p class="hint">
+            your work stays in this browser until you export, save, or share it.
+            Download a project to keep your layers.
+          </p>
+        </aside>
+      </div>
+    </main>
+    <dialog id="dialog">
+      <form method="dialog">
+        <h2 id="dialog-title"></h2>
+        <div id="dialog-body"></div>
+        <div class="dialog-actions">
+          <button value="cancel">cancel</button
+          ><button id="dialog-ok" value="ok" class="primary">continue</button>
+        </div>
+      </form>
+    </dialog>
+    <script type="module" src="./app.js"></script>
+    <script type="module" src="./integration.js"></script>
+  </body>
+</html>
