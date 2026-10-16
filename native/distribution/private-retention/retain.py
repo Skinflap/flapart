@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Private unqualified candidate retention using GnuPG, never a release gate."""
 import argparse
+import contextlib
 import hashlib
 import json
 import os
@@ -68,9 +69,37 @@ def regular(root, name):
 
 def gpg(home, *args, **kwargs):
     # No personal config, keyserver discovery, or inherited default recipients.
-    return subprocess.run(['gpg', '--no-options', '--homedir', str(home), '--batch',
-        '--no-auto-key-retrieve', *args], check=True, stdout=subprocess.PIPE,
+    result = subprocess.run(['gpg', '--no-options', '--homedir', str(home), '--batch',
+        '--no-auto-key-retrieve', *args], check=False, stdout=subprocess.PIPE,
         stderr=subprocess.PIPE, **kwargs)
+    if result.returncode:
+        # Expose only bounded IPC diagnostics, not imported identities or key data.
+        terms = (b'socket', b'ipc', b'keyboxd', b'agent', b'connect')
+        diagnostic = b'\n'.join(line for line in result.stderr.splitlines()
+                                if any(term in line.lower() for term in terms))[:1024]
+        raise RuntimeError('GnuPG failed (exit %s): %s' %
+                           (result.returncode, diagnostic.decode('utf-8', errors='replace') or 'no IPC diagnostic'))
+    return result
+
+@contextlib.contextmanager
+def ephemeral_gpg_home():
+    # macOS temporary payload paths can exceed AF_UNIX's socket-name bound.
+    # Keep daemon sockets in a separate, short, private directory. Never use
+    # the caller's personal keyring or put private keys in the payload tree.
+    parent = Path('/tmp').resolve(strict=True) if os.name == 'posix' else None
+    with tempfile.TemporaryDirectory(prefix='flpg-', dir=parent) as name:
+        home = Path(name).resolve()
+        home.chmod(0o700)
+        if os.name == 'posix' and len(os.fsencode(home / 'S.keyboxd')) >= 90:
+            raise ValueError('Temporary GnuPG socket path is too long')
+        try:
+            yield home
+        finally:
+            # Stop only daemons belonging to this disposable home, before its
+            # files disappear. The local release key home is never affected.
+            subprocess.run(['gpgconf', '--homedir', str(home), '--kill', 'all'],
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                           check=False)
 
 def encrypt(root, inventory_path, public_key, recipient, output):
     recipient = fingerprint(recipient)
@@ -78,9 +107,8 @@ def encrypt(root, inventory_path, public_key, recipient, output):
     root = root.resolve(strict=True)
     if output.exists() or output.is_symlink():
         raise ValueError('output already exists')
-    with tempfile.TemporaryDirectory(prefix='.retention-', dir=output.parent) as tmp:
+    with tempfile.TemporaryDirectory(prefix='.retention-', dir=output.parent) as tmp, ephemeral_gpg_home() as home:
         tmp = Path(tmp); os.chmod(tmp, 0o700)
-        home = tmp / 'gnupg'; home.mkdir(mode=0o700)
         gpg(home, '--import', str(public_key.resolve(strict=True)))
         if b'sec:' in gpg(home, '--with-colons', '--list-secret-keys').stdout:
             raise ValueError('encryption input must contain public keys only')

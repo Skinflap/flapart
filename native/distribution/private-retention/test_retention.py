@@ -42,6 +42,18 @@ class Retention(unittest.TestCase):
         for name in ('candidate.zip','stage.json'): self.assertEqual((out/name).read_bytes(),(self.root/name).read_bytes())
         self.assertEqual(out.stat().st_mode & 0o777,0o700)
         self.assertEqual(encrypted.stat().st_mode & 0o777,0o600)
+    def test_deep_payload_path_uses_short_private_key_home(self):
+        parent = self.root / ('deep-' + 'x' * 110)
+        parent.mkdir()
+        encrypted = parent / 'private.gpg'
+        with r.ephemeral_gpg_home() as home:
+            self.assertLess(len(str(home / 'S.keyboxd').encode()), 90)
+            self.assertEqual(home.stat().st_mode & 0o777, 0o700)
+        self.assertFalse(home.exists())
+        result = r.encrypt(self.root,self.manifest,self.pub,self.fpr,encrypted)
+        recovered = parent / 'recovered'
+        r.decrypt(encrypted,result['encrypted_sha256'],self.home,self.fpr,recovered)
+        self.assertEqual((recovered/'candidate.zip').read_bytes(),b'candidate fixture')
     def test_wrong_fingerprint(self):
         with self.assertRaises(ValueError): r.encrypt(self.root,self.manifest,self.pub,'0'*40,self.root/'bad.gpg')
         self.assertFalse((self.root/'bad.gpg').exists())
