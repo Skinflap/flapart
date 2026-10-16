@@ -57,3 +57,12 @@ Native engine target: Windows x86_64. Artifact layout and build are not yet froz
 Source and notices: COPYING and studio-plugin.zip. Plugin GPL-3.0-or-later; Syne
 Mono SIL OFL. The actual full native package must retain all dependency notices
 and provide its exact corresponding source. https://flaptown.com/flapsoft/
+
+Installed-runtime qualification also requires --archive-sha256 with the reviewed
+archive digest and --architecture with the actual requested arm64 or x86_64
+process. Each run needs a fresh disposable profile. --disposable-native-host
+explicitly selects an isolated private host; it does not claim hosted CI. The
+producer retains failed outcomes and verifies installed bytes and actual child
+identity. Mac open -W does not expose an independent child exit code; the receipt
+records launcher completion, Qt lifecycle and observed process exit separately.
+See native/qa/installer-followup/IMPLEMENTATION.md for the exact evidence scope.

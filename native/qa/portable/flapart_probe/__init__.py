@@ -94,6 +94,54 @@ def finish(result,w,out,studio=None,owned_documents=(),keepalive=()):
                 raise OSError(ctypes.get_errno(),'Cannot identify native application translation mode')
             result['execution_mode'] = 'translated' if translated.value == 1 else 'native'
             result['hardware_architecture'] = 'arm64' if translated.value == 1 else result['process_architecture']
+        # Observe the actual native process image, not embedded Python's sys.executable.
+        import ctypes, hashlib
+        if platform.system() == 'Darwin':
+            library = ctypes.CDLL(None)
+            get_image = library._NSGetExecutablePath
+            get_image.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint32)]
+            get_image.restype = ctypes.c_int
+            size = ctypes.c_uint32(0)
+            get_image(None, ctypes.byref(size))
+            if not 1 <= size.value <= 32768:
+                raise RuntimeError('Invalid native executable path size')
+            buffer = ctypes.create_string_buffer(size.value)
+            if get_image(buffer, ctypes.byref(size)) != 0:
+                raise RuntimeError('Cannot read actual native executable path')
+            image = pathlib.Path(os.fsdecode(buffer.value)).resolve(strict=True)
+        elif platform.system() == 'Windows':
+            library = ctypes.WinDLL('kernel32', use_last_error=True)
+            get_image = library.GetModuleFileNameW
+            get_image.argtypes = [ctypes.c_void_p, ctypes.c_wchar_p, ctypes.c_uint32]
+            get_image.restype = ctypes.c_uint32
+            buffer = ctypes.create_unicode_buffer(32768)
+            length = get_image(None, buffer, len(buffer))
+            if not 0 < length < len(buffer):
+                raise ctypes.WinError(ctypes.get_last_error())
+            image = pathlib.Path(buffer.value).resolve(strict=True)
+            library.GetCurrentProcess.restype = ctypes.c_void_p
+            query = library.IsWow64Process2
+            query.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_ushort), ctypes.POINTER(ctypes.c_ushort)]
+            query.restype = ctypes.c_int
+            process_machine = ctypes.c_ushort()
+            native_machine = ctypes.c_ushort()
+            if not query(library.GetCurrentProcess(), ctypes.byref(process_machine), ctypes.byref(native_machine)):
+                raise ctypes.WinError(ctypes.get_last_error())
+            machines = {0x8664: 'x86_64', 0xaa64: 'arm64', 0x14c: 'x86'}
+            result['process_architecture'] = machines.get(process_machine.value or native_machine.value, 'unsupported')
+            result['hardware_architecture'] = machines.get(native_machine.value, 'unsupported')
+            result['execution_mode'] = 'native' if process_machine.value == 0 else 'translated'
+        else:
+            image = pathlib.Path('/proc/self/exe').resolve(strict=True)
+        qt_image = pathlib.Path(QApplication.instance().applicationFilePath()).resolve(strict=True)
+        if image != qt_image:
+            raise RuntimeError('Qt application file differs from actual native process image')
+        with image.open('rb') as executable_file:
+            image_sha = hashlib.file_digest(executable_file, 'sha256').hexdigest()
+        result['process_id'] = os.getpid()
+        result['process_image'] = {'path': str(image), 'sha256': image_sha,
+                                   'bytes': image.stat().st_size,
+                                   'qt_application_file_path': str(qt_image)}
         result['native_engine_version'] = Krita.instance().version()
         result['application_font'] = QFontInfo(QApplication.instance().font()).family()
         dialog = studio.dialogs[-1] if studio and studio.dialogs else None

@@ -60,3 +60,12 @@ The installer itself needs only built-in Mac tools; Python is CI/release-only. D
 COPYING covers GPL-3.0-or-later source; studio-plugin.zip is frozen 0.1.1 and
 includes the Syne Mono SIL OFL license. Native dependency notices and exact source
 must accompany the qualified full distribution. https://flaptown.com/flapsoft/
+
+Installed-runtime qualification also requires --archive-sha256 with the reviewed
+archive digest and --architecture with the actual requested arm64 or x86_64
+process. Each run needs a fresh disposable profile. --disposable-native-host
+explicitly selects an isolated private host; it does not claim hosted CI. The
+producer retains failed outcomes and verifies installed bytes and actual child
+identity. Mac open -W does not expose an independent child exit code; the receipt
+records launcher completion, Qt lifecycle and observed process exit separately.
+See native/qa/installer-followup/IMPLEMENTATION.md for the exact evidence scope.

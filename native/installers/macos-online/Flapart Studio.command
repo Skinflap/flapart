@@ -16,4 +16,10 @@ if ! /usr/sbin/spctl --assess --type execute "$app"; then
  echo 'https://support.apple.com/en-ie/102445'
 fi
 export FLAPART_NATIVE=1
+# Explicit disposable QA launch: normal user invocations retain the original path.
+if [[ "${1:-}" == --flapart-qa-architecture ]]; then
+ [[ "${FLAPART_QA_EXPECT_COMPILED:-}" == 1 && -n "${FLAPART_QA_OUTPUT:-}" && "$#" == 2 ]] || { echo 'QA launch needs an explicit probe output and architecture.' >&2; exit 1; }
+ case "$2" in arm64|x86_64) ;; *) echo 'Unsupported QA architecture.' >&2; exit 1;; esac
+ exec /usr/bin/open -n -W --arch "$2" -a "$app"
+fi
 exec /usr/bin/open -a "$app" --args "$@"
