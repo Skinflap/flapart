@@ -1,0 +1,333 @@
+{
+  "schema": 1,
+  "review_candidate_only": true,
+  "native_compiled": false,
+  "native_regression_executed": false,
+  "source_revisions": {
+    "qtbase": "d96d05760ac47f39c26b0f4292feb38cb0641725",
+    "qtdeclarative": "967fb735aeb5ef26fb1ccab42bc0720442c14fa2",
+    "qtsvg": "83296f10ebdb9a666b11dc69f3a148c38b9c425c"
+  },
+  "changes": [
+    {
+      "module": "qtbase",
+      "path": "src/corelib/codecs/qtextcodec.cpp",
+      "before_sha256": "d1bd5e1fc774d5260eaf5fbe49e32a492cce9fd5c68b54b33ed41285e825cff6",
+      "after_sha256": "c7c0099be61c19958cc8bdde15f638e2e7d491e674e0d4540608e134fab1249e",
+      "fixes": [
+        {
+          "cve": "CVE-2026-9499",
+          "upstream_gerrit": "723911",
+          "adaptation": "Qt5 corelib path; explicit <string>; c_str gives C++11 NUL guarantee; both ICU/non-ICU branches preserved"
+        }
+      ]
+    },
+    {
+      "module": "qtbase",
+      "path": "src/corelib/io/qdataurl.cpp",
+      "before_sha256": "43f2a3a4654fd2ff3c95b392b926501700ad62215dc0f2e35f353b94d490a305",
+      "after_sha256": "b45d030731748f4290bb2420eb4827c0bba1d93a36ee25787e0deb2851e1d1d3",
+      "fixes": [
+        {
+          "cve": "CVE-2025-5455",
+          "upstream_gerrit": "642434",
+          "adaptation": "Qt5 owned QByteArray; explicit bounds checks equivalent to upstream view startsWith checks"
+        }
+      ]
+    },
+    {
+      "module": "qtbase",
+      "path": "src/corelib/io/qfilesystemengine_win.cpp",
+      "before_sha256": "6945e7b6337e8c070abafe84c677644dc062cc6e3b6fe713fcd4a911bb72379e",
+      "after_sha256": "2b4b4cc94dfbf22947e255f2a8bfcf749df1084adb8d01941025c1f21a793b40",
+      "fixes": [
+        {
+          "cve": "CVE-2025-4211",
+          "upstream_gerrit": "635127",
+          "adaptation": "Same official implementation at Qt5 function location"
+        }
+      ]
+    },
+    {
+      "module": "qtbase",
+      "path": "src/corelib/serialization/qxmlstream.cpp",
+      "before_sha256": "b69f7f8443a633ad157b67ab4d543d825ddc08b6f2a3b97a21339a321fca52b8",
+      "after_sha256": "3291e4eb3726637f417dacfa27a439c8033a32af99dd3a0e9f3d07b9d866e3aa",
+      "fixes": [
+        {
+          "cve": "CVE-2026-78253",
+          "upstream_gerrit": "754345",
+          "adaptation": "Keep Qt5 unicode()/size() append expression; use same upstream iterative nesting algorithm and qsizetype available in pinned qglobal.h"
+        },
+        {
+          "cve": "CVE-2023-37369/38197/32763/51714",
+          "upstream_gerrit": "parent-reviewed-v2",
+          "adaptation": "Pinned parent patch; exact independent arithmetic/XML source regression evidence retained separately"
+        }
+      ]
+    },
+    {
+      "module": "qtbase",
+      "path": "src/corelib/serialization/qxmlstream.g",
+      "before_sha256": "b42956fc78637b724348346f348512cbb614a56233a3d3b5da32d19d62b87013",
+      "after_sha256": "ff3595ca2d02eb7b13b9653eb0f24d7104a9af774cf2e700a002e1ef86c5cada",
+      "fixes": [
+        {
+          "cve": "CVE-2023-37369/38197/32763/51714",
+          "upstream_gerrit": "parent-reviewed-v2",
+          "adaptation": "Pinned parent patch; exact independent arithmetic/XML source regression evidence retained separately"
+        }
+      ]
+    },
+    {
+      "module": "qtbase",
+      "path": "src/corelib/serialization/qxmlstream_p.h",
+      "before_sha256": "373f33b8ea280cb5fb2328bf27ab0008ccf1efa713c5c3f708a886380f13fcc9",
+      "after_sha256": "37d9aa17e97def765ccaa4b3bce222d831d9955c1384645dfef6a730ea2ae481",
+      "fixes": [
+        {
+          "cve": "CVE-2023-37369/38197/32763/51714",
+          "upstream_gerrit": "parent-reviewed-v2",
+          "adaptation": "Pinned parent patch; exact independent arithmetic/XML source regression evidence retained separately"
+        }
+      ]
+    },
+    {
+      "module": "qtbase",
+      "path": "src/gui/painting/qfixed_p.h",
+      "before_sha256": "801257a2a4be54c17aa9615ad9e562e2cd68e421bb6c107c1dbe4fd93245c9f7",
+      "after_sha256": "c43cac40a47fda0b25d156365833d66d8de58866ba2ee2bfd49d815d541e6a0a",
+      "fixes": [
+        {
+          "cve": "CVE-2023-37369/38197/32763/51714",
+          "upstream_gerrit": "parent-reviewed-v2",
+          "adaptation": "Pinned parent patch; exact independent arithmetic/XML source regression evidence retained separately"
+        }
+      ]
+    },
+    {
+      "module": "qtbase",
+      "path": "src/gui/text/qtextlayout.cpp",
+      "before_sha256": "511e8bc59e59b0f03bd8e4c12e33a2ecf2e709fd03773b59a6e840e12f3ba5e1",
+      "after_sha256": "daf47586ccd71ec2931bf63c57c0624c34559251c7c99a59d996af73e07152d9",
+      "fixes": [
+        {
+          "cve": "CVE-2023-37369/38197/32763/51714",
+          "upstream_gerrit": "parent-reviewed-v2",
+          "adaptation": "Pinned parent patch; exact independent arithmetic/XML source regression evidence retained separately"
+        }
+      ]
+    },
+    {
+      "module": "qtbase",
+      "path": "src/gui/util/qktxhandler.cpp",
+      "before_sha256": "8e50eacd738a2639a7aec68a10a0791ebd33b2d67b93ec7c805353168438a737",
+      "after_sha256": "b4e1767623643ac2d078a92ed81b5c8d30dda255bff3751d6ab9aa56ebf58dae",
+      "fixes": [
+        {
+          "cve": "CVE-2024-25580",
+          "upstream_gerrit": "536680",
+          "adaptation": "Qt5 has single-face texture data and no QByteArrayView/std::optional; use widened64bit checked offsets and memcpy; reject dimensions/levels before signed narrowing; preserve existing single-face restriction"
+        }
+      ]
+    },
+    {
+      "module": "qtbase",
+      "path": "src/network/access/http2/hpacktable.cpp",
+      "before_sha256": "1af98b1b804a7ff10f2b541159d790f6d6f7056f2e4054ece35ccdaeb6ede8d6",
+      "after_sha256": "3082e2ad0305cb818c364f3a51ef8143d4921ba5f4abb17bd0bd325e3203cb75",
+      "fixes": [
+        {
+          "cve": "CVE-2023-37369/38197/32763/51714",
+          "upstream_gerrit": "parent-reviewed-v2",
+          "adaptation": "Pinned parent patch; exact independent arithmetic/XML source regression evidence retained separately"
+        }
+      ]
+    },
+    {
+      "module": "qtbase",
+      "path": "src/network/access/qhsts.cpp",
+      "before_sha256": "ba58f6a51bad3eb7a45e58eeb4851630b4b2909ac8869a96f147709aa59a2810",
+      "after_sha256": "7e52b012200a373d9261a4d3b3f34421bc728934fe7a65e0751d49a4ed538f6e",
+      "fixes": [
+        {
+          "cve": "CVE-2023-32762",
+          "upstream_gerrit": "476494",
+          "adaptation": "Official production patch applies unchanged; tests remain retained upstream"
+        }
+      ]
+    },
+    {
+      "module": "qtbase",
+      "path": "src/network/kernel/qdnslookup_unix.cpp",
+      "before_sha256": "6ef2dd27d2a39bc7ca5df1fb7f10451f976a7dbd6d01de18ac289084a2666cc7",
+      "after_sha256": "4bb141181a2354e8892d82675abac84642871c03f02c697e9494a59028b5deca",
+      "fixes": [
+        {
+          "cve": "CVE-2023-33285",
+          "upstream_gerrit": "477704",
+          "adaptation": "Official production patch applies unchanged; tests remain retained upstream"
+        }
+      ]
+    },
+    {
+      "module": "qtbase",
+      "path": "src/network/ssl/qsslcertificate.cpp",
+      "before_sha256": "e9adf12c44be3971b8c364c90cc2970dc89325f3a83cecbe5c9361b92d0d26a9",
+      "after_sha256": "3b5633c67e6e2eb8b2f604cf2b5e55e792626e4f077445fdc7d76fe117c7bd47",
+      "fixes": [
+        {
+          "cve": "CVE-2025-14575",
+          "upstream_gerrit": "642967",
+          "adaptation": "Official production patch applies unchanged; tests remain retained upstream"
+        }
+      ]
+    },
+    {
+      "module": "qtbase",
+      "path": "src/network/ssl/qsslsocket.cpp",
+      "before_sha256": "3e46409630b905151282d9404a0ae32cd5da4c5c8f4916c1f5945cf894352f4d",
+      "after_sha256": "99300d68d54cf6da13fb2699de554a6c4da995078ff7fe321b92fb24f7cf0977",
+      "fixes": [
+        {
+          "cve": "CVE-2023-34410",
+          "upstream_gerrit": "480002",
+          "adaptation": "Same default configuration flags copied at Qt5 constructor/deep-copy locations; Schannel portion separately assessed"
+        }
+      ]
+    },
+    {
+      "module": "qtbase",
+      "path": "src/xml/dom/qdom.cpp",
+      "before_sha256": "59353e48ea26dfe4a4d8315dbbe447bb828708d3e03cdef46d68aaca4e8b6f1d",
+      "after_sha256": "a730cc77bbb6e49dd79a69afe10f4a053e8a1b6f96d03e4f5cbc0715db97d58f",
+      "fixes": [
+        {
+          "cve": "CVE-2026-19248",
+          "upstream_gerrit": "740427",
+          "adaptation": "Keep Qt5 first/last reset; replace std::exchange with equivalent explicit parent temporary for C++11 compatibility"
+        },
+        {
+          "cve": "CVE-2026-15037",
+          "upstream_gerrit": "748323",
+          "adaptation": "Official production patch applies unchanged; tests remain retained upstream"
+        },
+        {
+          "cve": "CVE-2026-11573",
+          "upstream_gerrit": "606899",
+          "adaptation": "Official iterative traversal; Qt5 iterators/QLatin1Char kept; preserve Qt5 encoding policy"
+        },
+        {
+          "cve": "CVE-2025-30348",
+          "upstream_gerrit": "581442",
+          "adaptation": "Chunk append algorithm; preserve Qt5 QTextCodec canEncode and no-textcodec branches; C++11 explicit QString lambda type"
+        }
+      ]
+    },
+    {
+      "module": "qtbase",
+      "path": "src/xml/dom/qdom_p.h",
+      "before_sha256": "3642627e539d0dcc2d86c80736b3bbc7ddd7ac531d3ffcd2c6641a7d4bfcdcab",
+      "after_sha256": "c6c7424770afab25cf15dec9912e98f9fb185ccff8b9c44ef5385819c6a94759",
+      "fixes": [
+        {
+          "cve": "CVE-2026-11573",
+          "upstream_gerrit": "606899",
+          "adaptation": "Same private virtual hooks; no public API change"
+        }
+      ]
+    },
+    {
+      "module": "qtdeclarative",
+      "path": "src/quick/items/qquicktextdocument.cpp",
+      "before_sha256": "cede1c9b88b408f1bd5099133ee4384deb87149d2350c406ea88d7d9e89b1683",
+      "after_sha256": "1f5e9067de9a82ab1c06ff2287a3eb8b4f92f3142c4c9f4248603dbf2eb96b21",
+      "fixes": [
+        {
+          "cve": "CVE-2025-12385",
+          "upstream_gerrit": "687239",
+          "adaptation": "Same official rounding clamp at Qt5 function"
+        }
+      ]
+    },
+    {
+      "module": "qtdeclarative",
+      "path": "src/quick/items/qquicktextnodeengine.cpp",
+      "before_sha256": "c9577bff0803fd951eb7f013f313d1a3d700b5a9e1dc8e9d8924a02cced89a06",
+      "after_sha256": "4f3f8d6e696b3634634e9f575b30d472a6fde36aabe49784b0c52e94ad84688b",
+      "fixes": [
+        {
+          "cve": "CVE-2025-12385",
+          "upstream_gerrit": "687766",
+          "adaptation": "Qt5 lacks allocateImage API; local finite/dimension/64-bit byte bounds with modern default256MiB and QT_IMAGEIO_MAXALLOC override (0 disables limit)"
+        }
+      ]
+    },
+    {
+      "module": "qtdeclarative",
+      "path": "src/quick/util/qquickstyledtext.cpp",
+      "before_sha256": "bf296fb85d56a1d724ec986457465d10e05fed585183fe0d16bafa1184929498",
+      "after_sha256": "953bc30da0d1eab62b918bca1dab353be03efad31d4309baa916aeaf9da027a4",
+      "fixes": [
+        {
+          "cve": "CVE-2025-12385",
+          "upstream_gerrit": "687239",
+          "adaptation": "Qt5 logging uses qWarning; same raster coordinate limit and parse success check"
+        }
+      ]
+    },
+    {
+      "module": "qtdeclarative",
+      "path": "src/quick/util/qquicksvgparser.cpp",
+      "before_sha256": "be2d6c880d9259ac277e99f492831f84fa0a9f5a6f731ae897fee6e12a28bc93",
+      "after_sha256": "6c6595e42f4f36aa84e2ff191699f20d8006d98384a8f0a3642edf78a1e776f7",
+      "fixes": [
+        {
+          "cve": "CVE-2026-79616",
+          "upstream_gerrit": "754718",
+          "adaptation": "Official production patch applies unchanged; tests remain retained upstream"
+        }
+      ]
+    },
+    {
+      "module": "qtsvg",
+      "path": "src/svg/qsvgfont_p.h",
+      "before_sha256": "2419bd074a2e634be9b3df02f1f8272fb181cc988fc6751bb3cea87ad4544f70",
+      "after_sha256": "63c9852203dbe7af0442a85a278a4394e3826fdfda4e1ca4136aecec2c84a9a3",
+      "fixes": [
+        {
+          "cve": "CVE-2023-32573",
+          "upstream_gerrit": "474093",
+          "adaptation": "Official production patch applies unchanged; tests remain retained upstream"
+        }
+      ]
+    },
+    {
+      "module": "qtsvg",
+      "path": "src/svg/qsvghandler.cpp",
+      "before_sha256": "0b60155ad031f46b9ecbc61393ae04eca7154c7f4be6f9694da7eb43f30f5f86",
+      "after_sha256": "eab6528b38146e24a9cce99b1bd581e3890d760bdc820433673cadb8213aa548",
+      "fixes": [
+        {
+          "cve": "CVE-2023-32573",
+          "upstream_gerrit": "474093",
+          "adaptation": "Official production patch applies unchanged; tests remain retained upstream"
+        }
+      ]
+    }
+  ],
+  "patches": [
+    {
+      "path": "qtbase.patch",
+      "sha256": "c7a7b6b5c76d8cbe663c0d5299bf7acee96e2d34eaedfbb9451f1412e8d951ec"
+    },
+    {
+      "path": "qtdeclarative.patch",
+      "sha256": "59c5b3b4c6599dbafc176ea6f681be1781af913c6e42635e271e3b047fad9048"
+    },
+    {
+      "path": "qtsvg.patch",
+      "sha256": "3292db57d993afb0fd47e2338566d8b3fd0b48cf2c282e8f123bac1deac0fc94"
+    }
+  ]
+}

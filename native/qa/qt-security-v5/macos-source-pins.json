@@ -1,0 +1,80 @@
+{
+  "superproject": "2d0ea49d3428d639d45e7b1a32bbe0d096ed8b8e",
+  "recipe_sha256": "a3a88bb507c7db564a77cdcbf534ada152d8ddbb21f34732a37a6e399d25ff16",
+  "modules": [
+    {
+      "module": "qtbase",
+      "available": true,
+      "gitlink": "d96d05760ac47f39c26b0f4292feb38cb0641725",
+      "head": "d96d05760ac47f39c26b0f4292feb38cb0641725",
+      "matches": true,
+      "tracked_changes": []
+    },
+    {
+      "module": "qtdeclarative",
+      "available": true,
+      "gitlink": "967fb735aeb5ef26fb1ccab42bc0720442c14fa2",
+      "head": "967fb735aeb5ef26fb1ccab42bc0720442c14fa2",
+      "matches": true,
+      "tracked_changes": []
+    },
+    {
+      "module": "qtimageformats",
+      "available": true,
+      "gitlink": "adbc372b890ed90f006a6c4f3ca56bf0cba477ef",
+      "head": "adbc372b890ed90f006a6c4f3ca56bf0cba477ef",
+      "matches": true,
+      "tracked_changes": []
+    },
+    {
+      "module": "qttools",
+      "available": true,
+      "gitlink": "3cea28be7c7dfe6fd90d3eef88ac6c2307f09051",
+      "head": "3cea28be7c7dfe6fd90d3eef88ac6c2307f09051",
+      "matches": true,
+      "tracked_changes": []
+    },
+    {
+      "module": "qtsvg",
+      "available": true,
+      "gitlink": "83296f10ebdb9a666b11dc69f3a148c38b9c425c",
+      "head": "83296f10ebdb9a666b11dc69f3a148c38b9c425c",
+      "matches": true,
+      "tracked_changes": []
+    },
+    {
+      "module": "qtmacextras",
+      "available": true,
+      "gitlink": "e7d4c37810976b6a1730d842cbca04b66ca7de30",
+      "head": "e7d4c37810976b6a1730d842cbca04b66ca7de30",
+      "matches": true,
+      "tracked_changes": []
+    },
+    {
+      "module": "qttranslations",
+      "available": true,
+      "gitlink": "c38edd3a5501bcd53132e1e4abb7d25a98e0e1a9",
+      "head": "c38edd3a5501bcd53132e1e4abb7d25a98e0e1a9",
+      "matches": true,
+      "tracked_changes": []
+    },
+    {
+      "module": "qtquickcontrols2",
+      "available": true,
+      "gitlink": "5465566a4ad9f6f9758bed304153f0c7fec3437b",
+      "head": "5465566a4ad9f6f9758bed304153f0c7fec3437b",
+      "matches": true,
+      "tracked_changes": []
+    },
+    {
+      "module": "qtgraphicaleffects",
+      "available": true,
+      "gitlink": "a2b1600300cda89804d48ec90e0068a075fecc8b",
+      "head": "a2b1600300cda89804d48ec90e0068a075fecc8b",
+      "matches": true,
+      "tracked_changes": []
+    }
+  ],
+  "architecture_strategy": "Original recipe builds separate arm64/x86_64 Qt5 then combines; preserve this strategy for full Qt rebuild",
+  "scope": "Retained clean source availability, not patched Mac compilation"
+}

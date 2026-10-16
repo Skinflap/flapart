@@ -1,0 +1,972 @@
+--- a/src/corelib/codecs/qtextcodec.cpp
++++ b/src/corelib/codecs/qtextcodec.cpp
+@@ -41,6 +41,7 @@
+ #include "qplatformdefs.h"
+ 
+ #include "qtextcodec.h"
++#include <string>
+ #include "qtextcodec_p.h"
+ 
+ #include "qbytearraymatcher.h"
+@@ -553,6 +554,8 @@
+     if (name.isEmpty())
+         return nullptr;
+ 
++    // Ensure NUL termination even for QByteArray::fromRawData().
++    const std::string name0(name.constData(), size_t(name.size()));
+     const TextCodecsMutexLocker locker;
+ 
+     QCoreGlobalData *globalData = QCoreGlobalData::instance();
+@@ -569,14 +572,14 @@
+ 
+     for (TextCodecListConstIt it = globalData->allCodecs.constBegin(), cend = globalData->allCodecs.constEnd(); it != cend; ++it) {
+         QTextCodec *cursor = *it;
+-        if (qTextCodecNameMatch(cursor->name(), name)) {
++        if (qTextCodecNameMatch(cursor->name().constData(), name0.c_str())) {
+             if (cache)
+                 cache->insert(name, cursor);
+             return cursor;
+         }
+         QList<QByteArray> aliases = cursor->aliases();
+         for (ByteArrayListConstIt ait = aliases.constBegin(), acend = aliases.constEnd(); ait != acend; ++ait) {
+-            if (qTextCodecNameMatch(*ait, name)) {
++            if (qTextCodecNameMatch(ait->constData(), name0.c_str())) {
+                 cache->insert(name, cursor);
+                 return cursor;
+             }
+@@ -585,7 +588,7 @@
+ 
+     return nullptr;
+ #else
+-    return QIcuCodec::codecForNameUnlocked(name);
++    return QIcuCodec::codecForNameUnlocked(name0.c_str());
+ #endif
+ }
+ 
+--- a/src/corelib/io/qdataurl.cpp
++++ b/src/corelib/io/qdataurl.cpp
+@@ -77,9 +77,9 @@
+ 
+         if (data.toLower().startsWith("charset")) {
+             int i = 7;      // strlen("charset")
+-            while (data.at(i) == ' ')
++            while (i < data.size() && data.at(i) == ' ')
+                 ++i;
+-            if (data.at(i) == '=')
++            if (i < data.size() && data.at(i) == '=')
+                 data.prepend("text/plain;");
+         }
+ 
+--- a/src/corelib/io/qfilesystemengine_win.cpp
++++ b/src/corelib/io/qfilesystemengine_win.cpp
+@@ -1390,7 +1390,14 @@
+     QString ret;
+ #ifndef Q_OS_WINRT
+     wchar_t tempPath[MAX_PATH];
+-    const DWORD len = GetTempPath(MAX_PATH, tempPath);
++    using GetTempPathPrototype = DWORD (WINAPI *)(DWORD, LPWSTR);
++    static GetTempPathPrototype getTempPathW = []() {
++        const HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
++        if (auto *func = QFunctionPointer(GetProcAddress(kernel32, "GetTempPath2W")))
++            return GetTempPathPrototype(func);
++        return GetTempPath;
++    }();
++    const DWORD len = getTempPathW(MAX_PATH, tempPath);
+     if (len) { // GetTempPath() can return short names, expand.
+         wchar_t longTempPath[MAX_PATH];
+         const DWORD longLen = GetLongPathName(tempPath, longTempPath, MAX_PATH);
+--- a/src/corelib/serialization/qxmlstream.cpp
++++ b/src/corelib/serialization/qxmlstream.cpp
+@@ -620,6 +620,7 @@
+         d->token = -1;
+         return readNext();
+     }
++    d->checkToken();
+     return d->type;
+ }
+ 
+@@ -866,6 +867,8 @@
+ 
+     type = QXmlStreamReader::NoToken;
+     error = QXmlStreamReader::NoError;
++    currentContext = XmlContext::Prolog;
++    foundDTD = false;
+ }
+ 
+ /*
+@@ -1302,7 +1305,7 @@
+     return n;
+ }
+ 
+-inline int QXmlStreamReaderPrivate::fastScanName(int *prefix)
++inline QXmlStreamReaderPrivate::FastScanNameResult QXmlStreamReaderPrivate::fastScanName(int *prefix)
+ {
+     int n = 0;
+     uint c;
+@@ -1310,7 +1313,8 @@
+         if (n >= 4096) {
+             // This is too long to be a sensible name, and
+             // can exhaust memory
+-            return 0;
++            raiseNamePrefixTooLongError();
++            return {};
+         }
+         switch (c) {
+         case '\n':
+@@ -1344,18 +1348,18 @@
+                 putChar(':');
+                 --n;
+             }
+-            return n;
++            return FastScanNameResult(n);
+         case ':':
+             if (prefix) {
+                 if (*prefix == 0) {
+                     *prefix = n+2;
+                 } else { // only one colon allowed according to the namespace spec.
+                     putChar(c);
+-                    return n;
++                    return FastScanNameResult(n);
+                 }
+             } else {
+                 putChar(c);
+-                return n;
++                return FastScanNameResult(n);
+             }
+             Q_FALLTHROUGH();
+         default:
+@@ -1369,7 +1373,7 @@
+     int pos = textBuffer.size() - n;
+     putString(textBuffer, pos);
+     textBuffer.resize(pos);
+-    return 0;
++    return FastScanNameResult(0);
+ }
+ 
+ enum NameChar { NameBeginning, NameNotBeginning, NotName };
+@@ -1873,6 +1877,109 @@
+     type = QXmlStreamReader::Invalid;
+ }
+ 
++static QLatin1String contextString(QXmlStreamReaderPrivate::XmlContext context)
++{
++    return QLatin1String(context == QXmlStreamReaderPrivate::XmlContext::Prolog ? "Prolog" : "Body");
++}
++
++static bool isTokenAllowedInContext(QXmlStreamReader::TokenType type,
++                                               QXmlStreamReaderPrivate::XmlContext loc)
++{
++    switch (type) {
++    case QXmlStreamReader::StartDocument:
++    case QXmlStreamReader::DTD:
++        return loc == QXmlStreamReaderPrivate::XmlContext::Prolog;
++
++    case QXmlStreamReader::StartElement:
++    case QXmlStreamReader::EndElement:
++    case QXmlStreamReader::Characters:
++    case QXmlStreamReader::EntityReference:
++    case QXmlStreamReader::EndDocument:
++        return loc == QXmlStreamReaderPrivate::XmlContext::Body;
++
++    case QXmlStreamReader::Comment:
++    case QXmlStreamReader::ProcessingInstruction:
++        return true;
++
++    case QXmlStreamReader::NoToken:
++    case QXmlStreamReader::Invalid:
++        return false;
++    }
++
++    // GCC 8.x does not treat __builtin_unreachable() as constexpr
++#if !defined(Q_CC_GNU_ONLY) || (Q_CC_GNU >= 900)
++    Q_UNREACHABLE();
++    return false;
++#else
++    return false;
++#endif
++}
++
++/*!
++   \internal
++   \brief QXmlStreamReader::isValidToken
++   \return \c true if \param type is a valid token type.
++   \return \c false if \param type is an unexpected token,
++   which indicates a non-well-formed or invalid XML stream.
++ */
++bool QXmlStreamReaderPrivate::isValidToken(QXmlStreamReader::TokenType type)
++{
++    // Don't change currentContext, if Invalid or NoToken occur in the prolog
++    if (type == QXmlStreamReader::Invalid || type == QXmlStreamReader::NoToken)
++        return false;
++
++    // If a token type gets rejected in the body, there is no recovery
++    const bool result = isTokenAllowedInContext(type, currentContext);
++    if (result || currentContext == XmlContext::Body)
++        return result;
++
++    // First non-Prolog token observed => switch context to body and check again.
++    currentContext = XmlContext::Body;
++    return isTokenAllowedInContext(type, currentContext);
++}
++
++/*!
++   \internal
++   Checks token type and raises an error, if it is invalid
++   in the current context (prolog/body).
++ */
++void QXmlStreamReaderPrivate::checkToken()
++{
++    Q_Q(QXmlStreamReader);
++
++    // The token type must be consumed, to keep track if the body has been reached.
++    const XmlContext context = currentContext;
++    const bool ok = isValidToken(type);
++
++    // Do nothing if an error has been raised already (going along with an unexpected token)
++    if (error != QXmlStreamReader::Error::NoError)
++        return;
++
++    if (!ok) {
++        raiseError(QXmlStreamReader::UnexpectedElementError,
++                   QXmlStream::tr("Unexpected token type %1 in %2.")
++                   .arg(q->tokenString(), contextString(context)));
++        return;
++    }
++
++    if (type != QXmlStreamReader::DTD)
++        return;
++
++    // Raise error on multiple DTD tokens
++    if (foundDTD) {
++        raiseError(QXmlStreamReader::UnexpectedElementError,
++                   QXmlStream::tr("Found second DTD token in %1.").arg(contextString(context)));
++    } else {
++        foundDTD = true;
++    }
++}
++
++void QXmlStreamReaderPrivate::raiseNamePrefixTooLongError()
++{
++    raiseError(QXmlStreamReader::NotWellFormedError,
++               QXmlStream::tr("Length of XML attribute name exceeds implementation limits (4KiB characters)."));
++}
++
+ void QXmlStreamReaderPrivate::raiseWellFormedError(const QString &message)
+ {
+     raiseError(QXmlStreamReader::NotWellFormedError, message);
+@@ -2153,14 +2260,16 @@
+     Q_D(QXmlStreamReader);
+     if (isStartElement()) {
+         QString result;
+-        forever {
++        qsizetype nestingLevel = 1;
++        do {
+             switch (readNext()) {
+             case Characters:
+             case EntityReference:
+                 result.insert(result.size(), d->text.unicode(), d->text.size());
+                 break;
+             case EndElement:
+-                return result;
++                --nestingLevel;
++                break;
+             case ProcessingInstruction:
+             case Comment:
+                 break;
+@@ -2169,7 +2278,7 @@
+                     skipCurrentElement();
+                     break;
+                 } else if (behaviour == IncludeChildElements) {
+-                    result += readElementText(behaviour);
++                    ++nestingLevel;
+                     break;
+                 }
+                 Q_FALLTHROUGH();
+@@ -2180,7 +2289,8 @@
+                     return result;
+                 }
+             }
+-        }
++        } while (nestingLevel);
++        return result;
+     }
+     return QString();
+ }
+--- a/src/corelib/serialization/qxmlstream.g
++++ b/src/corelib/serialization/qxmlstream.g
+@@ -314,6 +314,11 @@
+     QTextDecoder *decoder;
+ #endif
+     bool atEnd;
++    enum class XmlContext { Prolog, Body };
++    XmlContext currentContext = XmlContext::Prolog;
++    bool foundDTD = false;
++    bool isValidToken(QXmlStreamReader::TokenType type);
++    void checkToken();
+ 
+     /*!
+       \sa setType()
+@@ -516,7 +521,15 @@
+     int fastScanLiteralContent();
+     int fastScanSpace();
+     int fastScanContentCharList();
+-    int fastScanName(int *prefix = nullptr);
++    struct FastScanNameResult {
++        FastScanNameResult() : addToLen(0), ok(false) {}
++        explicit FastScanNameResult(int len) : addToLen(len), ok(true) {}
++        operator bool() const { return ok; }
++        int operator*() const { Q_ASSERT(ok); return addToLen; }
++        int addToLen;
++        bool ok;
++    };
++    FastScanNameResult fastScanName(int *prefix = nullptr);
+     inline int fastScanNMTOKEN();
+ 
+ 
+@@ -525,6 +538,7 @@
+ 
+     void raiseError(QXmlStreamReader::Error error, const QString& message = QString());
+     void raiseWellFormedError(const QString &message);
++    void raiseNamePrefixTooLongError();
+ 
+     QXmlStreamEntityResolver *entityResolver;
+ 
+@@ -1809,7 +1823,10 @@
+ qname ::= LETTER;
+ /.
+         case $rule_number: {
+-            sym(1).len += fastScanName(&sym(1).prefix);
++            if (auto res = fastScanName(&sym(1).prefix))
++                sym(1).len += *res;
++            else
++                return false;
+             if (atEnd) {
+                 resume($rule_number);
+                 return false;
+@@ -1820,7 +1837,10 @@
+ name ::= LETTER;
+ /.
+         case $rule_number:
+-            sym(1).len += fastScanName();
++            if (auto res = fastScanName())
++                sym(1).len += *res;
++            else
++                return false;
+             if (atEnd) {
+                 resume($rule_number);
+                 return false;
+--- a/src/corelib/serialization/qxmlstream_p.h
++++ b/src/corelib/serialization/qxmlstream_p.h
+@@ -803,6 +803,11 @@
+     QTextDecoder *decoder;
+ #endif
+     bool atEnd;
++    enum class XmlContext { Prolog, Body };
++    XmlContext currentContext = XmlContext::Prolog;
++    bool foundDTD = false;
++    bool isValidToken(QXmlStreamReader::TokenType type);
++    void checkToken();
+ 
+     /*!
+       \sa setType()
+@@ -1005,7 +1010,15 @@
+     int fastScanLiteralContent();
+     int fastScanSpace();
+     int fastScanContentCharList();
+-    int fastScanName(int *prefix = nullptr);
++    struct FastScanNameResult {
++        FastScanNameResult() : addToLen(0), ok(false) {}
++        explicit FastScanNameResult(int len) : addToLen(len), ok(true) {}
++        operator bool() const { return ok; }
++        int operator*() const { Q_ASSERT(ok); return addToLen; }
++        int addToLen;
++        bool ok;
++    };
++    FastScanNameResult fastScanName(int *prefix = nullptr);
+     inline int fastScanNMTOKEN();
+ 
+ 
+@@ -1014,6 +1027,7 @@
+ 
+     void raiseError(QXmlStreamReader::Error error, const QString& message = QString());
+     void raiseWellFormedError(const QString &message);
++    void raiseNamePrefixTooLongError();
+ 
+     QXmlStreamEntityResolver *entityResolver;
+ 
+@@ -1937,7 +1951,10 @@
+         break;
+ 
+         case 262: {
+-            sym(1).len += fastScanName(&sym(1).prefix);
++            if (auto res = fastScanName(&sym(1).prefix))
++                sym(1).len += *res;
++            else
++                return false;
+             if (atEnd) {
+                 resume(262);
+                 return false;
+@@ -1945,7 +1962,10 @@
+         } break;
+ 
+         case 263:
+-            sym(1).len += fastScanName();
++            if (auto res = fastScanName())
++                sym(1).len += *res;
++            else
++                return false;
+             if (atEnd) {
+                 resume(263);
+                 return false;
+--- a/src/gui/painting/qfixed_p.h
++++ b/src/gui/painting/qfixed_p.h
+@@ -55,6 +55,7 @@
+ #include "QtCore/qdebug.h"
+ #include "QtCore/qpoint.h"
+ #include "QtCore/qsize.h"
++#include <QtCore/private/qnumeric_p.h>
+ 
+ QT_BEGIN_NAMESPACE
+ 
+@@ -182,6 +183,22 @@
+ Q_DECL_CONSTEXPR inline bool operator>(const QFixed &f, int i) { return f.value() > i * 64; }
+ Q_DECL_CONSTEXPR inline bool operator>(int i, const QFixed &f) { return i * 64 > f.value(); }
+ 
++inline bool add_overflow(QFixed v1, QFixed v2, QFixed *r)
++{
++    int val;
++    bool result = add_overflow(v1.value(), v2.value(), &val);
++    r->setValue(val);
++    return result;
++}
++
++inline bool mul_overflow(QFixed v1, QFixed v2, QFixed *r)
++{
++    int val;
++    bool result = mul_overflow(v1.value(), v2.value(), &val);
++    r->setValue(val);
++    return result;
++}
++
+ #ifndef QT_NO_DEBUG_STREAM
+ inline QDebug &operator<<(QDebug &dbg, const QFixed &f)
+ { return dbg << f.toReal(); }
+--- a/src/gui/text/qtextlayout.cpp
++++ b/src/gui/text/qtextlayout.cpp
+@@ -2150,11 +2150,14 @@
+         eng->maxWidth = qMax(eng->maxWidth, line.textWidth);
+     } else {
+         eng->minWidth = qMax(eng->minWidth, lbh.minw);
+-        eng->maxWidth += line.textWidth;
+-    }
+-
+-    if (line.textWidth > 0 && item < eng->layoutData->items.size())
+-        eng->maxWidth += lbh.spaceData.textWidth;
++        if (add_overflow(eng->maxWidth, line.textWidth, &eng->maxWidth))
++            eng->maxWidth = QFIXED_MAX;
++    }
++
++    if (line.textWidth > 0 && item < eng->layoutData->items.size()) {
++        if (add_overflow(eng->maxWidth, lbh.spaceData.textWidth, &eng->maxWidth))
++            eng->maxWidth = QFIXED_MAX;
++    }
+ 
+     line.textWidth += trailingSpace;
+     if (lbh.spaceData.length) {
+--- a/src/gui/util/qktxhandler.cpp
++++ b/src/gui/util/qktxhandler.cpp
+@@ -38,6 +38,8 @@
+ ****************************************************************************/
+ 
+ #include "qktxhandler_p.h"
++#include <climits>
++#include <cstring>
+ #include "qtexturefiledata_p.h"
+ #include <QtEndian>
+ #include <QSize>
+@@ -107,7 +109,7 @@
+ {
+     Q_UNUSED(suffix)
+ 
+-    return (qstrncmp(block.constData(), ktxIdentifier, KTX_IDENTIFIER_LENGTH) == 0);
++    return block.startsWith(QByteArray(ktxIdentifier, KTX_IDENTIFIER_LENGTH));
+ }
+ 
+ QTextureFileData QKtxHandler::read()
+@@ -122,7 +124,9 @@
+         return QTextureFileData();
+     }
+ 
+-    const KTXHeader *header = reinterpret_cast<const KTXHeader *>(buf.constData());
++    KTXHeader headerStorage;
++    memcpy(&headerStorage, buf.constData(), sizeof headerStorage);
++    const KTXHeader *header = &headerStorage;
+     if (!checkHeader(*header)) {
+         qCDebug(lcQtGuiTextureIO, "Unsupported KTX file format in %s", logName().constData());
+         return QTextureFileData();
+@@ -136,17 +140,37 @@
+     texData.setGLInternalFormat(decode(header->glInternalFormat));
+     texData.setGLBaseInternalFormat(decode(header->glBaseInternalFormat));
+ 
+-    texData.setNumLevels(decode(header->numberOfMipmapLevels));
+-    quint32 offset = headerSize + decode(header->bytesOfKeyValueData);
+-    const int maxLevels = qMin(texData.numLevels(), 32);               // Cap iterations in case of corrupt file.
+-    for (int i = 0; i < maxLevels; i++) {
+-        if (offset + sizeof(KTXMipmapLevel) > dataSize)                // Corrupt file; avoid oob read
+-            break;
+-        const KTXMipmapLevel *level = reinterpret_cast<const KTXMipmapLevel *>(buf.constData() + offset);
+-        quint32 levelLen = decode(level->imageSize);
+-        texData.setDataOffset(offset + sizeof(KTXMipmapLevel::imageSize), i);
+-        texData.setDataLength(levelLen, i);
+-        offset += sizeof(KTXMipmapLevel::imageSize) + levelLen + (3 - ((levelLen + 3) % 4));
++    const quint32 width = decode(header->pixelWidth);
++    const quint32 height = decode(header->pixelHeight);
++    const quint32 levels = decode(header->numberOfMipmapLevels);
++    // Qt5 stores offsets and dimensions as signed int; reject before narrowing.
++    if (!width || !height || width > quint32(INT_MAX) || height > quint32(INT_MAX))
++        return QTextureFileData();
++    quint32 dimension = qMax(width, height);
++    quint32 maximumLevels = 0;
++    do { ++maximumLevels; dimension >>= 1; } while (dimension);
++    if (!levels || levels > maximumLevels)
++        return QTextureFileData();
++    texData.setNumLevels(int(levels));
++    // Widen before addition; every view and following offset is bounded by buf.
++    quint64 offset = quint64(headerSize) + decode(header->bytesOfKeyValueData);
++    if (offset > dataSize)
++        return QTextureFileData();
++    for (quint32 i = 0; i < levels; ++i) {
++        if (quint64(dataSize) - offset < sizeof(quint32))
++            return QTextureFileData();
++        quint32 rawLength;
++        memcpy(&rawLength, buf.constData() + offset, sizeof rawLength);
++        const quint32 levelLen = decode(rawLength);
++        offset += sizeof(quint32);
++        if (!levelLen || quint64(levelLen) > quint64(dataSize) - offset)
++            return QTextureFileData();
++        texData.setDataOffset(int(offset), int(i));
++        texData.setDataLength(int(levelLen), int(i));
++        const quint64 padded = (quint64(levelLen) + 3) & ~quint64(3);
++        if (padded > quint64(dataSize) - offset)
++            return QTextureFileData();
++        offset += padded;
+     }
+ 
+     if (!texData.isValid()) {
+--- a/src/network/access/http2/hpacktable.cpp
++++ b/src/network/access/http2/hpacktable.cpp
+@@ -40,6 +40,7 @@
+ #include "hpacktable_p.h"
+ 
+ #include <QtCore/qdebug.h>
++#include <QtCore/private/qnumeric_p.h>
+ 
+ #include <algorithm>
+ #include <cstddef>
+@@ -62,8 +63,10 @@
+     // for counting the number of references to the name and value would have
+     // 32 octets of overhead."
+ 
+-    const unsigned sum = unsigned(name.size() + value.size());
+-    if (std::numeric_limits<unsigned>::max() - 32 < sum)
++    size_t sum;
++    if (add_overflow(size_t(name.size()), size_t(value.size()), &sum))
++        return HeaderSize();
++    if (sum > (std::numeric_limits<unsigned>::max() - 32))
+         return HeaderSize();
+     return HeaderSize(true, quint32(sum + 32));
+ }
+--- a/src/network/access/qhsts.cpp
++++ b/src/network/access/qhsts.cpp
+@@ -364,8 +364,8 @@
+ bool QHstsHeaderParser::parse(const QList<QPair<QByteArray, QByteArray>> &headers)
+ {
+     for (const auto &h : headers) {
+-        // We use '==' since header name was already 'trimmed' for us:
+-        if (h.first == "Strict-Transport-Security") {
++        // We compare directly because header name was already 'trimmed' for us:
++        if (h.first.compare("Strict-Transport-Security", Qt::CaseInsensitive) == 0) {
+             header = h.second;
+             // RFC6797, 8.1:
+             //
+--- a/src/network/kernel/qdnslookup_unix.cpp
++++ b/src/network/kernel/qdnslookup_unix.cpp
+@@ -227,7 +227,6 @@
+     // responseLength in case of error, we still can extract the
+     // exact error code from the response.
+     HEADER *header = (HEADER*)response;
+-    const int answerCount = ntohs(header->ancount);
+     switch (header->rcode) {
+     case NOERROR:
+         break;
+@@ -260,18 +259,31 @@
+         return;
+     }
+ 
+-    // Skip the query host, type (2 bytes) and class (2 bytes).
+     char host[PACKETSZ], answer[PACKETSZ];
+     unsigned char *p = response + sizeof(HEADER);
+-    int status = local_dn_expand(response, response + responseLength, p, host, sizeof(host));
+-    if (status < 0) {
++    int status;
++
++    if (ntohs(header->qdcount) == 1) {
++        // Skip the query host, type (2 bytes) and class (2 bytes).
++        status = local_dn_expand(response, response + responseLength, p, host, sizeof(host));
++        if (status < 0) {
++            reply->error = QDnsLookup::InvalidReplyError;
++            reply->errorString = tr("Could not expand domain name");
++            return;
++        }
++        if ((p - response) + status + 4 >= responseLength)
++            header->qdcount = 0xffff;   // invalid reply below
++        else
++            p += status + 4;
++    }
++    if (ntohs(header->qdcount) > 1) {
+         reply->error = QDnsLookup::InvalidReplyError;
+-        reply->errorString = tr("Could not expand domain name");
+-        return;
+-    }
+-    p += status + 4;
++        reply->errorString = tr("Invalid reply received");
++        return;
++    }
+ 
+     // Extract results.
++    const int answerCount = ntohs(header->ancount);
+     int answerIndex = 0;
+     while ((p < response + responseLength) && (answerIndex < answerCount)) {
+         status = local_dn_expand(response, response + responseLength, p, host, sizeof(host));
+@@ -283,6 +295,11 @@
+         const QString name = QUrl::fromAce(host);
+ 
+         p += status;
++
++        if ((p - response) + 10 > responseLength) {
++            // probably just a truncated reply, return what we have
++            return;
++        }
+         const quint16 type = (p[0] << 8) | p[1];
+         p += 2; // RR type
+         p += 2; // RR class
+@@ -290,6 +307,8 @@
+         p += 4;
+         const quint16 size = (p[0] << 8) | p[1];
+         p += 2;
++        if ((p - response) + size > responseLength)
++            return;             // truncated
+ 
+         if (type == QDnsLookup::A) {
+             if (size != 4) {
+--- a/src/network/ssl/qsslcertificate.cpp
++++ b/src/network/ssl/qsslcertificate.cpp
+@@ -580,6 +580,9 @@
+                                                  QSsl::EncodingFormat format,
+                                                  PatternSyntax syntax)
+ {
++    if (path.isEmpty())
++        return {};
++
+     // $, (,), *, +, ., ?, [, ,], ^, {, | and }.
+ 
+     // make sure to use the same path separators on Windows and Unix like systems.
+--- a/src/network/ssl/qsslsocket.cpp
++++ b/src/network/ssl/qsslsocket.cpp
+@@ -2221,6 +2221,9 @@
+     , flushTriggered(false)
+ {
+     QSslConfigurationPrivate::deepCopyDefaultConfiguration(&configuration);
++    // Explicit default CA lists must disable system root loading for each socket.
++    if (!configuration.allowRootCertOnDemandLoading)
++        allowRootCertOnDemandLoading = false;
+ }
+ 
+ /*!
+@@ -2470,6 +2473,7 @@
+     ptr->sessionProtocol = global->sessionProtocol;
+     ptr->ciphers = global->ciphers;
+     ptr->caCertificates = global->caCertificates;
++    ptr->allowRootCertOnDemandLoading = global->allowRootCertOnDemandLoading;
+     ptr->protocol = global->protocol;
+     ptr->peerVerifyMode = global->peerVerifyMode;
+     ptr->peerVerifyDepth = global->peerVerifyDepth;
+--- a/src/xml/dom/qdom.cpp
++++ b/src/xml/dom/qdom.cpp
+@@ -127,7 +127,7 @@
+  *
+  **************************************************************/
+ QDomImplementation::InvalidDataPolicy QDomImplementationPrivate::invalidDataPolicy
+-    = QDomImplementation::AcceptInvalidChars;
++    = QDomImplementation::ReturnNullNode;
+ 
+ // [5] Name ::= (Letter | '_' | ':') (NameChar)*
+ 
+@@ -579,11 +579,12 @@
+     This enum specifies what should be done when a factory function
+     in QDomDocument is called with invalid data.
+     \value AcceptInvalidChars The data should be stored in the DOM object
+-        anyway. In this case the resulting XML document might not be well-formed.
+-        This is the default value and QDom's behavior in Qt < 4.1.
++           anyway. In this case the resulting XML document might not be well-formed.
++           This was the default value and QDom's behavior prior to Qt 6.12.
+     \value DropInvalidChars The invalid characters should be removed from
+-        the data.
++           the data.
+     \value ReturnNullNode The factory function should return a null node.
++           This is the default value since Qt 6.12.
+ 
+     \sa setInvalidDataPolicy(), invalidDataPolicy()
+ */
+@@ -977,16 +978,23 @@
+ 
+ QDomNodePrivate::~QDomNodePrivate()
+ {
+-    QDomNodePrivate* p = first;
+-    QDomNodePrivate* n;
+-
+-    while (p) {
+-        n = p->next;
+-        if (!p->ref.deref())
++    QDomNodePrivate *p = this;
++
++    // post-order depth-first-search; visitation is deletion (avoids recursion)
++    while (true) {
++        if (QDomNodePrivate *c = p->first) {
++            p->first = c->next;          // peel firstChild off p
++            if (c->ref.deref())
++                c->setNoParent();        // survivor: detach, don't descend
++            else
++                p = c;                  // descend; c's parent() remembers p
++        } else {                        // p ran out of children (= is a leaf now)
++            if (p == this)
++                break;                  // we're done, don't delete this
++            QDomNodePrivate *parent = p->parent();
+             delete p;
+-        else
+-            p->setNoParent();
+-        p = n;
++            p = parent;                 // deletes and ascends (C++11-compatible)
++        }
+     }
+     first = nullptr;
+     last = nullptr;
+@@ -1398,13 +1406,40 @@
+ /*! \internal
+   \a depth is used for indentation, it seems.
+  */
+-void QDomNodePrivate::save(QTextStream& s, int depth, int indent) const
+-{
+-    const QDomNodePrivate* n = first;
+-    while (n) {
+-        n->save(s, depth, indent);
+-        n = n->next;
+-    }
++void QDomNodePrivate::saveSubTree(const QDomNodePrivate *n, QTextStream &s,
++                                  int depth, int indent) const
++{
++    if (!n)
++        return;
++
++    const QDomNodePrivate *root = n->first;
++    n->save(s, depth, indent);
++    if (root) {
++        const int branchDepth = depth + 1;
++        int layerDepth = 0;
++        while (root) {
++            root->save(s, layerDepth + branchDepth, indent);
++            // A flattened (non-recursive) depth-first walk through the node tree.
++            if (root->first) {
++                layerDepth ++;
++                root = root->first;
++                continue;
++            }
++            root->afterSave(s, layerDepth + branchDepth, indent);
++            const QDomNodePrivate *prev = root;
++            root = root->next;
++            // Close QDomElementPrivate groups
++            while (!root && prev && (layerDepth > 0)) {
++                root = prev->parent();
++                layerDepth --;
++                root->afterSave(s, layerDepth + branchDepth, indent);
++                prev = root;
++                root = root->next;
++            }
++        }
++        Q_ASSERT(layerDepth == 0);
++    }
++    n->afterSave(s, depth, indent);
+ }
+ 
+ void QDomNodePrivate::setLocation(int lineNumber, int columnNumber)
+@@ -2193,7 +2228,7 @@
+     if(isDocument())
+         static_cast<const QDomDocumentPrivate *>(impl)->saveDocument(stream, indent, encodingPolicy);
+     else
+-        IMPL->save(stream, 1, indent);
++        IMPL->saveSubTree(IMPL, stream, 1, indent);
+ }
+ 
+ /*!
+@@ -3102,11 +3137,11 @@
+ 
+         QHash<QString, QDomNodePrivate *>::const_iterator it2 = notations->map.constBegin();
+         for (; it2 != notations->map.constEnd(); ++it2)
+-            (*it2)->save(s, 0, indent);
++            (*it2)->saveSubTree(*it2, s, 0, indent);
+ 
+         QHash<QString, QDomNodePrivate *>::const_iterator it = entities->map.constBegin();
+         for (; it != entities->map.constEnd(); ++it)
+-            (*it)->save(s, 0, indent);
++            (*it)->saveSubTree(*it, s, 0, indent);
+ 
+         s << ']';
+     }
+@@ -3661,58 +3696,38 @@
+     const QTextCodec *const codec = s.codec();
+     Q_ASSERT(codec);
+ #endif
+-    QString retval(str);
+-    int len = retval.length();
+-    int i = 0;
+-
+-    while (i < len) {
+-        const QChar ati(retval.at(i));
+-
++    QString retval;
++    int start = 0;
++    const auto appendToOutput = [&](int cur, const QString &replacement) {
++        if (start < cur)
++            retval.append(str.constData() + start, cur - start);
++        start = cur + 1;
++        retval.append(replacement);
++    };
++    for (int cur = 0; cur < str.size(); ++cur) {
++        const QChar ati(str.at(cur));
+         if (ati == QLatin1Char('<')) {
+-            retval.replace(i, 1, QLatin1String("&lt;"));
+-            len += 3;
+-            i += 4;
+-        } else if (encodeQuotes && (ati == QLatin1Char('"'))) {
+-            retval.replace(i, 1, QLatin1String("&quot;"));
+-            len += 5;
+-            i += 6;
++            appendToOutput(cur, QStringLiteral("&lt;"));
++        } else if (encodeQuotes && ati == QLatin1Char('"')) {
++            appendToOutput(cur, QStringLiteral("&quot;"));
+         } else if (ati == QLatin1Char('&')) {
+-            retval.replace(i, 1, QLatin1String("&amp;"));
+-            len += 4;
+-            i += 5;
+-        } else if (ati == QLatin1Char('>') && i >= 2 && retval[i - 1] == QLatin1Char(']') && retval[i - 2] == QLatin1Char(']')) {
+-            retval.replace(i, 1, QLatin1String("&gt;"));
+-            len += 3;
+-            i += 4;
+-        } else if (performAVN &&
+-                   (ati == QChar(0xA) ||
+-                    ati == QChar(0xD) ||
+-                    ati == QChar(0x9))) {
+-            const QString replacement(QLatin1String("&#x") + QString::number(ati.unicode(), 16) + QLatin1Char(';'));
+-            retval.replace(i, 1, replacement);
+-            i += replacement.length();
+-            len += replacement.length() - 1;
+-        } else if (encodeEOLs && ati == QChar(0xD)) {
+-            retval.replace(i, 1, QLatin1String("&#xd;")); // Replace a single 0xD with a ref for 0xD
+-            len += 4;
+-            i += 5;
++            appendToOutput(cur, QStringLiteral("&amp;"));
++        } else if (ati == QLatin1Char('>') && cur >= 2
++                   && str[cur - 1] == QLatin1Char(']') && str[cur - 2] == QLatin1Char(']')) {
++            appendToOutput(cur, QStringLiteral("&gt;"));
++        } else if ((performAVN && (ati == QChar(0xA) || ati == QChar(0xD) || ati == QChar(0x9)))
++                   || (encodeEOLs && ati == QChar(0xD))) {
++            appendToOutput(cur, QLatin1String("&#x") + QString::number(ati.unicode(), 16) + QLatin1Char(';'));
+         } else {
+ #if QT_CONFIG(textcodec)
+-            if(codec->canEncode(ati))
+-                ++i;
+-            else
++            if (!codec->canEncode(ati))
+ #endif
+-            {
+-                // We have to use a character reference to get it through.
+-                const ushort codepoint(ati.unicode());
+-                const QString replacement(QLatin1String("&#x") + QString::number(codepoint, 16) + QLatin1Char(';'));
+-                retval.replace(i, 1, replacement);
+-                i += replacement.length();
+-                len += replacement.length() - 1;
+-            }
++                appendToOutput(cur, QLatin1String("&#x") + QString::number(ati.unicode(), 16) + QLatin1Char(';'));
+         }
+     }
+-
++    if (!start)
++        return str;
++    retval.append(str.constData() + start, str.size() - start);
+     return retval;
+ }
+ 
+@@ -4130,12 +4145,20 @@
+             if (indent != -1)
+                 s << Qt::endl;
+         }
+-        QDomNodePrivate::save(s, depth + 1, indent); if (!last->isText())
+-            s << QString(indent < 1 ? 0 : depth * indent, QLatin1Char(' '));
+-
+-        s << "</" << qName << '>';
+     } else {
+         s << "/>";
++    }
++}
++
++void QDomElementPrivate::afterSave(QTextStream &s, int depth, int indent) const
++{
++    if (last) {
++        QString qName(name);
++        if (!prefix.isEmpty())
++            qName = prefix + QLatin1Char(':') + name;
++        if (!last->isText())
++            s << QString(indent < 1 ? 0 : depth * indent, QLatin1Char(' '));
++        s << "</" << qName << '>';
+     }
+     if (!(next && next->isText())) {
+         /* -1 disables new lines. */
+@@ -5992,7 +6015,7 @@
+                 type->save(s, 0, indent);
+                 doc = true;
+             }
+-            n->save(s, 0, indent);
++            n->saveSubTree(n, s, 0, indent);
+             n = n->next;
+         }
+     }
+@@ -6026,7 +6049,7 @@
+ 
+         // Now we serialize all the nodes after the faked XML declaration(the PI).
+         while(startNode) {
+-            startNode->save(s, 0, indent);
++            startNode->saveSubTree(startNode, s, 0, indent);
+             startNode = startNode->next;
+         }
+     }
+--- a/src/xml/dom/qdom_p.h
++++ b/src/xml/dom/qdom_p.h
+@@ -144,7 +144,9 @@
+ 
+     virtual QDomNode::NodeType nodeType() const { return QDomNode::BaseNode; }
+ 
+-    virtual void save(QTextStream &, int, int) const;
++    void saveSubTree(const QDomNodePrivate *n, QTextStream &s, int depth, int indent) const;
++    virtual void save(QTextStream &, int, int) const {}
++    virtual void afterSave(QTextStream &, int, int) const {}
+ 
+     void setLocation(int lineNumber, int columnNumber);
+ 
+@@ -363,6 +365,7 @@
+     QDomNode::NodeType nodeType() const override { return QDomNode::ElementNode; }
+     QDomNodePrivate *cloneNode(bool deep = true) override;
+     virtual void save(QTextStream &s, int, int) const override;
++    virtual void afterSave(QTextStream &s, int, int) const override;
+ 
+     // Variables
+     QDomNamedNodeMapPrivate *m_attr;
