@@ -37,7 +37,7 @@ def configure_args(source, sdk, arch):
             '-no-dbus', '-no-iconv', '-no-qml-debug', '-no-libproxy', '-no-system-proxies',
             '-icu', '-no-mtdev', '-system-zlib', '-qt-pcre', '-qt-sqlite',
             '-system-libpng', '-system-libjpeg', '-system-freetype', '-system-harfbuzz',
-            '-webp', 'system', '-opensource', '-confirm-license', '-openssl-linked',
+            '-system-webp', '-opensource', '-confirm-license', '-openssl-linked',
             '-prefix', str(sdk), 'OPENSSL_PREFIX=' + str(sdk),
             '-I', str(sdk / 'include'), '-L', str(sdk / 'lib'),
             '-device-option', 'QMAKE_APPLE_DEVICE_ARCHS=' + arch]
