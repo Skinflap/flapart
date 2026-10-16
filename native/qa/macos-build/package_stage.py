@@ -48,8 +48,44 @@ def stage_command(stage, command, root, evidence, helpers=(), tools=(), retain=F
 
 
 def run_stage(stage, command, root, evidence, helpers=(), tools=(), retain=False, env=None, sdk=None):
-    subprocess.run(stage_command(stage, command, root, evidence, helpers, tools, retain, env, sdk),
-                   env=env, check=True)
+    try:
+        subprocess.run(stage_command(stage, command, root, evidence, helpers, tools, retain, env, sdk),
+                       env=env, check=True)
+    except subprocess.CalledProcessError:
+        # Keep the original subprocess failure even when diagnostics are unavailable.
+        # Never print recorded argv, environment or child output. Unrecognized error
+        # text may contain paths or arbitrary child data, so retain it only in receipt.
+        if evidence is not None:
+            try:
+                path = Path(evidence) / stage / 'receipt.json'
+                if path.is_symlink() or not path.is_file() or path.stat().st_size > 1024 * 1024:
+                    raise ValueError('Unavailable bounded receipt')
+                receipt = json.loads(path.read_text())
+                if receipt.get('stage') != stage or receipt.get('passed') is not False:
+                    raise ValueError('Unexpected receipt identity')
+                code = receipt.get('returncode')
+                if code is not None and (type(code) is not int or not -65536 <= code <= 65536):
+                    raise ValueError('Invalid recorded return code')
+                errors = receipt.get('errors')
+                if not isinstance(errors, list) or not all(isinstance(x, str) for x in errors):
+                    raise ValueError('Invalid recorded errors')
+                safe = {
+                    'Command exited unsuccessfully',
+                    'Command timed out; POSIX process group or Windows direct child was terminated',
+                    'Command working directory missing', 'Command executable not found',
+                    'Captured tree contains an escaping symlink',
+                    'Captured tree contains a broken symlink',
+                    'Native file changed while capturing',
+                    'Recorded tool/helper changed during stage',
+                    'Recorded tool/helper missing after stage',
+                }
+                summary = [x if x in safe else 'Additional error redacted; inspect retained receipt'
+                           for x in errors[:8]]
+                print(json.dumps({'recorder_failure': True, 'returncode': code,
+                                  'errors': summary, 'additional_errors': max(0, len(errors) - 8)}), file=sys.stderr)
+            except (OSError, ValueError, TypeError, AttributeError):
+                print('Recorder failure details unavailable; original command failure preserved.', file=sys.stderr)
+        raise
 
 
 def sdk_identity(root):

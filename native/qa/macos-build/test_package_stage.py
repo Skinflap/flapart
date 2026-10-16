@@ -1,5 +1,7 @@
 """Portable orchestration checks; synthetic commands never qualify native packages."""
 import json
+import io
+from contextlib import redirect_stderr
 import ast
 from pathlib import Path
 import plistlib
@@ -42,6 +44,32 @@ class PackageStage(unittest.TestCase):
   self.assertFalse(first['before']['package']['exists']);self.assertTrue(first['after']['package']['exists'])
   with self.assertRaises(subprocess.CalledProcessError):stage.run_stage('stage02-fail',[sys.executable,'-c','raise SystemExit(7)'],self.root,self.evidence)
   failed=json.loads((self.evidence/'stage02-fail/receipt.json').read_text());self.assertFalse(failed['passed']);self.assertEqual(failed['returncode'],7)
+ def test_failed_recorder_summary_is_bounded_and_does_not_print_private_fields(self):
+  log=io.StringIO()
+  with redirect_stderr(log), self.assertRaises(subprocess.CalledProcessError):
+   stage.run_stage('failure',[sys.executable,'-c','raise SystemExit(7)'],self.root,self.evidence)
+  summary=json.loads(log.getvalue());self.assertEqual(summary['returncode'],7)
+  self.assertEqual(summary['errors'],['Command exited unsuccessfully'])
+  self.assertNotIn('environment',summary);self.assertNotIn('argv',summary)
+ def test_missing_or_malformed_receipt_preserves_original_failure(self):
+  failure=subprocess.CalledProcessError(23,['recorder'])
+  for contents in (None,'invalid JSON','[]',json.dumps({'stage':'other','passed':False})):
+   with self.subTest(contents=contents):
+    folder=self.evidence/'failure';folder.mkdir(parents=True,exist_ok=True);path=folder/'receipt.json'
+    if path.exists():path.unlink()
+    if contents is not None:path.write_text(contents)
+    with patch.object(stage.subprocess,'run',side_effect=failure), redirect_stderr(io.StringIO()), self.assertRaises(subprocess.CalledProcessError) as error:
+     stage.run_stage('failure',['recorder'],self.root,self.evidence)
+    self.assertIs(error.exception,failure)
+ def test_untrusted_receipt_error_text_is_not_echoed(self):
+  folder=self.evidence/'failure';folder.mkdir(parents=True)
+  (folder/'receipt.json').write_text(json.dumps({'stage':'failure','passed':False,'returncode':None,
+   'errors':['secret-token-value\ncontrol']*20,'environment':{'SECRET':'private'},'stdout':'private'}))
+  log=io.StringIO()
+  with patch.object(stage.subprocess,'run',side_effect=subprocess.CalledProcessError(1,['recorder'])), redirect_stderr(log),self.assertRaises(subprocess.CalledProcessError):
+   stage.run_stage('failure',['recorder'],self.root,self.evidence)
+  self.assertNotIn('secret-token-value',log.getvalue());self.assertNotIn('private',log.getvalue())
+  summary=json.loads(log.getvalue());self.assertEqual(len(summary['errors']),8);self.assertEqual(summary['additional_errors'],12)
  def test_collector_rename_and_plist_in_same_command(self):
   source=self.base/'source';prefix=self.base/'sdk';prefix.mkdir()
   def fake(cmd,check):

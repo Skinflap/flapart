@@ -212,7 +212,7 @@ def main():
     save()
     try:
         runtime.regular_tree(candidate)
-        with tempfile.TemporaryDirectory(prefix='Flapart candidate gates ', dir=temporary) as temp:
+        with tempfile.TemporaryDirectory(prefix='fq-', dir=temporary) as temp:
             work = Path(temp);owned_root = work;root = work / 'runtime';root.mkdir();copy = root / candidate.name
             shutil.copytree(candidate, copy)
             inventory = provenance.archive_inventory(archive, root)
@@ -251,7 +251,7 @@ def main():
                 if args.https_proxy:command += ['--https-proxy', args.https_proxy]
                 run('embedded-runtime', command, runtime.clean_environment(copy), 360)
                 provenance.archive_inventory(archive, root)
-                installer_temporary = work / 'installed-runtime';installer_temporary.mkdir()
+                installer_temporary = work / 'i';installer_temporary.mkdir()
                 installer_env = dict(clean, RUNNER_TEMP=str(installer_temporary))
                 with safe_profile(profile_paths, temporary, profiles, lambda: stop_owned_processes(work), result):
                     command = [sys.executable, staged_installer / 'ci_e2e.py', '--archive', archive, '--archive-sha256', args.archive_sha256,
