@@ -66,8 +66,10 @@ Outputs:
 - `provenance.json`: separate child/parent mapped files and system paths, with
   `release_qualified: false` and `app_probe_required: true`.
 
-Failure exits nonzero; some failures happen before output creation. Native Windows
-and Mac execution of this new helper remains untested. The current TLS helper
+Failure exits nonzero; some failures happen before output creation. Native Windows archive-bound execution passed in the retained Windows 11 VM
+(`windows-vm/maintained-runtime-v4-evidence`) for candidate SHA256
+`8a3ff3117f6674c6864b1c38ab59e3537cf5b904ec841600afb838bfb8216225`.
+This does not qualify a future changed archive or establish Mac execution. The current TLS helper
 requires OpenSSL >=3.5.9, so this tool does not qualify Linux's separately reviewed
 Ubuntu backport runtime. Existing SDK receipts cannot substitute for final archive
 runs. Relocation, installed upgrades, app artwork/plugin tests, source closure,
@@ -79,5 +81,14 @@ Focused local verification:
 python test_package_runtime_probe.py
 ```
 
-These 20 synthetic provenance tests include actual host-Python refusal but do not
+These 28 synthetic provenance tests include actual host-Python refusal but do not
 claim candidate native execution, successful TLS, or completed release evidence.
+
+Windows permits exactly the measured Python/Qt OpenSSL pair layout: the
+`python/lib{ssl,crypto}-3.dll` pair and `bin/lib{ssl,crypto}-3-x64.dll` pair
+inside the same archive root. Every loaded member retains its archive hash.
+Other duplicate runtime roles fail closed. The only additional non-System32
+OS-module exception is the actual `ProgramFiles/Windows Defender/MpOAV.dll`
+KnownFolder location. Each run requires a valid default-trust Microsoft Windows
+signature and matching before/after hash; the signature and system verifier
+identity are retained in provenance. Defender is never disabled.
