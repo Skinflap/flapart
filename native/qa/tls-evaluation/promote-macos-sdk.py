@@ -169,16 +169,31 @@ def promote(work, evidence, output):
         if info:
             assert set(info['architectures']) == {'arm64', 'x86_64'}, ('Non-universal promoted binary', source)
             assert not any(old_ssl(dep) for dep in info['native_dependencies']), ('Old SSL dependency in promoted binary', source)
+    # These two plugins belong to the retired OpenSSL 1.1 engine ABI.
+    # Do not carry them into the maintained SDK or exempt arbitrary consumers.
+    retired = {}
+    engines = sdk / 'lib/engines-1.1'
+    if engines.exists() or engines.is_symlink():
+        assert engines.is_dir() and not engines.is_symlink(), 'Unsafe retired engine directory'
+        assert {p.name for p in engines.iterdir()} <= {'capi.dylib', 'padlock.dylib'}, 'Unexpected retired engine entry'
+        for path in engines.iterdir():
+            assert path.is_file() and not path.is_symlink(), 'Unsafe retired engine entry'
+            info = native(path)
+            assert info and info['format'] == 'macho' and set(info['architectures']) == {'arm64', 'x86_64'}, ('Unexpected retired engine format', path)
+            assert any(old_ssl(dep) for dep in info['native_dependencies']), ('Not an obsolete TLS engine', path)
+            retired[path] = digest(path)
+    retired_names = {p.name for p in retired}
     # Reject old consumers before removing the old providers. Account for the
     # two framework binaries that the validated copy plan replaces.
     replacements = {target: source for source, target in plan}
     scanned = []
     for path in sdk.rglob('*'):
-        if not path.is_file() or path.is_symlink() or old_ssl(path.name):
+        if not path.is_file() or path.is_symlink() or old_ssl(path.name) or path in retired:
             continue
         info = native(replacements.get(path, path))
         if info:
             assert not any(old_ssl(dep) for dep in info['native_dependencies']), ('Old SSL consumer', path, info['native_dependencies'])
+            assert not any(pathlib.PurePosixPath(dep).name in retired_names for dep in info['native_dependencies']), ('Consumer of retired TLS engine', path)
             scanned.append(str(path.relative_to(sdk)))
     try:
         # Remove obsolete headers too, so deleted upstream APIs cannot survive.
@@ -205,6 +220,12 @@ def promote(work, evidence, output):
             if path.exists():
                 result['removed'].append({'path': str(path.relative_to(sdk)), 'sha256': digest(path)})
                 path.unlink()
+        for path, original_sha in retired.items():
+            assert digest(path) == original_sha, 'Retired engine changed during promotion'
+            result['removed'].append({'path': str(path.relative_to(sdk)), 'sha256': original_sha, 'reason': 'retired-openssl-1.1-engine'})
+            path.unlink()
+        if engines.exists():
+            engines.rmdir()
         assert '3.5.9' in (sdk / 'include/openssl/opensslv.h').read_text()
         result.update(promoted=True, checked_native_consumers=scanned)
     finally:

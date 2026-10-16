@@ -108,6 +108,22 @@ class Promotion(unittest.TestCase):
  def test_invalid_archive_diagnostic_names_file(self):
   path=self.f.ssl/'lib/libssl.a';self.f.write(path,fat_archive()[:-1])
   with self.assertRaisesRegex(ValueError,'libssl.a'):m.native(path)
+ def test_only_verified_old_engine_modules_are_retired(self):
+  paths=[self.f.sdk/'lib/engines-1.1'/name for name in ('capi.dylib','padlock.dylib')]
+  for path in paths:self.f.write(path,macho(imports=('@rpath/libcrypto.1.1.dylib',)))
+  hashes={str(p.relative_to(self.f.sdk)):m.digest(p) for p in paths}
+  result=self.f.run();self.assertTrue(result['promoted']);self.assertFalse(paths[0].parent.exists())
+  removed={r['path']:r['sha256'] for r in result['removed'] if r.get('reason')=='retired-openssl-1.1-engine'}
+  self.assertEqual(removed,hashes)
+ def test_unknown_retired_engine_entry_refused(self):
+  self.f.write(self.f.sdk/'lib/engines-1.1/extra.dylib',macho(imports=('@rpath/libcrypto.1.1.dylib',)));self.refused_without_mutation()
+ def test_nonobsolete_engine_refused(self):
+  self.f.write(self.f.sdk/'lib/engines-1.1/capi.dylib',macho(imports=('@rpath/libcrypto.3.dylib',)));self.refused_without_mutation()
+ def test_retired_engine_consumer_refused(self):
+  self.f.write(self.f.sdk/'lib/engines-1.1/capi.dylib',macho(imports=('@rpath/libcrypto.1.1.dylib',)))
+  self.f.write(self.f.sdk/'plugins/consumer.dylib',macho(imports=('@rpath/engines-1.1/capi.dylib',)));self.refused_without_mutation()
+ def test_retired_engine_symlink_refused(self):
+  path=self.f.sdk/'lib/engines-1.1';path.symlink_to(self.f.ssl/'lib',target_is_directory=True);self.refused_without_mutation()
  def test_workspace_receipt_mismatch_refused(self):
   (self.f.evidence/'network-build.json').write_text('{}');self.refused_without_mutation()
  def test_failed_native_tls_receipt_refused(self):
