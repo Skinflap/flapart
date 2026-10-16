@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Native Windows CI test; settings paths come from Windows Known Folders."""
 import argparse,ctypes,uuid,pathlib,platform,os,subprocess,json,shutil,hashlib
-p=argparse.ArgumentParser();p.add_argument('--prefix',required=True,type=pathlib.Path);p.add_argument('--probe',required=True,type=pathlib.Path);p.add_argument('--output',required=True,type=pathlib.Path);p.add_argument('--timeout',type=int,default=180);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--prefix',required=True,type=pathlib.Path);p.add_argument('--probe',required=True,type=pathlib.Path);p.add_argument('--output',required=True,type=pathlib.Path);p.add_argument('--packaged',action='store_true',help='Require a relocated self-contained runtime without build-prefix environment');p.add_argument('--timeout',type=int,default=180);a=p.parse_args()
 if platform.system()!='Windows' or os.environ.get('CI')!='true':raise SystemExit('Requires a disposable native Windows CI profile (CI=true).')
 def knownfolder(identifier):
  raw=(ctypes.c_ubyte*16).from_buffer_copy(uuid.UUID(identifier).bytes_le);result=ctypes.c_wchar_p()
@@ -23,6 +23,11 @@ for path in (local/'kritarc',local/'kritadisplayrc',local/'kritashortcutsrc',roa
  if not path.exists():path.write_bytes(b'ORIGINAL-KRITA-SENTINEL\n')
  sentinels[path]=hashlib.sha256(path.read_bytes()).hexdigest()
 env=dict(os.environ,FLAPART_NATIVE='1',FLAPART_QA_EXPECT_COMPILED='1',FLAPART_QA_OUTPUT=str(output),PATH=str(prefix/'bin')+os.pathsep+os.environ['PATH'],PYTHONHOME=str(prefix/'python'),PYTHONPATH=str(prefix/'lib/site-packages'),QT_PLUGIN_PATH=str(prefix/'plugins'))
+if a.packaged:
+ # Do not let a build SDK or host Python make an incomplete package appear valid.
+ for key in ('PYTHONHOME','PYTHONPATH','QT_PLUGIN_PATH','QT_QPA_PLATFORM_PLUGIN_PATH','DYLD_FRAMEWORK_PATH','DYLD_LIBRARY_PATH','DYLD_FALLBACK_LIBRARY_PATH','CMAKE_PREFIX_PATH'):
+  env.pop(key,None)
+ env['PATH']=str(prefix/'bin')+os.pathsep+str(pathlib.Path(os.environ['SystemRoot'])/'System32')+os.pathsep+os.environ['SystemRoot']
 receipt=output/'result.json'
 if receipt.exists():raise SystemExit('Output already contains a receipt; use a fresh output directory.')
 with (output/'runtime.log').open('w') as log:
@@ -38,5 +43,5 @@ for key in ('png','kra','batchmode_restored','focus_hides_panels','focus_restore
 assert result['canvas']==[64,64] and result['round_trip']==[64,64,'Draw here'] and result['round_trip_pixel']==[70,110,191,255]
 assert result['browser_handoff']==['https://flaptown.com/flapart/?from=native&destination=profile']
 assert all(path.exists() and hashlib.sha256(path.read_bytes()).hexdigest()==digest for path,digest in sentinels.items()),'Original Krita sentinel changed'
-(output/'qualification.json').write_text(json.dumps({'platform':platform.platform(),'architecture':platform.machine(),'native_runtime_test':True,'original_krita_sentinels_preserved':True,'compiled_fork':True,'signed':False,'physical_tablet_tested':False},indent=2)+'\n')
+(output/'qualification.json').write_text(json.dumps({'platform':platform.platform(),'architecture':platform.machine(),'native_runtime_test':True,'original_krita_sentinels_preserved':True,'compiled_fork':True,'relocated_package_test':a.packaged,'signed':False,'physical_tablet_tested':False},indent=2)+'\n')
 print('Native Windows source application probe and Krita namespace preservation passed.')

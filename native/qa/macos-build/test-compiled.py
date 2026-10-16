@@ -2,11 +2,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Native Mac CI qualification for a locally built namespaced Flapart application."""
 import argparse,pathlib,platform,os,subprocess,json,shutil,hashlib,time,signal
-p=argparse.ArgumentParser();p.add_argument('--prefix',required=True,type=pathlib.Path);p.add_argument('--probe',required=True,type=pathlib.Path);p.add_argument('--output',required=True,type=pathlib.Path);p.add_argument('--timeout',type=int,default=150);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--prefix',required=True,type=pathlib.Path);p.add_argument('--probe',required=True,type=pathlib.Path);p.add_argument('--output',required=True,type=pathlib.Path);p.add_argument('--packaged',action='store_true',help='Require a relocated self-contained runtime without build-prefix environment');p.add_argument('--timeout',type=int,default=150);a=p.parse_args()
 if platform.system()!='Darwin':raise SystemExit('Native macOS runner required.')
 if os.environ.get('CI')!='true':raise SystemExit('Use only a disposable CI profile (CI=true); this harness writes test settings.')
 prefix=a.prefix.resolve();probe=a.probe.resolve();output=a.output.resolve();output.mkdir(parents=True,exist_ok=True)
-candidates=[prefix/'bin/krita.app/Contents/MacOS/krita',prefix/'bin/Flapart Native.app/Contents/MacOS/krita',prefix/'bin/krita']
+candidates=[prefix/'Contents/MacOS/krita',prefix/'bin/krita.app/Contents/MacOS/krita',prefix/'bin/Flapart Native.app/Contents/MacOS/krita',prefix/'bin/krita']
 candidates += sorted(prefix.glob('**/*.app/Contents/MacOS/krita'))
 executable=next((x for x in candidates if x.is_file()),None)
 if executable is None:raise SystemExit('No installed Krita/Flapart executable under prefix.')
@@ -29,6 +29,11 @@ site += list(prefix.glob('lib/python*/site-packages'))
 # Keep the embedded SDK Python and Qt separate from Homebrew/runtime-host packages.
 env=dict(os.environ,FLAPART_NATIVE='1',FLAPART_QA_EXPECT_COMPILED='1',FLAPART_QA_OUTPUT=str(output),PATH=str(prefix/'bin')+os.pathsep+os.environ['PATH'],DYLD_FRAMEWORK_PATH=str(prefix/'lib'),DYLD_FALLBACK_LIBRARY_PATH=str(prefix/'lib'),PYTHONPATH=os.pathsep.join(map(str,site)),QT_PLUGIN_PATH=str(prefix/'plugins'))
 if pythonhome:env['PYTHONHOME']=str(pythonhome)
+if a.packaged:
+ # Do not let a build SDK or host Python make an incomplete package appear valid.
+ for key in ('PYTHONHOME','PYTHONPATH','QT_PLUGIN_PATH','QT_QPA_PLATFORM_PLUGIN_PATH','DYLD_FRAMEWORK_PATH','DYLD_LIBRARY_PATH','DYLD_FALLBACK_LIBRARY_PATH','CMAKE_PREFIX_PATH'):
+  env.pop(key,None)
+ env['PATH']='/usr/bin:/bin:/usr/sbin:/sbin'
 receipt=output/'result.json'
 if receipt.exists():raise SystemExit('Output already contains a receipt; use a fresh output directory.')
 with (output/'runtime.log').open('w') as log:
@@ -45,5 +50,5 @@ for key in ('png','kra','batchmode_restored','focus_hides_panels','focus_restore
 assert result['canvas']==[64,64] and result['round_trip']==[64,64,'Draw here'] and result['round_trip_pixel']==[70,110,191,255]
 assert result['browser_handoff']==['https://flaptown.com/flapart/?from=native&destination=profile']
 assert all(path.exists() and hashlib.sha256(path.read_bytes()).hexdigest()==digest for path,digest in sentinels.items()),'Original Krita sentinel changed'
-qualification={'platform':platform.platform(),'architecture':platform.machine(),'native_runtime_test':True,'original_krita_sentinels_preserved':True,'compiled_fork':True,'signed':False,'notarized':False,'physical_tablet_tested':False}
+qualification={'platform':platform.platform(),'architecture':platform.machine(),'native_runtime_test':True,'original_krita_sentinels_preserved':True,'compiled_fork':True,'relocated_package_test':a.packaged,'signed':False,'notarized':False,'physical_tablet_tested':False}
 (output/'qualification.json').write_text(json.dumps(qualification,indent=2)+'\n');print('Native source application probe and Krita namespace preservation passed.')

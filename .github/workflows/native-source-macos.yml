@@ -38,11 +38,23 @@ jobs:
           python3 native/qa/macos-build/build.py --source "$RUNNER_TEMP/flapart-upstream" --prefix "$RUNNER_TEMP/flapart-sdk" --build "$RUNNER_TEMP/flapart-build" --jobs ${{ matrix.jobs }} 2>&1 | tee qa-result/build.log
       - name: Verify native artwork and separate Krita settings
         run: python3 native/qa/macos-build/test-compiled.py --prefix "$RUNNER_TEMP/flapart-sdk" --probe native/qa/portable --output qa-result/runtime
+      - name: Package and test relocation without SDK fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 native/qa/macos-build/package-candidate.py --source "$RUNNER_TEMP/flapart-upstream" --prefix "$RUNNER_TEMP/flapart-sdk" --output "$RUNNER_TEMP/flapart-packaged" 2>&1 | tee qa-result/package.log
+          cp "$RUNNER_TEMP/flapart-packaged/candidate-inventory.json" qa-result/candidate-inventory.json
+          python3 native/qa/portable/test-relocated.py --candidate "$RUNNER_TEMP/flapart-packaged/Flapart Studio.app" --probe native/qa/portable --output qa-result/relocated --previous-qualification qa-result/runtime/qualification.json
       - name: Retain source-build evidence only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: compiled-${{ matrix.runner }}-evidence
-          path: qa-result/
+          path: |
+            qa-result/build.log
+            qa-result/package.log
+            qa-result/candidate-inventory.json
+            qa-result/runtime/*
+            qa-result/relocated/runtime/*
           retention-days: 7
           if-no-files-found: warn
