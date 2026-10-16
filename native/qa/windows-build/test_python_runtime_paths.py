@@ -7,7 +7,7 @@ class Paths(unittest.TestCase):
     def test_case_insensitive_sdk(self):
         self.assertEqual(relocated_lines('python313.zip\n.\nc:/sdk/lib/site-packages\n','C:/SDK')[-1],'../lib/site-packages')
     def test_reject_external(self):
-        for line in ['C:/other/site-packages','../../outside','D:/SDK/lib','C:relative','import os','x\x00y']:
+        for line in ['C:/other/site-packages','../../outside','D:/SDK/lib','C:relative','import os','x\x00y','../lib/foo:stream']:
             with self.subTest(line=line),self.assertRaises(ValueError):
                 relocated_lines('python313.zip\n.\n'+line,'C:/SDK')
     def test_missing_stdlib(self):

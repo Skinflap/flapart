@@ -6,6 +6,7 @@ from pathlib import Path
 from functools import wraps
 from flask import request, session, jsonify, abort, send_file
 
+FILE_LIMIT=256
 LIMIT=2*1024*1024
 QUOTA=32*1024*1024
 LICENSES={'MIT','Apache-2.0','GPL-3.0-only','BSD-3-Clause','CC0-1.0'}
@@ -44,7 +45,7 @@ def text(value,limit,empty=False):
     if not isinstance(value,str) or (not empty and not value.strip()) or len(value)>limit or any((ord(c)<32 and c not in '\n\t') or 0xD800<=ord(c)<=0xDFFF for c in value): raise ValueError('Check the text length and characters.')
     return value.strip()
 def files_checked(files):
-    if not isinstance(files,dict) or not 1<=len(files)<=100: raise ValueError('Use 1–100 text files per version.')
+    if not isinstance(files,dict) or not 1<=len(files)<=FILE_LIMIT: raise ValueError(f'Use 1–{FILE_LIMIT} text files per version.')
     result={}
     folded=set()
     for name,body in files.items():
@@ -152,7 +153,7 @@ def register(app,store,bearer,csrf,origin,rate_limit):
         return send_file(path,as_attachment=True,download_name=filename,mimetype='application/octet-stream',conditional=True,etag=entry['sha256'])
     @app.get('/flapsoft/session')
     @atomic
-    def flapsoft_session(): return jsonify(authenticated=bool(who()),moderator=admin(who()),csrf=csrf(),limits={'version_bytes':LIMIT,'account_bytes':QUOTA,'files':100})
+    def flapsoft_session(): return jsonify(authenticated=bool(who()),moderator=admin(who()),csrf=csrf(),limits={'version_bytes':LIMIT,'account_bytes':QUOTA,'files':FILE_LIMIT})
     @app.get('/flapsoft/projects')
     @atomic
     def flapsoft_list():

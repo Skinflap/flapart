@@ -1311,7 +1311,15 @@ $("open").onclick = async () => {
   }
   $("project-file").click();
 };
-$("import").onclick = () => $("image-file").click();
+let imageImportMode = "layer";
+function chooseImage({ mode = "layer" } = {}) {
+  if (!["layer", "new"].includes(mode)) throw Error("unsupported image import mode");
+  if (busy || gesture) { status("finish the current operation first"); return false; }
+  imageImportMode = mode;
+  $("image-file").click();
+  return true;
+}
+$("import").onclick = () => chooseImage();
 $("project-file").onchange = async (e) => {
   const f = e.target.files[0];
   e.target.value = "";
@@ -1366,27 +1374,40 @@ async function imageDimensions(file) {
     "image dimensions could not be read safely; export it as PNG first",
   );
 }
+function imageImportResult(state, type = "", mode = "layer") {
+  window.dispatchEvent(new CustomEvent("flapart:image-import", { detail: { state, type, mode } }));
+}
+$("image-file").addEventListener("cancel", () => {
+  const mode = imageImportMode;
+  imageImportMode = "layer";
+  imageImportResult("cancel", "", mode);
+});
 $("image-file").onchange = async (e) => {
-  const f = e.target.files[0];
+  const f = e.target.files[0], mode = imageImportMode;
+  imageImportMode = "layer";
   e.target.value = "";
-  if (!f || busy || !allowLayer()) return;
+  if (!f) { imageImportResult("cancel", "", mode); return; }
+  if (busy || gesture || (mode === "layer" && !allowLayer())) { imageImportResult("error", f.type, mode); return; }
   if (
     f.size > 32 * 1024 * 1024 ||
     !["image/png", "image/jpeg", "image/webp", "image/gif"].includes(f.type)
   ) {
     status("choose a PNG, JPEG, WebP or GIF under 32 MB");
+    imageImportResult("error", f.type, mode);
     return;
   }
   busy = true;
   document.querySelector("main").inert = true;
-  let bitmap;
+  let bitmap, imported = false;
   try {
     const [iw, ih] = await imageDimensions(f);
+    if (mode === "new" && (iw > 4096 || ih > 4096 || iw * ih > MAX_PIXELS))
+      throw Error("PNG is too large to open at its original size here. Resize it in Flapart Studio and export a smaller PNG (up to 4096 pixels per side)");
     if (!iw || !ih || iw > 16384 || ih > 16384 || iw * ih > 64000000)
       throw Error(
         "source image exceeds 64 million pixels or 16384 pixels per side",
       );
-    const ratio = Math.min(width / iw, height / ih, 1),
+    const ratio = mode === "new" ? 1 : Math.min(width / iw, height / ih, 1),
       w = Math.max(1, Math.round(iw * ratio)),
       h = Math.max(1, Math.round(ih * ratio));
     bitmap = await createImageBitmap(f, {
@@ -1394,25 +1415,32 @@ $("image-file").onchange = async (e) => {
       resizeHeight: h,
       resizeQuality: "high",
     });
+    // Decode and draw fully before touching the current drawing or its history.
+    const c = makeCanvas(mode === "new" ? w : width, mode === "new" ? h : height);
+    c.getContext("2d").drawImage(bitmap, mode === "new" ? 0 : (width - w) / 2, mode === "new" ? 0 : (height - h) / 2, w, h);
     checkpoint();
-    const c = makeCanvas();
-    c.getContext("2d").drawImage(
-      bitmap,
-      (width - w) / 2,
-      (height - h) / 2,
-      w,
-      h,
-    );
-    layers.push(layer(f.name.slice(0, 100), c));
-    active = layers.length - 1;
+    if (mode === "new") {
+      width = w;
+      height = h;
+      layers = [layer(f.name.slice(0, 100), c)];
+      active = 0;
+      selection = null;
+      $("name").value = f.name.replace(/\.[^.]+$/, "").slice(0, 100) || "untitled";
+      resize();
+    } else {
+      layers.push(layer(f.name.slice(0, 100), c));
+      active = layers.length - 1;
+    }
     changed();
-    status("image added as a layer; use move to position it");
+    status(mode === "new" ? "PNG opened as its own drawing; undo restores your previous canvas" : "image added as a layer; use move to position it");
+    imported = true;
   } catch (err) {
     status(`image could not be opened: ${err.message}`);
   } finally {
     bitmap?.close();
     busy = false;
     document.querySelector("main").inert = false;
+    imageImportResult(imported ? "success" : "error", f.type, mode);
   }
 };
 async function initRecovery() {
@@ -1557,6 +1585,7 @@ window.addEventListener("beforeunload", (e) => {
   }
 });
 window.flapart = {
+  chooseImage,
   exportProject,
   loadProject,
   exportPreview: async () => canvas.toDataURL("image/png"),

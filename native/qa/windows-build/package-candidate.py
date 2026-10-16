@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Assemble a local Windows candidate with upstream runtime deployment rules."""
-import argparse,pathlib,platform,os,subprocess,sys,json,hashlib,shutil
+import argparse,pathlib,platform,os,subprocess,sys,json,hashlib,shutil,importlib.util
 from python_runtime_paths import relocated_lines
 p=argparse.ArgumentParser();p.add_argument('--source',type=pathlib.Path,required=True);p.add_argument('--prefix',type=pathlib.Path,required=True);p.add_argument('--tools',type=pathlib.Path,required=True);p.add_argument('--output',type=pathlib.Path,required=True);a=p.parse_args()
 if platform.system()!='Windows':raise SystemExit('Run on native Windows after the compiled fork probe passes.')
@@ -44,6 +44,28 @@ for line in python_paths:
  target=(root/'python'/line).resolve()
  assert target.is_relative_to(root.resolve()) and target.exists(),('Missing packaged Python path',line)
 pth.write_text('\n'.join(python_paths)+'\n',encoding='utf-8')
+# pyqtbuild is a build-only bundler, not PyQt5 or its runtime SIP module.
+# Its optional DLL collection includes obsolete OpenSSL and unrelated MSVC
+# runtimes; upstream removes its metadata but leaves this lowercase package.
+build_only_package=root/'lib/site-packages/pyqtbuild'
+if build_only_package.exists():shutil.rmtree(build_only_package)
+assert not build_only_package.exists()
+metadata_path=pathlib.Path(__file__).resolve().parents[2]/'distribution/source-qualification/native_metadata.py'
+assert metadata_path.is_file(), 'Reviewed PE import parser is required'
+spec=importlib.util.spec_from_file_location('flapart_native_metadata',metadata_path)
+metadata=importlib.util.module_from_spec(spec);spec.loader.exec_module(metadata)
+old_ssl={'libssl-1_1-x64.dll','libcrypto-1_1-x64.dll','libssl-1_1.dll','libcrypto-1_1.dll','ssleay32.dll','libeay32.dll'}
+retired=[];native_count=0
+for native_file in sorted(root.rglob('*')):
+ if not native_file.is_file() or native_file.suffix.lower() not in ('.dll','.pyd','.exe'):continue
+ if native_file.name.casefold() in old_ssl:
+  retired.append(native_file);continue
+ info=metadata.parse(native_file.read_bytes())
+ assert info and info['format']=='pe' and info['architectures']==['x86_64'],('Unexpected runtime architecture',native_file)
+ native_count+=1
+ assert not any(name.casefold() in old_ssl for name in info['native_dependencies']),('Unrebuilt OpenSSL1.1 consumer',native_file)
+retired_files=[{'path':f.relative_to(out).as_posix(),'sha256':hashlib.sha256(f.read_bytes()).hexdigest()} for f in retired]
+for f in retired:f.unlink()
 # Preserve upstream notices; remove an upstream desktop shortcut pointing to its old name.
 (root/'krita.lnk').unlink(missing_ok=True)
 (root/'Flapart.cmd').write_text('@echo off\r\nstart "Flapart Studio" "%~dp0bin\\krita.exe" %*\r\n')
@@ -52,5 +74,5 @@ for f in sorted(root.rglob('*')):
  if f.is_file():files.append({'path':f.relative_to(out).as_posix(),'bytes':f.stat().st_size,'sha256':hashlib.sha256(f.read_bytes()).hexdigest()})
 # The upstream pre-customization ZIP is not a release artifact; retain the folder only.
 (out/'Flapart-Studio.zip').unlink(missing_ok=True)
-(out/'candidate-inventory.json').write_text(json.dumps({'product':'Flapart Studio','platform':'windows-x86_64','entrypoint':'Flapart-Studio/bin/krita.exe','minimum_windows':'10','required_system_dlls':['d3dcompiler_47.dll'],'system_d3d_loading_and_angle_render_qualified':False,'packager_source_sha256':hashlib.sha256(original.encode()).hexdigest(),'packager_adapter_sha256':hashlib.sha256(adapted.encode()).hexdigest(),'python_path_entries':python_paths,'runtime_collected':True,'relocation_test_passed':False,'source_closure_complete':False,'publishable':False,'files':files},indent=2)+'\n')
+(out/'candidate-inventory.json').write_text(json.dumps({'product':'Flapart Studio','platform':'windows-x86_64','entrypoint':'Flapart-Studio/bin/krita.exe','minimum_windows':'10','required_system_dlls':['d3dcompiler_47.dll'],'system_d3d_loading_and_angle_render_qualified':False,'packager_source_sha256':hashlib.sha256(original.encode()).hexdigest(),'packager_adapter_sha256':hashlib.sha256(adapted.encode()).hexdigest(),'python_path_entries':python_paths,'native_imports_checked':native_count,'retired_old_ssl':retired_files,'build_only_pyqtbuild_omitted':True,'runtime_collected':True,'relocation_test_passed':False,'source_closure_complete':False,'publishable':False,'files':files},indent=2)+'\n')
 print('Local candidate folder assembled. Relocation, native probe and source/license closure still required; not publishable.')

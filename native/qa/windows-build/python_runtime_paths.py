@@ -15,6 +15,8 @@ def relocated_lines(text, sdk_root):
             continue
         if '\x00' in line or line.startswith('import '):
             raise ValueError('Unexpected embedded Python directive')
+        if ':' in ntpath.splitdrive(line)[1]:
+            raise ValueError('Alternate-stream Python paths are unsupported')
         if ntpath.splitdrive(line)[0] and not ntpath.isabs(line):
             raise ValueError('Drive-relative Python path is ambiguous')
         target=ntpath.normpath(ntpath.join(python,line))

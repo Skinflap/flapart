@@ -39,8 +39,39 @@ if(destination==='townhall'){
 try{const post=await call('/projects/'+current.id+'/townhall',{expectedRevision:current.revision,title:name.input.value.trim(),body:description.input.value.trim(),public:true});content.replaceChildren(el('p','Your artwork is posted.'),link('open your Town Square post',post.url),button('your artwork',list));say('Published.');}catch(error){say('The image was published, but the post failed: '+error.message);content.append(button('manage or withdraw the public image',list));}
 }else{content.replaceChildren(el('p','Your image is now available in your profile image library. Open your profile editor, insert an image from your library, preview and publish your page.'),link('open profile editor','https://flaptown.com/flapdraft/profile/'),link('view image',r.publication.url),button('your artwork',list));say('Published to your profile library.');}
 }),button('back',list));}
-async function open(destination){if(busy)return;if(!window.flapart){return;}panel.showModal();content.replaceChildren();say('Checking your Flaptown sign-in…');try{auth=await call('/session');if(!auth.authenticated){say('Sign in to save privately or share. Drawing and exporting do not need an account.');content.append(link('sign in to Flaptown','https://accounts.flaptown.com/connect'),button('refresh sign-in',async()=>{panel.close();await open(destination);}));return;}say('Private cloud limit: '+Math.floor(auth.limits.projectBytes/1048576)+' MiB per work, '+auth.limits.projects+' works. Larger projects can be saved locally.');if(destination==='townhall')await publishForm('townhall');else await list();}catch(error){say(error.message);}}
+async function showAccount(destination,review=false){content.replaceChildren();say('Checking your Flaptown sign-in…');try{auth=await call('/session');if(!auth.authenticated){say('Sign in to save privately or share. Drawing and exporting do not need an account.');content.append(link('sign in to Flaptown','https://accounts.flaptown.com/connect'),button('refresh sign-in',()=>showAccount(destination,review)));return;}say('Private cloud limit: '+Math.floor(auth.limits.projectBytes/1048576)+' MiB per work, '+auth.limits.projects+' works. Larger projects can be saved locally.');if(destination==='townhall'||review){await publishForm(destination);if(review)content.querySelector('input')?.focus();}else await list();}catch(error){say(error.message);}}
+async function open(destination,review=false){if(busy||!window.flapart)return;if(!panel.open)panel.showModal();await showAccount(destination,review);}
 $('#account-save')?.addEventListener('click',()=>open('profile'));
 $('#account-post')?.addEventListener('click',()=>open('townhall'));
 // New/open actions detach the cloud target, preventing accidental overwrites of another work.
 for(const id of ['new','open'])$('#'+id)?.addEventListener('click',()=>{current=null;});
+
+// Native exports remain local until the person chooses their PNG and publishes.
+// URL values select guidance only; never carry a filename, image or account data.
+const handoffQuery=new URLSearchParams(location.search);
+if(handoffQuery.getAll('from').length===1&&handoffQuery.get('from')==='native'&&handoffQuery.getAll('destination').length===1&&['profile','townhall'].includes(handoffQuery.get('destination'))){
+  const destination=handoffQuery.get('destination');
+  const banner=el('section',undefined,'native-handoff');banner.setAttribute('aria-labelledby','native-handoff-title');
+  const heading=el('h2',destination==='profile'?'bring your desktop art to your profile':'bring your desktop art to townhall');heading.id='native-handoff-title';
+  const instructions=el('p','Choose how to open your exported PNG. A new drawing contains only that picture at its original size. Nothing is saved online or published until you choose to publish.');
+  const hint=el('p','Adding to the current drawing keeps its visible layers: sharing will include the whole combined canvas. Your desktop layers stay in your original Studio file.','handoff-hint');
+  const notice=el('p','', 'handoff-status');notice.setAttribute('role','status');
+  const choose=el('button','open PNG as new drawing');choose.type='button';choose.id='native-handoff-choose';
+  const review=el('button',destination==='profile'?'review profile sharing':'review townhall post');review.type='button';review.hidden=true;
+  const dismiss=el('button','keep drawing');dismiss.type='button';
+  const add=el('button','add PNG to current drawing');add.type='button';add.id='native-handoff-layer';
+  const saveLocal=el('button','save current project first');saveLocal.type='button';saveLocal.addEventListener('click',()=>$('#save').click());
+  let armed=false,active=true;
+  const pick=mode=>{armed=true;notice.textContent='Choose your exported PNG. Cancelling keeps your current drawing.';if(!window.flapart.chooseImage({mode})){armed=false;notice.textContent='Finish the current editor operation, then choose your PNG.';}};
+  choose.addEventListener('click',async()=>{if(!window.flapart||!active)return;const yes=await window.flapart.ask('open PNG as a new drawing?',[],'This replaces the current canvas only after the PNG is read successfully. Save your current project first if you want a durable copy. Local recovery will then switch to the new drawing; undo can immediately restore this canvas.');if(!active)return;if(yes)pick('new');else notice.textContent='Your current drawing is unchanged.';});
+  add.addEventListener('click',()=>{if(window.flapart&&active)pick('layer');});
+  review.addEventListener('click',()=>open(destination,true));
+  const file=$('#image-file');
+  const guard=event=>{if(!armed||!active)return;const selected=file.files[0];if(selected&&selected.type!=='image/png'){event.stopImmediatePropagation();file.value='';armed=false;notice.textContent='Choose a PNG exported from Flapart Studio. Your canvas has not changed.';}};
+  file.addEventListener('change',guard,true);
+  const imported=event=>{if(!armed||!active)return;armed=false;const detail=event.detail||{};if(detail.state==='success'&&detail.type==='image/png'){current=null;notice.textContent=detail.mode==='new'?'PNG opened on its own. Review before publishing.':'PNG added to your current drawing. Sharing includes all visible layers.';review.hidden=false;open(destination,true);}else{notice.textContent=detail.state==='cancel'?'No file chosen. Your canvas is still here.':'The PNG could not be added. Check the editor message, then choose another PNG.';}};
+  window.addEventListener('flapart:image-import',imported);
+  dismiss.addEventListener('click',()=>{active=false;armed=false;file.removeEventListener('change',guard,true);window.removeEventListener('flapart:image-import',imported);banner.remove();$('#import').focus();});
+  const actions=el('div',undefined,'handoff-actions');actions.append(choose,add,saveLocal,review,dismiss);
+  banner.append(heading,instructions,hint,notice,actions);document.querySelector('main').prepend(banner);
+}

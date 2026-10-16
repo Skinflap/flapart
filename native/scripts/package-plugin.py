@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 import pathlib,zipfile,json,hashlib
 r=pathlib.Path(__file__).resolve().parents[1]; dest=r/'dist'; dest.mkdir(exist_ok=True)
-p=dest/'flapart-studio-0.1.0-krita-plugin.zip'
+p=dest/'flapart-studio-0.1.1-krita-plugin.zip'
+if p.exists():raise SystemExit('Refusing to overwrite an existing release ZIP')
 with zipfile.ZipFile(p,'w',zipfile.ZIP_DEFLATED) as z:
  for f in sorted((r/'plugin').rglob('*')):
   if f.is_file() and '__pycache__' not in f.parts:

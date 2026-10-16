@@ -2,7 +2,7 @@ import sys,tempfile,unittest,json
 from pathlib import Path
 sys.path.insert(0,'/home/skinflap/Projects/Flaptown/accounts/issuer')
 from session_issuer import create_session_fixture,COOKIE
-from flapsoft_routes import register,install,files_checked
+from flapsoft_routes import register,install,files_checked,FILE_LIMIT,LIMIT,QUOTA
 from flask import session
 import secrets
 O='https://identity.example'; W='https://flaptown.com'
@@ -65,6 +65,52 @@ class FlapsoftTest(unittest.TestCase):
   self.assertEqual(self.post(p+'/visibility',{'revision':4,'public':False}).status_code,200)
   from flapsoft_routes import export
   self.assertEqual(len(export(self.s,'p')['projects']),1)
+ def test_file_count_boundary_and_rejected_save_preserves_version(self):
+  self.assertEqual(self.get('/session').json['limits'],{'files':256,'version_bytes':2*1024*1024,'account_bytes':32*1024*1024})
+  files={f'src/file-{i:03}.txt':str(i) for i in range(256)}
+  self.assertEqual(json.loads(files_checked(files)),files)
+  r=self.post('/projects',{'name':'Expanded source','license':'MIT','files':files})
+  self.assertEqual(r.status_code,201,r.data);path='/projects/'+r.json['id']
+  too_many={**files,'extra.txt':'no room'}
+  with self.assertRaisesRegex(ValueError,'1–256'):files_checked(too_many)
+  rejected=self.post(path+'/save',{'revision':1,'files':too_many,'message':'Too many'})
+  self.assertEqual(rejected.status_code,400);self.assertIn('1–256',rejected.json['error'])
+  self.assertEqual(self.get(path).json['revision'],1);self.assertEqual(self.get(path).json['files'],files)
+  self.assertEqual(len(self.get(path+'/history').json['versions']),1)
+  files['src/file-255.txt']='Edited at the cap'
+  self.assertEqual(self.post(path+'/save',{'revision':1,'files':files,'message':'At cap'}).status_code,200)
+  self.assertEqual(self.get(path).json['files'],files)
+  import io,zipfile
+  with zipfile.ZipFile(io.BytesIO(self.get(path+'/download').data)) as archive:
+   self.assertEqual(set(archive.namelist()),set(files)|{'FLAPSOFT-PROVENANCE.json'})
+   self.assertEqual(archive.read('src/file-255.txt').decode(),files['src/file-255.txt'])
+ def bounded_version(self):
+  files={f'part-{i}.txt':'x'*(512*1024-100) for i in range(4)}
+  files['padding.txt']=''
+  files['padding.txt']='x'*(LIMIT-len(files_checked(files).encode()))
+  self.assertEqual(len(files_checked(files).encode()),LIMIT)
+  return files
+ def test_exact_version_byte_boundary_unchanged(self):
+  self.assertEqual((FILE_LIMIT,LIMIT,QUOTA),(256,2097152,33554432))
+  files=self.bounded_version()
+  self.assertEqual(len(files_checked(files).encode()),LIMIT)
+  files['padding.txt']+='x'
+  with self.assertRaisesRegex(ValueError,'2 MiB'):files_checked(files)
+  with self.assertRaisesRegex(ValueError,'512 KiB'):files_checked({'large.txt':'x'*(512*1024+1)})
+ def test_account_byte_boundary_rejects_extra_version_atomically(self):
+  import hashlib,time
+  files=self.bounded_version();encoded=files_checked(files)
+  r=self.post('/projects',{'name':'Quota boundary','license':'MIT','files':files})
+  self.assertEqual(r.status_code,201,r.data);pid=r.json['id'];path='/projects/'+pid
+  # Seed real bounded immutable history to one version below the quota.
+  for version in range(2,16):
+   self.s.db.execute('INSERT INTO flapsoft_versions VALUES(?,?,?,?,?,?)',(pid,version,encoded,'Fixture history',hashlib.sha256(encoded.encode()).hexdigest(),time.time()))
+  self.s.db.execute('UPDATE flapsoft_projects SET revision=15 WHERE id=?',(pid,))
+  self.assertEqual(self.post(path+'/save',{'revision':15,'files':files,'message':'Exactly 32 MiB'}).status_code,200)
+  self.assertEqual(self.post(path+'/save',{'revision':16,'files':{'a.txt':''},'message':'Over quota'}).status_code,413)
+  self.assertEqual(self.get(path).json['revision'],16)
+  self.assertEqual(len(self.get(path+'/history').json['versions']),16)
+  self.assertEqual(self.s.db.execute('SELECT sum(length(CAST(files AS BLOB))) FROM flapsoft_versions').fetchone()[0],QUOTA)
  def test_public_release_download_range_and_manifest_boundaries(self):
   import os,hashlib
   from unittest.mock import patch

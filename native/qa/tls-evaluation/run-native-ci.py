@@ -59,7 +59,14 @@ try:
  if system=='Windows':command+=['--toolchain',llvm]
  run('build-openssl',command)
  # syncqt prepares forwarding headers in our private source copy only.
- run('syncqt',[perl,candidate/'bin/syncqt.pl','-version','5.15.7','-outdir',qtbase,qtbase])
+ # MSYS/Cygwin Perl reports Unix paths from Cwd::abs_path. Supply both
+ # source and output in that namespace so generated relative headers do not
+ # combine C:/... with /cygdrive/c/... (native clang cannot resolve the mix).
+ syncqt_root=qtbase
+ if system=='Windows':
+  drive=qtbase.drive.rstrip(':').lower();assert len(drive)==1
+  syncqt_root='/cygdrive/'+drive+qtbase.as_posix()[2:]
+ run('syncqt',[perl,candidate/'bin/syncqt.pl','-version','5.15.7','-outdir',syncqt_root,syncqt_root])
  if system=='Windows':libs=[prefix/'lib/libssl.dll.a',prefix/'lib/libcrypto.dll.a']
  else:libs=[prefix/'lib/libssl.3.dylib',prefix/'lib/libcrypto.3.dylib']
  qmake=candidate/'bin'/('qmake.exe' if system=='Windows' else 'qmake')
