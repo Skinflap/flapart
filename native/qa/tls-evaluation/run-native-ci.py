@@ -102,9 +102,13 @@ try:
   # KDE macOS PyQt lives inside the framework, reached by lib/python3.13 alias.
   oldsite=work/'python-sdk-original/Versions/3.13/lib/python3.13/site-packages'
   newsite=old/'Versions/3.13/lib/python3.13/site-packages'
-  shutil.copytree(oldsite,newsite,symlinks=True,dirs_exist_ok=True)
+  shutil.copytree(oldsite,newsite,symlinks=True,dirs_exist_ok=True,ignore=shutil.ignore_patterns('pip','pip-*.dist-info'))
+  assert (newsite/'pip/__init__.py').is_file(),'Maintained bundled pip missing'
   python=old/'Versions/3.13/bin/python3.13';openssl=prefix/'bin/openssl'
   env['DYLD_FRAMEWORK_PATH']=str(candidate/'lib');env['DYLD_LIBRARY_PATH']=os.pathsep.join(map(str,[candidate/'lib',prefix/'lib']));env['PYTHONPATH']=str(candidate/'lib/python3.13/site-packages')
+  pip_probe=json.loads(subprocess.check_output([str(python),'-c','import pip,json;print(json.dumps(dict(version=pip.__version__,path=pip.__file__)))'],env=env,text=True))
+  assert pathlib.Path(pip_probe['path']).resolve().is_relative_to(newsite.resolve()),'Pip imported outside candidate SDK'
+  receipt['bundled_pip']=pip_probe
  env['OPENSSL_MODULES']=str(prefix/'lib/ossl-modules');env['QT_QPA_PLATFORM']='offscreen'
  probe_args=[str(ROOT/'https-validation-probe.py'),'--openssl',str(openssl),'--output',str(output/'tls-validation.json')]
  if system=='Windows':

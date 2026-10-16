@@ -43,7 +43,7 @@ try:
  for rel,before,after in patches:
   path=source/rel;original=path.read_bytes();text=original.decode();assert text.count(before)==1,(rel,'source context changed')
   path.write_text(text.replace(before,after));receipt['source_patches'].append({'path':rel,'before_sha256':hashlib.sha256(original).hexdigest(),'after_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'recipe_commit':'0fd95c4efca2e5b5024121bb0ccae5b353956cd9'})
- run([source/'configure','--prefix='+str(a.prefix),'--enable-framework='+str(a.prefix/'lib'),'--enable-universalsdk='+sdk,'--with-universal-archs=universal2','--with-openssl='+str(a.openssl_prefix),'--with-openssl-rpath='+str(a.openssl_prefix/'lib'),'--without-ensurepip','--without-static-libpython','--with-readline=editline'])
+ run([source/'configure','--prefix='+str(a.prefix),'--enable-framework='+str(a.prefix/'lib'),'--enable-universalsdk='+sdk,'--with-universal-archs=universal2','--with-openssl='+str(a.openssl_prefix),'--with-openssl-rpath='+str(a.openssl_prefix/'lib'),'--with-ensurepip=install','--without-static-libpython','--with-readline=editline'])
  run(['make','-j'+str(a.jobs)])
  # CPython substitutes FRAMEWORKINSTALLLAST at configure time; overriding it
  # on the make command line does not suppress /Applications tools. Stage ALL
@@ -68,6 +68,16 @@ try:
   src=a.old_framework/rel
   if src.is_file():dest=framework/rel;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(src,dest);preserved.append(rel)
  receipt['preserved_custom_site_files']=preserved
+ # Keep the SDK's pip aliases valid using this CPython archive's bundled pip.
+ # make install runs ensurepip offline under DESTDIR; never copy the old pip.
+ receipt['pip_scripts']=[]
+ for name in ('pip3','pip3.13'):
+  script=version/'bin'/name
+  assert script.is_file() and not script.is_symlink(),('Missing bundled pip launcher',name)
+  text=script.read_text();assert text.startswith('#!'),('Unexpected pip launcher',name)
+  script.write_text('#!/usr/bin/env python3\n'+text.split('\n',1)[1])
+  receipt['pip_scripts'].append({'path':str(script.relative_to(framework)),'sha256':hashlib.sha256(script.read_bytes()).hexdigest()})
+ assert (site/'pip/__init__.py').is_file(),'Bundled pip module missing'
  # Snapshot the runner's OS root certificates into the isolated OpenSSL CA path.
  # This does not alter any system trust store or relax peer/hostname validation.
  roots=subprocess.check_output(['security','find-certificate','-a','-p','/System/Library/Keychains/SystemRootCertificates.keychain']);assert b'BEGIN CERTIFICATE' in roots
