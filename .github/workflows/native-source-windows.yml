@@ -46,6 +46,7 @@ jobs:
       - name: Verify native artwork and separate Krita settings
         shell: pwsh
         run: |
+          $env:PATH = "$env:RUNNER_TEMP/flapart-tools/llvm-mingw-20251118-ucrt-x86_64/x86_64-w64-mingw32/bin;" + $env:PATH
           python native/qa/windows-build/test-compiled.py --prefix "$env:RUNNER_TEMP/flapart-sdk" --probe native/qa/portable --output qa-result/runtime
           if ($LASTEXITCODE -ne 0) { throw 'Native runtime qualification failed' }
       - name: Retain source-build evidence only

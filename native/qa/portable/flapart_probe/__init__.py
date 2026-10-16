@@ -83,7 +83,10 @@ def finish(result,w,out,studio=None):
             dialog.grab().save(str(out/'studio.png'))
             result['dialog_font'] = QFontInfo(dialog.font()).family()
             result['dialog_visible'] = dialog.isVisible()
-            result['guided_controls'] = [button.text() for button in dialog.findChildren(QPushButton) if button.isVisible()]
+            result['guided_control_labels_raw'] = [button.text() for button in dialog.findChildren(QPushButton) if button.isVisible()]
+            # KDE adds Qt keyboard mnemonics when the registered menu action opens.
+            # Compare visible labels, preserving escaped literal ampersands.
+            result['guided_controls'] = [label.replace('&&', '\0').replace('&', '').replace('\0', '&') for label in result['guided_control_labels_raw']]
             assert result['dialog_font'] == 'Syne Mono', 'Guided dialog did not resolve Syne Mono'
             assert result['dialog_visible']
             for text in ('Start drawing','Open a drawing…','Export PNG picture…'):
