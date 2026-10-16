@@ -4,6 +4,7 @@
 import argparse,pathlib,platform,os,subprocess,sys,json,hashlib,plistlib
 sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[1]/'portable'))
 from binary_ids import macho_uuids
+from macho_format import is_macho
 p=argparse.ArgumentParser();p.add_argument('--source',type=pathlib.Path,required=True);p.add_argument('--prefix',type=pathlib.Path,required=True);p.add_argument('--output',type=pathlib.Path,required=True);p.add_argument('--universal',action='store_true');a=p.parse_args()
 if platform.system()!='Darwin':raise SystemExit('Run on native macOS after the compiled fork probe passes.')
 source=a.source.resolve();prefix=a.prefix.resolve();out=a.output.resolve();out.mkdir(parents=True,exist_ok=True)
@@ -24,7 +25,7 @@ for f in sorted(root.rglob('*')):
  if f.is_symlink():files.append({'path':f.relative_to(out).as_posix(),'symlink':os.readlink(f)})
  elif f.is_file():
   data=f.read_bytes();uuids=macho_uuids(data);architectures=[]
-  if uuids:
+  if is_macho(data):
    architectures=sorted(subprocess.check_output(['lipo','-archs',str(f)],text=True).strip().split())
    if a.universal and not {'arm64','x86_64'}.issubset(architectures):raise RuntimeError('Universal runtime contains a single-architecture binary: '+str(f.relative_to(root)))
   files.append({'path':f.relative_to(out).as_posix(),'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'macho_uuids':uuids,'architectures':architectures})
