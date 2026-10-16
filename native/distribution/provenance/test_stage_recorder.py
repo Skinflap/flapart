@@ -72,6 +72,33 @@ class RecorderTests(unittest.TestCase):
         self.assertEqual(len(info['slices'][0]['member_uuids']), 1)
         (self.tree / 'input.a').write_bytes(data)
         self.assertEqual(len(m.snapshot(self.tree)['files']), 2)
+    def test_pe32_inputs_capture_cpu_imports_and_hash(self):
+        data = bytearray(1024)
+        data[:2] = b'MZ'; struct.pack_into('<I', data, 60, 128)
+        data[128:132] = b'PE\0\0'
+        struct.pack_into('<HH', data, 132, 0x14c, 1)
+        struct.pack_into('<H', data, 148, 224)
+        opt = 152
+        struct.pack_into('<H', data, opt, 0x10b)
+        struct.pack_into('<I', data, opt + 28, 0x400000)
+        struct.pack_into('<I', data, opt + 60, 512)
+        struct.pack_into('<I', data, opt + 92, 16)
+        struct.pack_into('<II', data, opt + 104, 0x1000, 40)
+        struct.pack_into('<IIII', data, opt + 224 + 8, 512, 0x1000, 512, 512)
+        struct.pack_into('<5I', data, 512, 0, 0, 0, 0x1040, 0)
+        data[576:589] = b'KERNEL32.dll\0'
+        path = self.tree / 'builder-only.dll'; path.write_bytes(data)
+        row = next(row for row in m.snapshot(self.tree)['files'] if row['path'] == path.name)
+        self.assertEqual(row['architectures'], ['x86'])
+        self.assertEqual(row['slices'][0]['cpu'], 0x14c)
+        self.assertEqual(row['native_dependencies'], ['KERNEL32.dll'])
+        self.assertEqual(row['sha256'], hashlib.sha256(data).hexdigest())
+        # Include an actual PE32 delay import using RVA addressing.
+        struct.pack_into('<II', data, opt + 96 + 13 * 8, 0x1080, 64)
+        struct.pack_into('<8I', data, 640, 1, 0x10c0, 0, 0, 0, 0, 0, 0)
+        data[704:715] = b'USER32.dll\0'
+        info = m.captured_metadata(data)
+        self.assertEqual(info['native_dependencies'], ['KERNEL32.dll', 'USER32.dll'])
     def test_failed_command_retains_mutated_outputs_and_logs(self):
         result = self.run_stage('import pathlib,sys; p=pathlib.Path(sys.argv[1]); p.write_bytes(p.read_bytes()+b"partial"); print("failed"); sys.exit(7)')
         self.assertFalse(result['passed'])

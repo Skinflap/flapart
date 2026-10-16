@@ -57,8 +57,65 @@ def environment(source):
         require(not SECRET.search(value), 'Credential-like build environment value refused')
     return result
 
+def pe32_metadata(data):
+    """Capture observed i386 developer assets; never bless them for Mac shipping."""
+    u = lambda fmt, off: metadata.unpack('<' + fmt, data, off)
+    offset = u('I', 60)[0]
+    require(data[offset:offset + 4] == b'PE\0\0', 'Invalid PE signature')
+    cpu, sections = u('HH', offset + 4)
+    require(cpu == 0x14c, 'Unsupported PE32 CPU')
+    optlen = u('H', offset + 20)[0]
+    opt = offset + 24
+    require(u('H', opt)[0] == 0x10b and optlen >= 96 and opt + optlen + sections * 40 <= len(data), 'Invalid PE32 optional header')
+    count = u('I', opt + 92)[0]
+    require(count <= 16 and 96 + count * 8 <= optlen, 'Invalid PE32 directory count')
+    imagebase = u('I', opt + 28)[0]
+    headers = u('I', opt + 60)[0]
+    table = []
+    for index in range(sections):
+        _, rva, size, raw = u('IIII', opt + optlen + index * 40 + 8)
+        require(raw + size <= len(data), 'PE32 section outside file')
+        table.append((rva, size, raw))
+    def address(rva, length=1):
+        require(rva >= 0, 'Negative PE32 import RVA')
+        if rva < headers:
+            require(rva + length <= min(headers, len(data)), 'Invalid PE32 header RVA')
+            return rva
+        for start, size, raw in table:
+            if start <= rva and rva + length <= start + size:
+                return raw + rva - start
+        raise ValueError('PE32 import RVA outside file-backed sections')
+    dependencies = []
+    for index, stride in ((1, 20), (13, 32)):
+        if count <= index:
+            continue
+        rva, size = u('II', opt + 96 + index * 8)
+        if not rva:
+            require(size == 0, 'PE32 directory size without RVA')
+            continue
+        require(stride <= size <= 1024 * 1024, 'Invalid PE32 import directory')
+        terminated = False
+        for relative in range(0, size - stride + 1, stride):
+            values = u('I' * (stride // 4), address(rva + relative, stride))
+            if not any(values):
+                terminated = True
+                break
+            name = values[3] if index == 1 else values[1]
+            if index == 13:
+                require(values[0] in (0, 1), 'Unknown PE32 delayed import attributes')
+                if values[0] == 0:
+                    name -= imagebase
+            start = address(name)
+            dependencies.append(metadata.string(data, start, min(len(data), start + 4096)))
+        require(terminated, 'Unterminated PE32 import descriptors')
+    return metadata.combine('pe', [{'cpu': cpu, 'architecture': 'x86', 'dependencies': dependencies, 'uuid': None}])
+
 def captured_metadata(data):
     """Include static native build inputs without inventing an archive UUID."""
+    if data[:2] == b'MZ':
+        offset = metadata.unpack('<I', data, 60)[0]
+        if metadata.unpack('<H', data, offset + 24)[0] == 0x10b:
+            return pe32_metadata(data)
     if data.startswith(b'!<arch>\n'):
         offset = 8
         members = 0
@@ -77,7 +134,7 @@ def captured_metadata(data):
                 require(0 <= length <= len(body), 'Invalid BSD archive filename')
                 body = body[length:]
             if body[:4] in MAGIC - {b'!<ar'} or body[:2] == b'MZ':
-                info = metadata.parse(body)
+                info = captured_metadata(body)
                 if info:
                     arches.update(info['architectures'])
                     identities.update(info['macho_uuids'])

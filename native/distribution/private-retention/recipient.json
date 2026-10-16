@@ -1,0 +1,7 @@
+{
+  "recipient": "1E85461C2AE3E8E2A9B5D8FD9EA298F52A95D899",
+  "purpose": "Encrypted private unqualified candidate and build evidence retention",
+  "private_key_location": "Local protected GnuPG home only; never uploaded",
+  "public_key_file": "recipient-public.asc",
+  "release_qualified": false
+}

@@ -2,7 +2,7 @@
 
 `stage_recorder.py` runs a new command and records what actually happened. It does
 not produce historical proofs, source-closure selections, a release qualification,
-or an upload. It supports the existing Mach-O/all-slice and PE64 parser, and thin/universal
+or an upload. It supports the existing Mach-O/all-slice and PE64 parser, explicit i386 PE32 capture, and thin/universal
 static archives as native build inputs. Static archive rows retain real member
 counts/architectures/member UUIDs separately; archives receive no invented UUID. ELF and
 unsupported native formats fail rather than acquiring fictional metadata.
@@ -134,7 +134,12 @@ Native Mac/Windows build-stage integration remains unvalidated until actually ru
 
 A real retained SDK `libhwy_test.a` was additionally inspected read-only: both
 arm64/x86_64 static-archive slices parsed with two members each. Whole original
-SDK trees may also contain foreign/PE32 development assets; those remain explicit
-unsupported-format capture failures, not silently skipped inputs. Plan capture
-roots around the actual controlled stage inputs, and preserve the original SDK
-archive/hash correspondence separately. No native build was executed by this check.
+SDK trees also contain foreign PE32 development assets. The recorder now captures
+those exact bytes, actual i386 CPU and normal/delay imports, so the collector's
+before-completion tree remains observable. This does not approve shipping PE32 in
+a Mac app: the chain verifier still rejects every PE final member. The specific
+retained `pyqtbuild/bundle/dlls/openssl-32/libssl-1_1.dll` parsed as i386 PE with nine
+imports, SHA256 `f5ba7eef440ad9f83a7d59236499c412d7849a1856b5a5c689c4635db35f27a7`;
+local `file` independently identified PE32 Intel80386. There is no broad foreign
+binary skip or invented host architecture. Preserve original SDK archive/hash
+correspondence separately. No native build was executed by these checks.
