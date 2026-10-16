@@ -1,0 +1,27 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-or-later
+set -eu
+FLAPART_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+export FLAPART_NATIVE=1
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/flapart-studio"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/flapart-studio"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}/flapart-studio"
+export PYTHONHOME="$FLAPART_ROOT/krita-runtime/usr"
+# Ubuntu's TLS library uses Ubuntu default paths; follow the host system's
+# maintained trust store on other distributions. Explicit overrides stay intact.
+if [ "${SSL_CERT_FILE+x}" != x ]; then
+    for FLAPART_CA_BUNDLE in /etc/ssl/certs/ca-certificates.crt /etc/pki/tls/certs/ca-bundle.crt /etc/ssl/ca-bundle.pem /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem /etc/ssl/cert.pem; do
+        if [ -f "$FLAPART_CA_BUNDLE" ] && [ -r "$FLAPART_CA_BUNDLE" ]; then
+            export SSL_CERT_FILE="$FLAPART_CA_BUNDLE"
+            break
+        fi
+    done
+    unset FLAPART_CA_BUNDLE
+fi
+export FONTCONFIG_FILE="$FLAPART_ROOT/fonts.conf"
+export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}"
+mkdir -p "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_CACHE_HOME"
+if [ ! -f "$XDG_CONFIG_HOME/kritarc" ]; then
+    (umask 077; printf '[python]\nenable_flapart=true\n[theme]\nTheme=Flaptown\n' > "$XDG_CONFIG_HOME/kritarc")
+fi
+exec "$FLAPART_ROOT/krita-runtime/AppRun" "$@"

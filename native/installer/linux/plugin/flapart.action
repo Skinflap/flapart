@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<ActionCollection version="2" name="Scripts">
+ <Actions category="Scripts"><text>Flapart Studio</text>
+  <Action name="flapart_studio">
+   <icon></icon><text>Flapart Studio</text><whatsThis></whatsThis>
+   <toolTip>Open Flapart Studio</toolTip><iconText>Flapart Studio</iconText>
+   <activationFlags>0</activationFlags><activationConditions>0</activationConditions>
+   <shortcut>Ctrl+Alt+F</shortcut><isCheckable>false</isCheckable><statusTip></statusTip>
+  </Action>
+ </Actions>
+</ActionCollection>
