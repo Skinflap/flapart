@@ -85,6 +85,7 @@ def build(prepared, original_sdk, work, jobs, reviewed_text=None):
     env['PKG_CONFIG_LIBDIR'] = str(sdk / 'lib/pkgconfig')
     env['PKG_CONFIG_PATH'] = str(sdk / 'lib/pkgconfig')
     result = {'compiled': False, 'universal_assembled': False, 'runtime_qualified': False,
+              'baseline_sdk': str(original_sdk),
               'release_qualified': False, 'stages': [], 'source_receipt_sha256': sha(prepared / 'preparation.json')}
 
     def run(name, argv, cwd):
@@ -103,7 +104,18 @@ def build(prepared, original_sdk, work, jobs, reviewed_text=None):
             directory = work / ('build-' + arch)
             directory.mkdir()
             run(arch + '-configure', configure_args(source, sdk, arch), directory)
-            run(arch + '-metadata', ['arch', '-' + arch, 'make', '-j' + str(jobs), 'qmake_all'], directory)
+            # Preserve normal tool/module ordering. Early whole-tree qmake_all
+            # runs before qmltyperegistrar installs qmltypes.prf and can omit
+            # the generated QtQuick/QML registration translation units.
+            run(arch + '-build', ['arch', '-' + arch, 'make', '-j' + str(jobs)], directory)
+            registrations = []
+            for component in ('qml', 'quick'):
+                folder = directory / 'qtdeclarative/src' / component
+                matches = list(folder.glob('*_qmltyperegistrations.cpp'))
+                if len(matches) != 1 or not matches[0].stat().st_size:
+                    raise ValueError('Missing generated QML registration source: ' + component)
+                registrations.append({'path': str(matches[0]), 'sha256': sha(matches[0])})
+            (evidence / (arch + '-qml-registration-inputs.json')).write_text(json.dumps(registrations, indent=2) + '\n')
             run(arch + '-features', [sys.executable, str(ROOT.parent / 'qt-xml-security/compare-features.py'),
                 '--before', str(original_sdk / 'mkspecs'), '--after', str(directory / 'qtbase/mkspecs'),
                 '--allow-host-build-mode-change',
@@ -112,7 +124,6 @@ def build(prepared, original_sdk, work, jobs, reviewed_text=None):
             summary = (directory / 'qtbase/config.summary').read_text()
             if not any('Using system libwebp' in line and line.rstrip().endswith('yes') for line in summary.splitlines()):
                 raise ValueError('Configuration did not select system WebP')
-            run(arch + '-build', ['arch', '-' + arch, 'make', '-j' + str(jobs)], directory)
             stage = work / ('stage-' + arch)
             stage.mkdir()
             run(arch + '-install', ['arch', '-' + arch, 'make', '-j' + str(jobs), 'install',

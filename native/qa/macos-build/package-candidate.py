@@ -6,14 +6,14 @@ sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[1]/'portable'))
 from binary_ids import macho_uuids
 from macho_format import is_macho
 from package_stage import run_stage, validate_evidence
-p=argparse.ArgumentParser();p.add_argument('--source',type=pathlib.Path,required=True);p.add_argument('--prefix',type=pathlib.Path,required=True);p.add_argument('--output',type=pathlib.Path,required=True);p.add_argument('--universal',action='store_true');p.add_argument('--maintained-work',type=pathlib.Path,required=True);p.add_argument('--promotion-receipt',type=pathlib.Path,required=True);p.add_argument('--stage-evidence',type=pathlib.Path);p.add_argument('--retain-native-bytes',action='store_true');a=p.parse_args()
+from sdk_provenance import validate as validate_sdk_provenance
+p=argparse.ArgumentParser();p.add_argument('--source',type=pathlib.Path,required=True);p.add_argument('--prefix',type=pathlib.Path,required=True);p.add_argument('--output',type=pathlib.Path,required=True);p.add_argument('--universal',action='store_true');p.add_argument('--maintained-work',type=pathlib.Path,required=True);p.add_argument('--promotion-receipt',type=pathlib.Path,required=True);p.add_argument('--qt-promotion-receipt',type=pathlib.Path);p.add_argument('--stage-evidence',type=pathlib.Path);p.add_argument('--retain-native-bytes',action='store_true');a=p.parse_args()
 if platform.system()!='Darwin':raise SystemExit('Run on native macOS after the compiled fork probe passes.')
 source=a.source.resolve();prefix=a.prefix.resolve();out=a.output.resolve();validate_evidence(out,a.stage_evidence,a.retain_native_bytes);out.mkdir(parents=True,exist_ok=True)
 if any(out.iterdir()):raise SystemExit('Candidate output must be empty.')
-maintained=a.maintained_work.resolve();assert prefix==maintained/'sdk','Package the promoted maintained SDK only'
-promotion=json.loads(a.promotion_receipt.read_text());assert promotion['promoted'] and pathlib.Path(promotion['sdk']).resolve()==prefix
-for row in promotion['copied']:
- path=prefix/row['path'];assert path.resolve().is_relative_to(prefix) and hashlib.sha256(path.read_bytes()).hexdigest()==row['sha256'],('Promoted component changed',row['path'])
+maintained=a.maintained_work.resolve()
+sdk_provenance=validate_sdk_provenance(prefix,maintained,a.promotion_receipt,a.qt_promotion_receipt)
+(out/'sdk-provenance.json').write_text(json.dumps(sdk_provenance,indent=2)+'\n')
 python_receipt=json.loads((maintained/'python-build/python-build-receipt.json').read_text());assert python_receipt['compiled']
 assert 'flapartnativerc' in (source/'krita/main.cc').read_text()
 env=dict(os.environ,PATH=str(prefix/'bin')+os.pathsep+os.environ['PATH']);env.pop('BUILDROOT',None);env['PYTHONDONTWRITEBYTECODE']='1'
@@ -21,7 +21,7 @@ assert (prefix/'bin/python').is_file() and (prefix/'bin/python').resolve().is_re
 root=out/'Flapart Studio.app'
 helper=pathlib.Path(__file__).with_name('package_stage.py')
 collector=source/'packaging/macos/macos-deploy.py'
-recorder_helpers=[pathlib.Path(__file__)]
+recorder_helpers=[pathlib.Path(__file__),pathlib.Path(__file__).with_name('sdk_provenance.py')]
 def stage(name,command,helpers=(),tools=(),sdk=None):
  run_stage(name,command,root,a.stage_evidence,[*recorder_helpers,*helpers],tools,a.retain_native_bytes,env,sdk)
 stage('collector',[sys.executable,str(helper),'--source',str(source),'--prefix',str(prefix),'--output',str(out)],
