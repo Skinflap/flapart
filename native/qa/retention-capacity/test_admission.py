@@ -14,7 +14,7 @@ Disk = namedtuple('Disk', 'total used free')
 class Admission(unittest.TestCase):
     def test_duplicate_bytes_count_logically_but_unique_peak(self):
         with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
+            root = Path(tmp).resolve()
             (root / 'a').write_bytes(b'same')
             (root / 'b').write_bytes(b'same')
             with patch.object(m.shutil, 'disk_usage', return_value=Disk(10**12, 0, 10**12)):
@@ -27,7 +27,7 @@ class Admission(unittest.TestCase):
 
     def test_low_disk_fails_without_mutation(self):
         with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
+            root = Path(tmp).resolve()
             f = root / 'a'
             f.write_bytes(b'preserve')
             with patch.object(m.shutil, 'disk_usage', return_value=Disk(100, 99, 1)):
@@ -37,7 +37,7 @@ class Admission(unittest.TestCase):
 
     def test_symlink_and_overlap_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
+            root = Path(tmp).resolve()
             f = root / 'a'
             f.write_bytes(b'a')
             with self.assertRaisesRegex(ValueError, 'Overlapping'):
@@ -48,7 +48,7 @@ class Admission(unittest.TestCase):
 
     def test_v2_peak_tracks_unique_not_repeated_logical_bytes(self):
         with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
+            root = Path(tmp).resolve()
             data = b'x' * (1024 * 1024)
             for i in range(100):
                 (root / str(i)).write_bytes(data)
@@ -59,10 +59,23 @@ class Admission(unittest.TestCase):
             self.assertLess(compact['estimated_additional_peak_bytes'], legacy['estimated_additional_peak_bytes'])
             self.assertTrue(compact['unique_storage_with_generated_fits'])
 
+    def test_canonical_temp_path_works_but_alias_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp).resolve()
+            real = root / 'real'
+            real.mkdir()
+            alias = root / 'alias'
+            alias.symlink_to(real, target_is_directory=True)
+            (real / 'file').write_bytes(b'evidence')
+            with self.assertRaisesRegex(ValueError, 'Symlink'):
+                m.measure([alias / 'file'], root)
+            result = m.measure([(alias / 'file').resolve()], root)
+            self.assertEqual(result['logical_bytes'], 8)
+
     def test_missing_input_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             with self.assertRaisesRegex(ValueError, 'Missing'):
-                m.measure([Path(tmp) / 'missing'], tmp)
+                m.measure([Path(tmp).resolve() / 'missing'], Path(tmp).resolve())
 
 
 if __name__ == '__main__':
