@@ -76,6 +76,17 @@ def finish(result,w,out,studio=None):
         QToolTip.hideText()
         w.qwindow().grab().save(str(out/'main-window.png'))
         result['platform'] = platform.platform()
+        result['process_architecture'] = {'AMD64':'x86_64','aarch64':'arm64'}.get(platform.machine(),platform.machine())
+        if platform.system() == 'Darwin':
+            import ctypes, errno
+            system = ctypes.CDLL(None,use_errno=True)
+            translated = ctypes.c_int()
+            size = ctypes.c_size_t(ctypes.sizeof(translated))
+            status = system.sysctlbyname(b'sysctl.proc_translated',ctypes.byref(translated),ctypes.byref(size),None,0)
+            if status != 0 and ctypes.get_errno() != errno.ENOENT:
+                raise OSError(ctypes.get_errno(),'Cannot identify native application translation mode')
+            result['execution_mode'] = 'translated' if translated.value == 1 else 'native'
+            result['hardware_architecture'] = 'arm64' if translated.value == 1 else result['process_architecture']
         result['native_engine_version'] = Krita.instance().version()
         result['application_font'] = QFontInfo(QApplication.instance().font()).family()
         dialog = studio.dialogs[-1] if studio and studio.dialogs else None

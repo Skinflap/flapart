@@ -27,6 +27,7 @@ SYSTEM_DLLS=set(('advapi32 bcrypt bcryptprimitives cabinet cfgmgr32 comctl32 com
 def system_import(name,family):
  if family=='macos':return name.startswith(('/System/Library/','/usr/lib/')) and '..' not in PurePosixPath(name).parts
  lower=name.lower()
+ if lower=='d3dcompiler_47.dll':return True  # Windows 10/11 OS component; reviewed target evidence still required below.
  return lower=='winspool.drv' or bool(re.fullmatch(r'(?:api-ms-win-|ext-ms-win-)[a-z0-9-]+\.dll',lower)) or lower.endswith('.dll') and lower[:-4] in SYSTEM_DLLS
 
 def produce(archive,pin,platform,inputs,evidence):
@@ -118,6 +119,7 @@ def produce(archive,pin,platform,inputs,evidence):
     else:
      proof=e.json(resolution['system_evidence']);check(proof['platform']==family and proof['dependency']==dependency and proof.get('basis'),'Missing reviewed system import evidence')
      allowed=system_import(dependency,family) and (family=='macos' or proof.get('windows_system_component') is True)
+     if family=='windows' and dependency.lower()=='d3dcompiler_47.dll':allowed=allowed and proof.get('minimum_windows') in ('10','11')
      check(allowed,'Non-system dependency cannot be exempted');e.artifact(resolution['system_evidence'],'provenance')
    except (ValueError,KeyError,TypeError,OSError) as error:unresolved.append({'path':name,'dependency':dependency,'reason':'dependency-unresolved','detail':str(error)})
  for name in assets:

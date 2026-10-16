@@ -102,7 +102,7 @@ retained. Malformed or unsupported native data prevents completeness.
 
 ## Checks performed
 
-`python test_qualification.py` passes 17 tests, with additional parameterized
+`python test_qualification.py` passes 18 tests, with additional parameterized
 missing-provenance and maintained-component cases. Fixtures are synthetic and are
 not final qualification evidence. They cover pin/inventory failures, wrong locks,
 wrong recipe branches, absent notices, URL source mismatch, unknown imports,

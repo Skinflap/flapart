@@ -61,6 +61,14 @@ class Tests(unittest.TestCase):
  def test_narrow_system_import_evidence(self):
   f=Fixture(self.root,data=pe('KERNEL32.dll'));proof=f.ref('system.json',{'platform':'windows','dependency':'KERNEL32.dll','windows_system_component':True,'basis':'Synthetic Windows system evidence'});f.docs['selections']['dependencies']={f.name:{'KERNEL32.dll':{'system_evidence':proof}}};_,result=f.run();self.assertTrue(result['complete'])
   self.assertFalse(system_import('libssl-3-x64.dll','windows'));self.assertFalse(system_import('/tmp/host.dylib','macos'))
+ def test_os_d3d_compiler_requires_supported_target_evidence(self):
+  f=Fixture(self.root,data=pe('D3DCompiler_47.dll'))
+  proof={'platform':'windows','dependency':'D3DCompiler_47.dll','windows_system_component':True,'basis':'Synthetic Windows OS component evidence'}
+  f.docs['selections']['dependencies']={f.name:{'D3DCompiler_47.dll':{'system_evidence':f.ref('d3d-system.json',proof)}}}
+  _,result=f.run();self.assertFalse(result['complete'])
+  proof['minimum_windows']='10';f.docs['selections']['dependencies'][f.name]['D3DCompiler_47.dll']['system_evidence']=f.ref('d3d-system.json',proof)
+  _,result=f.run();self.assertTrue(result['complete'])
+  self.assertFalse(system_import('D3DCompiler_43.dll','windows'))
  def test_wrong_import_target_rejected(self):
   f=Fixture(self.root,data=pe('different.dll'));f.docs['selections']['dependencies']={f.name:{'different.dll':{'archive_path':f.name}}};_,result=f.run();self.assertFalse(result['complete'])
  def test_rebuilt_provenance_does_not_accept_wrong_output(self):

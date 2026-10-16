@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Native Mac CI qualification for a locally built namespaced Flapart application."""
 import argparse,pathlib,platform,os,subprocess,json,shutil,hashlib,time,signal
-p=argparse.ArgumentParser();p.add_argument('--prefix',required=True,type=pathlib.Path);p.add_argument('--probe',required=True,type=pathlib.Path);p.add_argument('--output',required=True,type=pathlib.Path);p.add_argument('--packaged',action='store_true',help='Require a relocated self-contained runtime without build-prefix environment');p.add_argument('--timeout',type=int,default=150);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--prefix',required=True,type=pathlib.Path);p.add_argument('--probe',required=True,type=pathlib.Path);p.add_argument('--output',required=True,type=pathlib.Path);p.add_argument('--packaged',action='store_true',help='Require a relocated self-contained runtime without build-prefix environment');p.add_argument('--timeout',type=int,default=150);p.add_argument('--process-architecture',choices=('arm64','x86_64'),help='Run and verify this actual Mac application process architecture');a=p.parse_args()
 if platform.system()!='Darwin':raise SystemExit('Native macOS runner required.')
 if os.environ.get('CI')!='true':raise SystemExit('Use only a disposable CI profile (CI=true); this harness writes test settings.')
 prefix=a.prefix.resolve();probe=a.probe.resolve();output=a.output.resolve();output.mkdir(parents=True,exist_ok=True)
@@ -37,7 +37,9 @@ if a.packaged:
 receipt=output/'result.json'
 if receipt.exists():raise SystemExit('Output already contains a receipt; use a fresh output directory.')
 with (output/'runtime.log').open('w') as log:
- process=subprocess.Popen([str(executable),'--nosplash'],env=env,stdout=log,stderr=log,start_new_session=True)
+ command=[str(executable),'--nosplash']
+ if a.process_architecture:command=['/usr/bin/arch','-'+a.process_architecture,*command]
+ process=subprocess.Popen(command,env=env,stdout=log,stderr=log,start_new_session=True)
  try:process.wait(timeout=a.timeout)
  except subprocess.TimeoutExpired:
   os.killpg(process.pid,signal.SIGTERM)
@@ -46,9 +48,13 @@ with (output/'runtime.log').open('w') as log:
 if not receipt.exists():raise SystemExit('No native result.json; inspect runtime.log and Flapart native logs.')
 result=json.loads(receipt.read_text());print(json.dumps(result,indent=2))
 assert process.returncode==0 and 'error' not in result
+process_arch=result.get('process_architecture');hardware_arch=result.get('hardware_architecture');execution_mode=result.get('execution_mode')
+assert process_arch in ('arm64','x86_64') and hardware_arch in ('arm64','x86_64'),'Application must report actual process and hardware architecture'
+assert execution_mode=='native' and process_arch==hardware_arch or execution_mode=='translated' and process_arch=='x86_64' and hardware_arch=='arm64','Inconsistent application architecture/translation evidence'
+if a.process_architecture:assert process_arch==a.process_architecture,'Application process did not use requested architecture'
 for key in ('png','kra','batchmode_restored','focus_hides_panels','focus_restores_panels','action'):assert result.get(key) is True,key
 assert result['canvas']==[64,64] and result['round_trip']==[64,64,'Draw here'] and result['round_trip_pixel']==[70,110,191,255]
 assert result['browser_handoff']==['https://flaptown.com/flapart/?from=native&destination=profile']
 assert all(path.exists() and hashlib.sha256(path.read_bytes()).hexdigest()==digest for path,digest in sentinels.items()),'Original Krita sentinel changed'
-qualification={'platform':platform.platform(),'architecture':platform.machine(),'native_runtime_test':True,'original_krita_sentinels_preserved':True,'compiled_fork':True,'relocated_package_test':a.packaged,'signed':False,'notarized':False,'physical_tablet_tested':False}
+qualification={'platform':platform.platform(),'architecture':process_arch,'process_architecture':process_arch,'hardware_architecture':hardware_arch,'execution_mode':execution_mode,'native_runtime_test':True,'original_krita_sentinels_preserved':True,'compiled_fork':True,'relocated_package_test':a.packaged,'signed':False,'notarized':False,'physical_tablet_tested':False}
 (output/'qualification.json').write_text(json.dumps(qualification,indent=2)+'\n');print('Native source application probe and Krita namespace preservation passed.')

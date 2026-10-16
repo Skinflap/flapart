@@ -12,7 +12,7 @@ jobs:
           - runner: macos-15
             jobs: 2
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 180
+    timeout-minutes: 330
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -29,21 +29,35 @@ jobs:
           python3 native/branding/apply-branding.py "$RUNNER_TEMP/flapart-upstream"
           python3 native/qa/macos-build/fetch-dependencies.py --prefix "$RUNNER_TEMP/flapart-sdk" --cache "$RUNNER_TEMP/flapart-sdk-downloads"
           python3 -c 'import os, pathlib, shutil; p=pathlib.Path(os.environ["RUNNER_TEMP"])/"flapart-sdk-downloads"; shutil.rmtree(p)'
+      - name: Build maintained TLS and Python in a private SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa-result
+          python3 native/qa/tls-evaluation/run-native-ci.py --sdk "$RUNNER_TEMP/flapart-sdk" --work "$RUNNER_TEMP/flapart-maintained" --output qa-result/tls --jobs ${{ matrix.jobs }}
+          python3 native/qa/tls-evaluation/promote-macos-sdk.py --work "$RUNNER_TEMP/flapart-maintained" --evidence qa-result/tls --output qa-result/sdk-promotion.json
       - name: Compile full painting application
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p qa-result
-          python3 native/qa/macos-build/build.py --source "$RUNNER_TEMP/flapart-upstream" --prefix "$RUNNER_TEMP/flapart-sdk" --build "$RUNNER_TEMP/flapart-build" --universal --jobs ${{ matrix.jobs }} 2>&1 | tee qa-result/build.log
+          python3 native/qa/macos-build/build.py --source "$RUNNER_TEMP/flapart-upstream" --prefix "$RUNNER_TEMP/flapart-maintained/sdk" --build "$RUNNER_TEMP/flapart-build" --universal --jobs ${{ matrix.jobs }} 2>&1 | tee qa-result/build.log
       - name: Verify native artwork and separate Krita settings
-        run: python3 native/qa/macos-build/test-compiled.py --prefix "$RUNNER_TEMP/flapart-sdk" --probe native/qa/portable --output qa-result/runtime
+        run: python3 native/qa/macos-build/test-compiled.py --prefix "$RUNNER_TEMP/flapart-maintained/sdk" --probe native/qa/portable --output qa-result/runtime
       - name: Package and test relocation without SDK fallback
         shell: bash
         run: |
           set -euo pipefail
-          python3 native/qa/macos-build/package-candidate.py --universal --source "$RUNNER_TEMP/flapart-upstream" --prefix "$RUNNER_TEMP/flapart-sdk" --output "$RUNNER_TEMP/flapart-packaged" 2>&1 | tee qa-result/package.log
+          python3 native/qa/macos-build/package-candidate.py --universal --source "$RUNNER_TEMP/flapart-upstream" --prefix "$RUNNER_TEMP/flapart-maintained/sdk" --maintained-work "$RUNNER_TEMP/flapart-maintained" --promotion-receipt qa-result/sdk-promotion.json --output "$RUNNER_TEMP/flapart-packaged" 2>&1 | tee qa-result/package.log
           cp "$RUNNER_TEMP/flapart-packaged/candidate-inventory.json" qa-result/candidate-inventory.json
-          python3 native/qa/portable/test-relocated.py --candidate "$RUNNER_TEMP/flapart-packaged/Flapart Studio.app" --probe native/qa/portable --output qa-result/relocated --previous-qualification qa-result/runtime/qualification.json
+          cp "$RUNNER_TEMP/flapart-packaged/maintained-runtime.json" qa-result/maintained-runtime.json
+          python3 native/qa/portable/test-relocated.py --candidate "$RUNNER_TEMP/flapart-packaged/Flapart Studio.app" --probe native/qa/portable --output qa-result/relocated-arm64 --previous-qualification qa-result/runtime/qualification.json --process-architecture arm64
+          python3 native/qa/portable/test-relocated.py --candidate "$RUNNER_TEMP/flapart-packaged/Flapart Studio.app" --probe native/qa/portable --output qa-result/relocated-x86_64 --previous-qualification qa-result/runtime/qualification.json --process-architecture x86_64
+      - name: Verify archived Python and TLS in both CPU processes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 native/qa/macos-build/test-packaged-runtime.py --candidate "$RUNNER_TEMP/flapart-packaged/Flapart Studio.app" --baseline qa-result/tls/python-build.json --output qa-result/packaged-runtime --archive-output "$RUNNER_TEMP/flapart-packaged/candidate.zip" --hide-build-prefix "$RUNNER_TEMP/flapart-sdk" --hide-build-prefix "$RUNNER_TEMP/flapart-maintained/sdk" --hide-build-prefix "$RUNNER_TEMP/flapart-maintained/python-stage" --hide-build-prefix "$RUNNER_TEMP/flapart-maintained/openssl"
       - name: Retain source-build evidence only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -51,9 +65,17 @@ jobs:
           name: compiled-${{ matrix.runner }}-evidence
           path: |
             qa-result/build.log
+            qa-result/tls/*.json
+            qa-result/tls/*.log
+            qa-result/sdk-promotion.json
             qa-result/package.log
             qa-result/candidate-inventory.json
+            qa-result/maintained-runtime.json
             qa-result/runtime/*
-            qa-result/relocated/runtime/*
+            qa-result/relocated-arm64/runtime/*
+            qa-result/relocated-x86_64/runtime/*
+            qa-result/packaged-runtime/**/*.json
+            qa-result/packaged-runtime/*.json
+            qa-result/packaged-runtime/*.log
           retention-days: 7
           if-no-files-found: warn
