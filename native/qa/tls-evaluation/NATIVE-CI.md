@@ -46,3 +46,21 @@ CANDIDATE_PYTHON https-validation-probe.py --openssl CANDIDATE_OPENSSL --output 
 ```
 
 Checks actual loaded Python and Qt SSL versions >=3.5.9, trusted local CA/localhost success, untrusted CA rejection, hostname mismatch rejection, then separate Python and Qt requests to https://www.python.org/ with untouched default trust. No ignored SSL errors or global trust modification. Exceptions/timeouts fail. Local fixture keys are temporary and removed. To test the Ubuntu backported library use --minimum 3.0.2 plus independent exact package hash/BuildID gate. The probe also requires expired-certificate rejection (Python verification code 10 and Qt CertificateExpired). Before release verify all package imports/load commands, both macOS slices, app plugin UI and archive relocation. Current helpers are not evidence of a completed native TLS build.
+
+### Consolidated Mac qualification
+
+The October 16 baseline audit (`macos-build-preflight.json`) verifies both Mach-O
+slices of the original CPython extensions. ctypes, sqlite, bz2, readline and zlib
+use Apple system libraries; `_lzma` and `_tkinter` are absent from that baseline.
+The full replacement pins the Apple SDK/compiler, uses editline, confines
+pkg-config discovery to maintained OpenSSL plus the Apple SDK, and requires all
+76 original extension modules to remain. It does not add a broad old-SDK library
+search that could accidentally select OpenSSL1.1.
+
+Qt's pinned qconfig explicitly enables `debug_and_release` and `build_all`.
+The generic bearer plugin is rebuilt for both variants and universal slices,
+because the original plugin directly imports old SSL even after QtNetwork is
+replaced. Newly compiled plugin imports must reject OpenSSL1.1. The complete
+native run remains the required validation; these audits are not binary release
+qualification. One Mac-only consolidated run was authorized after notification
+triage; failures require review and are not automatically retried.

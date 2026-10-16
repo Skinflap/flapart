@@ -14,11 +14,11 @@ assert (a.openssl_prefix/'lib/libssl.3.dylib').exists()
 a.work.mkdir(parents=True);a.prefix.parent.mkdir(parents=True,exist_ok=True)
 with tarfile.open(a.archive) as t:t.extractall(a.work,filter='data')
 source=a.work/'Python-3.13.16';build=a.work/'build';build.mkdir();sdk=subprocess.check_output(['xcrun','--show-sdk-path'],text=True).strip()
-env=dict(os.environ,MACOSX_DEPLOYMENT_TARGET=a.deployment_target,LDFLAGS='-Wl,-headerpad_max_install_names',PKG_CONFIG_PATH=str(a.openssl_prefix/'lib/pkgconfig'))
+env=dict(os.environ,SDKROOT=sdk,MACOSX_DEPLOYMENT_TARGET=a.deployment_target,LDFLAGS='-Wl,-headerpad_max_install_names',PKG_CONFIG_PATH=str(a.openssl_prefix/'lib/pkgconfig'),PKG_CONFIG_LIBDIR=os.pathsep.join([str(a.openssl_prefix/'lib/pkgconfig'),str(pathlib.Path(sdk)/'usr/lib/pkgconfig')]),CC=subprocess.check_output(['xcrun','--find','clang'],text=True).strip())
 receipt={'compiled':False,'version':'3.13.16','ssl_target':'3.5.9','sdk':sdk,'commands':[],'full_framework_reason':'Includes maintained CPython SSLContext/hostname/stdlib security fixes; retains cp313 ABI','runtime_qualified':False}
 def run(cmd):receipt['commands'].append(list(map(str,cmd)));subprocess.run(list(map(str,cmd)),cwd=build,env=env,check=True)
 try:
- run([source/'configure','--prefix='+str(a.prefix),'--enable-framework='+str(a.prefix/'lib'),'--enable-universalsdk='+sdk,'--with-universal-archs=universal2','--with-openssl='+str(a.openssl_prefix),'--with-openssl-rpath='+str(a.openssl_prefix/'lib'),'--without-ensurepip','--without-static-libpython'])
+ run([source/'configure','--prefix='+str(a.prefix),'--enable-framework='+str(a.prefix/'lib'),'--enable-universalsdk='+sdk,'--with-universal-archs=universal2','--with-openssl='+str(a.openssl_prefix),'--with-openssl-rpath='+str(a.openssl_prefix/'lib'),'--without-ensurepip','--without-static-libpython','--with-readline=editline'])
  run(['make','-j'+str(a.jobs)]);run(['make','install','FRAMEWORKINSTALLLAST=frameworkinstallmaclib','FRAMEWORKALTINSTALLLAST=frameworkinstallmaclib'])
  framework=a.prefix/'lib/Python.framework';version=framework/'Versions/3.13';site=version/'lib/python3.13/site-packages';site.mkdir(exist_ok=True)
  preserved=[]
@@ -30,6 +30,13 @@ try:
  # This does not alter any system trust store or relax peer/hostname validation.
  roots=subprocess.check_output(['security','find-certificate','-a','-p','/System/Library/Keychains/SystemRootCertificates.keychain']);assert b'BEGIN CERTIFICATE' in roots
  capath=a.openssl_prefix/'ssl';capath.mkdir(exist_ok=True);(capath/'cert.pem').write_bytes(roots);receipt['ca_snapshot_sha256']=hashlib.sha256(roots).hexdigest()
+ # The full replacement must retain the original interpreter's extension breadth.
+ def extension_names(folder):
+  return {f.name.split('.')[0] for f in folder.glob('*.so') if f.is_file()}
+ baseline=extension_names(a.old_framework/'Versions/3.13/lib/python3.13/lib-dynload')
+ actual=extension_names(version/'lib/python3.13/lib-dynload')
+ receipt['extension_modules']={'baseline':sorted(baseline),'candidate':sorted(actual),'missing':sorted(baseline-actual)}
+ assert baseline and not baseline-actual,('CPython extension regression',sorted(baseline-actual))
  sslmods=list((version/'lib/python3.13/lib-dynload').glob('_ssl*.so'))+list((version/'lib/python3.13/lib-dynload').glob('_hashlib*.so'));assert len(sslmods)==2
  for f in sslmods+[version/'Python']:
   arches=subprocess.check_output(['lipo','-archs',str(f)],text=True);assert 'arm64' in arches and 'x86_64' in arches,(f,arches)

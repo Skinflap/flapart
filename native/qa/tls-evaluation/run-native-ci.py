@@ -39,7 +39,9 @@ try:
   run('prepare-msys',[sys.executable,ROOT/'prepare-msys.py','--destination',msys,'--cache',downloads/'msys'])
   perl=choose([msys/'usr/bin/perl.exe'])
   ssl_make=choose([msys/'usr/bin/make.exe'])
-  assert subprocess.check_output([str(perl),'-e','print $^O'],text=True).strip()=='msys','OpenSSL MinGW requires Unix-path Perl'
+  receipt['perl_os']=subprocess.check_output([str(perl),'-e','print $^O'],text=True).strip()
+  perl_paths=subprocess.check_output([str(perl),'-MFile::Spec','-e','print File::Spec->catfile("a","b")'],text=True).strip()
+  assert perl_paths=='a/b',('OpenSSL MinGW requires Unix-path Perl',receipt['perl_os'],perl_paths)
   make=choose([llvm/'mingw32-make.exe','C:/Strawberry/c/bin/gmake.exe','C:/Strawberry/c/bin/mingw32-make.exe','mingw32-make.exe','gmake.exe'])
   env['PATH']=os.pathsep.join(map(str,[candidate/'bin',llvm,perl.parent,make.parent]))+os.pathsep+env.get('PATH','')
  else:
@@ -76,9 +78,10 @@ try:
    if (candidate/'bin'/name).exists():shutil.copy2(old/name,candidate/'bin'/name)
   python=old/'python.exe';openssl=prefix/'bin/openssl.exe';env['PATH']=str(old)+os.pathsep+env['PATH']
  else:
-  found=[f for base in search_roots for f in base.rglob('QtNetwork') if f.is_file() and not f.is_symlink() and 'QtNetwork.framework' in str(f)];assert len(found)==1,found
+  found=[f for base in search_roots for f in base.rglob('QtNetwork') if f.is_file() and not f.is_symlink() and f.parent.name=='5' and f.parent.parent.name=='Versions' and f.parent.parent.parent.name=='QtNetwork.framework'];assert len(found)==1,found
   destination=(candidate/'lib/QtNetwork.framework/Versions/5/QtNetwork');assert destination.is_file();shutil.copy2(found[0],destination)
   for name in ['libssl.3.dylib','libcrypto.3.dylib']:shutil.copy2(prefix/'lib'/name,candidate/'lib'/name)
+  run('build-bearer',[sys.executable,ROOT/'build-macos-bearer.py','--sdk',candidate,'--qtbase',qtbase,'--openssl-prefix',prefix,'--build',work/'bearer-build','--make',make,'--jobs',a.jobs])
   run('build-python',[sys.executable,ROOT/'build-macos-python.py','--archive',downloads/'Python-3.13.16.tar.xz','--openssl-prefix',prefix,'--old-framework',original/'lib/Python.framework','--site-packages',candidate/'lib/python3.13/site-packages','--work',work/'python-build','--prefix',work/'python-stage','--jobs',a.jobs])
   old=candidate/'lib/Python.framework';old.rename(work/'python-sdk-original');shutil.copytree(work/'python-stage/lib/Python.framework',old,symlinks=True)
   # KDE macOS PyQt lives inside the framework, reached by lib/python3.13 alias.
@@ -98,8 +101,10 @@ try:
 except Exception as error:
  receipt['error']=repr(error);raise
 finally:
- inner=work/'network-build/build.log'
- if inner.is_file():shutil.copy2(inner,output/'network-build-inner.log')
+ for module in ('network','bearer'):
+  inner=work/(module+'-build')/'build.log'
+  if inner.is_file():shutil.copy2(inner,output/(module+'-build-inner.log'))
+ if (work/'bearer-build/receipt.json').is_file():shutil.copy2(work/'bearer-build/receipt.json',output/'bearer-build.json')
  for name,source in [('openssl-build.json',work/'openssl-build/openssl-build-receipt.json'),('network-build.json',work/'network-build/receipt.json'),('python-build.json',work/'python-build/python-build-receipt.json'),('python-stage.json',candidate/'python/flapart-python-receipt.json')]:
   if source.is_file():shutil.copy2(source,output/name)
  (output/'native-ci-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
