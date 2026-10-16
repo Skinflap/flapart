@@ -1,4 +1,4 @@
-# Flapart native branding overlay v1
+# Flapart native branding overlay v3
 
 Apply `python native/branding/apply-branding.py PREPARED_SOURCE` after `native/scripts/prepare-fork.py`. This is a separate overlay; it does not change the frozen Studio 0.1.1 plugin or base source patch. It preflights every textual replacement before modifying the prepared checkout and refuses repeated application.
 
@@ -7,3 +7,7 @@ The icons reuse Flaptown's existing sigil. The splash and FLAPART banner use exa
 Native branding selects the Flapart icons, splash, product name, macOS bundle identity, and Flapsoft source link. Original Krita engine authors, legal notices, documentation, support links, and sources remain credited and available. The original splash asset stays in the source tree, while the displayed replacement correctly credits Flaptown Advancements. Existing Qt6 experimental safeguards remain active.
 
 Qualification is separate from asset generation. The Xcode 26 Icon Composer metadata is a candidate until compiled on that toolchain; older Xcode and other platforms use the provided PNG icons.
+
+Version 2 detects macOS bundles by the actual `.app/Contents/MacOS` structure instead of requiring the old `krita.app` name, preserving embedded Python discovery when the distribution is named Flapart Studio.app. Native macOS relocation validation remains required.
+
+Version 3 embeds Syne Mono and its OFL notice in the native resource bundle and registers the family at the beginning of the KisApplication constructor body, before style/font resolution. This addresses the observed Mac fallback before Python plugin setup; native Mac validation remains required. Explicit user font preferences remain handled by the existing configuration code.

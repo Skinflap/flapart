@@ -1,5 +1,5 @@
 {
-  "overlay_version": 1,
+  "overlay_version": 3,
   "files": {
     "Flapart/1024-apps-krita.png": "64976c2cbecfeecc1c992251d12bc5d1bb6d40e8f5747bdfd0a36b9621579160",
     "Flapart/128-apps-krita.png": "86917984e262825efa5aa71c345be8cdd6ae5b2f68ae4361fe8d72ed1e437ca0",
@@ -12,16 +12,18 @@
     "Flapart/512-apps-krita.png": "b69374fa8949d3ea0c3c0a9e60458bb30ab1100d02f5c05f528f15d8cd428d2f",
     "Flapart/64-apps-krita.png": "71afb9b140287c6d67829f9ea7a394b127005e879c9cade19ba37b1b3ea3cff5",
     "Flapart/CMakeLists.txt": "cad9ae29da6c99feeb3b93d152e0117df85edc9c7ab0822046908d1ee010592a",
-    "Flapart/branding.qrc": "4282b4dcd3aae7e6507c2970f37bf47dd5673c260977b5f9026c21334c6d5efc",
+    "Flapart/branding.qrc": "999f6e3230d7550033c09c6ae80c159d82a3329f0132a99d4e7c3ffd2b646a24",
     "Flapart/flapart-icon.svg": "10ce0b67786ffe5d05ee3fc3ec1f4d0460fa229a8f5c6584cfaf20722bee0f34",
     "Flapart/krita.icon/Assets/flapart.svg": "38a98b63a12dab40e450a253f7cdc2bd412ab656d8b99b7725bf7e44a11a7dbc",
     "Flapart/krita.icon/icon.json": "40e627ab92409148a4d8b131ed34fe3d7781134ef9cebadea6fc68c0fbaa5a0f",
     "Flapart/sc-apps-krita.svgz": "533dcf4632a111d13a0889fe981c43a75c0154c7f9a5ec80275fcbe6f798a85b",
-    "README.md": "2d71458a2a840ba37f4de10df4085d6c8b59f990dfda5bf6ccbc8c0590ac7cf5",
-    "apply-branding.py": "0614e6d1553657dd5bcdde456ab1957bd0f3c8433b24e888a9847d2a1114f797",
+    "README.md": "acbc009ab5826ff94c55046113ca72b28cb91cd6d42e1b0650a0b48a512f087e",
+    "apply-branding.py": "025806558f757a59007ffec293db715788ac393eb926778f9bb38cea7641b99e",
     "banner.svg": "6de7fc35c0fd4dccc71668eaf7d3525b5479a6c292e1382764fe92a01cfe81d1",
-    "build-assets.py": "20c36cde77fb9efa270b5b837903e0ba917041bb791bd58afae9c4e56fccaa2f",
+    "build-assets.py": "9936b27ba76a8f142796f19cdafd20b8f0513f45d1f955440d83031b92fe60b4",
     "flapart-splash.png": "67589ee557ba6aabb721b2a18f0ea26d63a62ab8ba4038a57fffb1a57a9115fa",
-    "splash.svg": "3949697d9bf740055f28dc29bc7e10f7bd6822144964abdc0abbdfc00b8b21d8"
+    "splash.svg": "3949697d9bf740055f28dc29bc7e10f7bd6822144964abdc0abbdfc00b8b21d8",
+    "Flapart/SyneMono-Regular.ttf": "b142b088680791725849cc74c54d7937c981de2378583bde72f826bd3eb267dc",
+    "Flapart/OFL-SyneMono.txt": "c80622543840e2bc72670a00daef3a6cb1af6fad522d15b9a5d9410733c878b5"
   }
 }

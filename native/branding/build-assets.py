@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Render existing Flaptown vector branding and Syne Mono outlines deterministically."""
 from pathlib import Path
-import subprocess,json,gzip
+import subprocess,json,gzip,shutil
 from fontTools.ttLib import TTFont
 from fontTools.pens.svgPathPen import SVGPathPen
 r=Path(__file__).resolve().parent;native=r.parent;dest=r/'Flapart';dest.mkdir(exist_ok=True)
@@ -19,7 +19,8 @@ icon='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><rect width=
 for size in [16,22,24,32,48,64,128,256,512,1024]:subprocess.run(['rsvg-convert','-w',str(size),'-h',str(size),'-o',str(dest/f'{size}-apps-krita.png'),str(dest/'flapart-icon.svg')],check=True)
 (dest/'sc-apps-krita.svgz').write_bytes(gzip.compress(sigil.encode(),mtime=0))
 (dest/'CMakeLists.txt').write_text('ecm_install_icons(ICONS\n'+''.join(f'{n}-apps-krita.png\n' for n in [16,22,24,32,48,64,128,256,512,1024])+'sc-apps-krita.svgz\nDESTINATION ${KDE_INSTALL_ICONDIR})\n')
-(dest/'branding.qrc').write_text('<RCC version="1.0"><qresource><file alias="krita-branding.svgz">sc-apps-krita.svgz</file></qresource></RCC>\n')
+(dest/'branding.qrc').write_text('<RCC version="1.0"><qresource><file alias="krita-branding.svgz">sc-apps-krita.svgz</file></qresource><qresource prefix="/flapart/fonts"><file>SyneMono-Regular.ttf</file><file>OFL-SyneMono.txt</file></qresource></RCC>\n')
+for name in ('SyneMono-Regular.ttf','OFL-SyneMono.txt'):shutil.copy2(native/'plugin/flapart'/name,dest/name)
 composer=dest/'krita.icon';(composer/'Assets').mkdir(parents=True,exist_ok=True);(composer/'Assets/flapart.svg').write_text(sigil)
 (composer/'icon.json').write_text(json.dumps({'fill':{'solid':'srgb:0.12157,0.12941,0.15686,1.00000'},'groups':[{'name':'Flapart','layers':[{'image-name':'flapart.svg','name':'Flaptown sigil'}],'shadow':{'kind':'neutral','opacity':0.15},'specular':False}],'supported-platforms':{'squares':'shared'}},indent=2)+'\n')
 # Vector outlines keep the banner's typography identical before application fonts load.
