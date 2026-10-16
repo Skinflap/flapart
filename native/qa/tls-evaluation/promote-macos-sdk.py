@@ -11,6 +11,7 @@ import json
 import pathlib
 import platform
 import shutil
+import struct
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location('native_metadata', ROOT / 'distribution/source-qualification/native_metadata.py')
@@ -22,11 +23,87 @@ def digest(path):
     with path.open('rb') as stream:
         return hashlib.file_digest(stream, 'sha256').hexdigest()
 
+def universal_static_archive(data):
+    """Recognize lipo containers of BSD ar/Mach-O objects, not runtime dylibs.
+
+    Keep this build-input format out of the packaged-runtime metadata parser.
+    Unknown object formats (including LLVM bitcode) fail rather than invent a CPU.
+    """
+    formats = {b'\xca\xfe\xba\xbe': ('>', 20), b'\xbe\xba\xfe\xca': ('<', 20),
+               b'\xca\xfe\xba\xbf': ('>', 32), b'\xbf\xba\xfe\xca': ('<', 32)}
+    if data[:4] not in formats:
+        return None
+    endian, stride = formats[data[:4]]
+    count = metadata.unpack(endian + 'I', data, 4)[0]
+    if count > 16:  # Java class magic is handled by the original parser.
+        return None
+    metadata.check(count > 0 and 8 + stride * count <= len(data), 'Invalid universal archive table')
+    parts, ranges = [], []
+    for index in range(count):
+        pos = 8 + stride * index
+        cpu = metadata.unpack(endian + 'I', data, pos)[0]
+        offset, size = metadata.unpack(endian + ('II' if stride == 20 else 'QQ'), data, pos + 8)
+        if stride == 32:
+            metadata.check(metadata.unpack(endian + 'I', data, pos + 28)[0] == 0, 'Invalid universal archive reserved field')
+        alignment = metadata.unpack(endian + 'I', data, pos + (16 if stride == 20 else 24))[0]
+        metadata.check(alignment <= 63 and offset % (1 << alignment) == 0, 'Invalid universal slice alignment')
+        metadata.check(offset >= 8 + stride * count and size >= 8 and offset + size <= len(data), 'Invalid universal archive bounds')
+        metadata.check(all(offset + size <= a or offset >= b for a, b in ranges), 'Overlapping universal archive slices')
+        ranges.append((offset, offset + size))
+        parts.append((cpu, data[offset:offset + size]))
+    if not any(part.startswith(b'!<arch>\n') for _, part in parts):
+        return None
+    metadata.check(all(part.startswith(b'!<arch>\n') for _, part in parts), 'Mixed universal archive/native slices')
+    architectures = {0x1000007: 'x86_64', 0x100000c: 'arm64'}
+    metadata.check(len({cpu for cpu, _ in parts}) == len(parts), 'Duplicate universal archive CPU')
+    slices = []
+    for cpu, archive in parts:
+        metadata.check(cpu in architectures, 'Unsupported universal archive CPU')
+        pos, objects, deps = 8, 0, set()
+        while pos < len(archive):
+            metadata.check(pos + 60 <= len(archive), 'Truncated ar member header')
+            header = archive[pos:pos + 60]
+            metadata.check(header[58:60] == b'`\n', 'Invalid ar member header')
+            size_text = header[48:58].strip()
+            metadata.check(size_text.isdigit(), 'Invalid ar member size')
+            size = int(size_text); start = pos + 60; end = start + size
+            metadata.check(end <= len(archive), 'Ar member outside slice')
+            name = header[:16].rstrip(b' ')
+            payload = archive[start:end]
+            if name.startswith(b'#1/'):
+                length_text = name[3:]
+                metadata.check(length_text.isdigit(), 'Invalid BSD ar filename length')
+                length = int(length_text)
+                metadata.check(0 < length <= len(payload), 'BSD ar filename outside member')
+                name, payload = payload[:length].rstrip(b'\0'), payload[length:]
+            name = name.rstrip(b'/')
+            metadata.check(name and b'\0' not in name, 'Invalid ar member name')
+            if name not in (b'__.SYMDEF', b'__.SYMDEF SORTED', b'__.SYMDEF_64', b'__.SYMDEF_64 SORTED'):
+                # Real relocatable objects only; a dylib hidden in an ar is not a static input.
+                thin = {b'\xcf\xfa\xed\xfe': '<', b'\xfe\xed\xfa\xcf': '>'}
+                metadata.check(payload[:4] in thin, 'Unsupported static archive member format')
+                metadata.check(metadata.unpack(thin[payload[:4]] + 'I', payload, 12)[0] == 1, 'Static archive member is not MH_OBJECT')
+                info = metadata.parse(payload)
+                metadata.check(info and info['format'] == 'macho' and len(info['slices']) == 1 and info['slices'][0]['cpu'] == cpu, 'Static archive object CPU mismatch')
+                deps.update(info['native_dependencies']); objects += 1
+            pos = end
+            if size % 2:
+                metadata.check(pos < len(archive) and archive[pos:pos + 1] == b'\n', 'Invalid ar member padding')
+                pos += 1
+        metadata.check(objects > 0, 'Static archive has no native objects')
+        slices.append({'cpu': cpu, 'architecture': architectures[cpu], 'uuid': None,
+                       'dependencies': sorted(deps), 'objects': objects})
+    return metadata.combine('static-archive', slices)
+
 def native(path):
     with path.open('rb') as stream:
         if stream.read(4) not in MAGIC:
             return None
-    return metadata.parse(path.read_bytes())
+    try:
+        data = path.read_bytes()
+        return universal_static_archive(data) or metadata.parse(data)
+    except ValueError as error:
+        raise ValueError(f'Invalid native/build input {path}: {error}') from error
 
 def old_ssl(name):
     return pathlib.PurePosixPath(name).name in {'libssl.1.1.dylib', 'libcrypto.1.1.dylib'}
@@ -62,7 +139,7 @@ def promote(work, evidence, output):
         assert len(matches) == 1, ('Expected one newly built variant', name, matches)
         source = matches[0]
         info = native(source)
-        assert info and set(info['architectures']) == {'arm64', 'x86_64'}
+        assert info and info['format'] == 'macho' and set(info['architectures']) == {'arm64', 'x86_64'}
         assert not any(old_ssl(dep) for dep in info['native_dependencies'])
         assert any(pathlib.PurePosixPath(dep).name == 'libssl.3.dylib' for dep in info['native_dependencies'])
         target = sdk / 'lib/QtNetwork.framework/Versions/5' / name
@@ -85,6 +162,10 @@ def promote(work, evidence, output):
         if target.is_symlink():
             assert target.resolve().is_relative_to(sdk)
         info = native(source)
+        if source.suffix == '.dylib' or source == ssl / 'bin/openssl':
+            assert info and info['format'] == 'macho', ('Expected dynamic Mach-O input', source)
+        if source.suffix == '.a':
+            assert info and info['format'] == 'static-archive', ('Expected validated universal static archive', source)
         if info:
             assert set(info['architectures']) == {'arm64', 'x86_64'}, ('Non-universal promoted binary', source)
             assert not any(old_ssl(dep) for dep in info['native_dependencies']), ('Old SSL dependency in promoted binary', source)

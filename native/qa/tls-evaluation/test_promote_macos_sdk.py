@@ -16,6 +16,23 @@ def macho(architectures=('x86_64','arm64'),imports=()):
   part=thin(arch);header+=struct.pack('>IIIII',cpu[arch],0,offset,len(part),0);offset+=len(part);body+=part
  return header+body
 
+def ar_object(arch='arm64',bad_cpu=False,body=None):
+ data=bytearray(macho((arch,)))
+ struct.pack_into('<I',data,12,1)  # MH_OBJECT, not MH_DYLIB.
+ if bad_cpu:struct.pack_into('<I',data,4,0x1000007 if arch=='arm64' else 0x100000c)
+ def member(name,payload):
+  header=name.ljust(16)+b'0'.ljust(12)+b'0'.ljust(6)+b'0'.ljust(6)+b'100644'.ljust(8)+str(len(payload)).encode().ljust(10)+b'`\n'
+  return header+payload+(b'\n' if len(payload)%2 else b'')
+ # Actual Apple BSD extended-name shape, including NUL name alignment.
+ name=b'object.o\0\0\0\0'
+ return b'!<arch>\n'+member(b'#1/12',name+(bytes(data) if body is None else body))
+def fat_archive(parts=None):
+ parts=parts or [('x86_64',ar_object('x86_64')),('arm64',ar_object('arm64'))]
+ cpus={'x86_64':0x1000007,'arm64':0x100000c};header=b'\xca\xfe\xba\xbe'+struct.pack('>I',len(parts));offset=8+20*len(parts);body=b''
+ for arch,data in parts:
+  header+=struct.pack('>IIIII',cpus[arch],0,offset,len(data),0);body+=data;offset+=len(data)
+ return header+body
+
 def tree(root):
  result={}
  for p in sorted(root.rglob('*')):
@@ -51,6 +68,46 @@ class Promotion(unittest.TestCase):
   for name in ('QtNetwork','QtNetwork_debug'):
    self.assertEqual((self.f.target/name).read_bytes(),(self.f.network/name).read_bytes());self.assertIn(str(self.f.sdk),(self.f.target/'Resources'/(name+'.prl')).read_text())
   for name in ('libssl.1.1.dylib','libcrypto.1.1.dylib'):self.assertFalse((self.f.sdk/'lib'/name).exists())
+ def test_universal_openssl_archives_promoted_without_runtime_parser_change(self):
+  data=fat_archive()
+  for name in ('libssl.a','libcrypto.a'):self.f.write(self.f.ssl/'lib'/name,data)
+  info=m.native(self.f.ssl/'lib/libssl.a');self.assertEqual(info['format'],'static-archive');self.assertEqual(info['architectures'],['arm64','x86_64'])
+  with self.assertRaisesRegex(ValueError,'Invalid universal native slice'):m.metadata.parse(data)
+  result=self.f.run();self.assertTrue(result['promoted']);self.assertEqual((self.f.sdk/'lib/libssl.a').read_bytes(),data)
+ def test_archives_already_in_sdk_are_validated(self):
+  self.f.write(self.f.sdk/'lib/existing.a',fat_archive());self.assertTrue(self.f.run()['promoted'])
+ def test_wrong_archive_object_cpu_refused_before_mutation(self):
+  self.f.write(self.f.ssl/'lib/libssl.a',fat_archive([('arm64',ar_object('arm64',True)),('x86_64',ar_object('x86_64'))]));self.refused_without_mutation()
+ def test_single_arch_static_input_refused(self):
+  self.f.write(self.f.ssl/'lib/libssl.a',fat_archive([('arm64',ar_object())]));self.refused_without_mutation()
+ def test_archive_cannot_impersonate_dynamic_library(self):
+  self.f.write(self.f.ssl/'lib/libssl.3.dylib',fat_archive());self.refused_without_mutation()
+ def test_thin_static_archive_in_promotion_plan_refused(self):
+  self.f.write(self.f.ssl/'lib/libssl.a',ar_object());self.refused_without_mutation()
+ def test_dynamic_macho_bad_slice_still_refused_with_filename(self):
+  data=bytearray(macho());struct.pack_into('<I',data,52,0x100000c)  # First declared x86 slice carries wrong CPU.
+  path=self.f.ssl/'lib/libssl.3.dylib';self.f.write(path,bytes(data))
+  with self.assertRaisesRegex(ValueError,'libssl.3.dylib.*CPU mismatch'):m.native(path)
+  self.refused_without_mutation()
+ def test_static_member_header_bounds_truncation_and_padding_refused(self):
+  variants=[]
+  archive=bytearray(ar_object());archive[56:66]=b'9999999999';variants.append(bytes(archive))
+  archive=bytearray(ar_object());archive[66:68]=b'xx';variants.append(bytes(archive))
+  variants.append(ar_object()[:30])
+  for archive in variants:
+   self.f.write(self.f.ssl/'lib/libssl.a',fat_archive([('arm64',archive),('x86_64',ar_object('x86_64'))]));self.refused_without_mutation()
+ def test_mixed_static_and_dynamic_slices_refused(self):
+  self.f.write(self.f.ssl/'lib/libssl.a',fat_archive([('arm64',ar_object()),('x86_64',macho(('x86_64',)))]));self.refused_without_mutation()
+ def test_malformed_static_bounds_and_members_refused(self):
+  valid=fat_archive();variants=[]
+  overlap=bytearray(valid);struct.pack_into('>I',overlap,36,48);variants.append(bytes(overlap))
+  variants.extend([valid[:-1],fat_archive([('arm64',ar_object(body=b'not an object')),('x86_64',ar_object('x86_64'))]),fat_archive([('arm64',ar_object()),('arm64',ar_object())]),fat_archive([('arm64',ar_object(body=macho(('arm64',)))),('x86_64',ar_object('x86_64'))])])
+  for data in variants:
+   with self.subTest(size=len(data)):
+    self.f.write(self.f.ssl/'lib/libssl.a',data);self.refused_without_mutation()
+ def test_invalid_archive_diagnostic_names_file(self):
+  path=self.f.ssl/'lib/libssl.a';self.f.write(path,fat_archive()[:-1])
+  with self.assertRaisesRegex(ValueError,'libssl.a'):m.native(path)
  def test_workspace_receipt_mismatch_refused(self):
   (self.f.evidence/'network-build.json').write_text('{}');self.refused_without_mutation()
  def test_failed_native_tls_receipt_refused(self):
