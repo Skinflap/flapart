@@ -1,0 +1,11 @@
+{
+  "scope": "Linux Qt5 qmake generation only; no Mac compiler/runtime qualification",
+  "qmake_version": "5.15.19",
+  "returncode": 0,
+  "stdout": "Info: creating stash file <fixture>/build/.qmake.stash\n",
+  "stderr": "",
+  "generated_module_files": [
+    "build/mkspecs/modules/qt_plugin_qgenericbearer.pri",
+    "build/mkspecs/modules-inst/qt_plugin_qgenericbearer.pri"
+  ]
+}

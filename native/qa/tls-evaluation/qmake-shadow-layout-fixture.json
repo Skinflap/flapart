@@ -1,0 +1,12 @@
+{
+  "flat": {
+    "returncode": 0,
+    "stdout": "Info: creating stash file <fixture>/flat/.qmake.stash\n",
+    "stderr": ""
+  },
+  "mirrored": {
+    "returncode": 0,
+    "stdout": "Info: creating stash file <fixture>/build/.qmake.stash\n",
+    "stderr": "Project MESSAGE: root=<fixture>/build\nProject MESSAGE: root=<fixture>/build\n"
+  }
+}

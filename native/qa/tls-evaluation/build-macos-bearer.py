@@ -11,14 +11,16 @@ a=p.parse_args()
 assert platform.system()=='Darwin' and 1<=a.jobs<=16
 sdk=a.sdk.resolve();qtbase=a.qtbase.resolve();ssl=a.openssl_prefix.resolve();build=a.build.resolve()
 assert not build.exists();build.mkdir(parents=True)
+# qmake shadowed() discovers the module root only with the source-relative layout.
+module_build=build/'src/plugins/bearer/generic';module_build.mkdir(parents=True)
 source=qtbase/'src/plugins/bearer/generic/generic.pro';assert source.is_file()
 qmake=sdk/'bin/qmake';assert subprocess.check_output([str(qmake),'-query','QT_VERSION'],text=True).strip()=='5.15.7'
 command=[str(qmake),str(source),'-o','Makefile','-after','QMAKE_APPLE_DEVICE_ARCHS=x86_64 arm64','QMAKE_MACOSX_DEPLOYMENT_TARGET=11.0','QMAKE_INCDIR_OPENSSL='+str(ssl/'include'),'QMAKE_LIBS_OPENSSL='+str(ssl/'lib/libssl.3.dylib')+' '+str(ssl/'lib/libcrypto.3.dylib')]
 receipt={'passed':False,'command':command,'source':str(source),'outputs':[]}
 try:
  with (build/'build.log').open('w') as log:
-  subprocess.run(command,cwd=build,stdout=log,stderr=log,check=True)
-  subprocess.run([a.make,'-j'+str(a.jobs)],cwd=build,stdout=log,stderr=log,check=True)
+  subprocess.run(command,cwd=module_build,stdout=log,stderr=log,check=True)
+  subprocess.run([a.make,'-j'+str(a.jobs)],cwd=module_build,stdout=log,stderr=log,check=True)
  for name in ('libqgenericbearer.dylib','libqgenericbearer_debug.dylib'):
   found=[f for root in (build,qtbase) for f in root.rglob(name) if f.is_file() and not f.is_symlink()]
   assert len(found)==1,(name,found)
