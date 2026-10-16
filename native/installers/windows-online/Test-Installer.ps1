@@ -7,7 +7,9 @@ $installer=Join-Path $PSScriptRoot 'Install Flapart.exe'
 if (!$ArchiveFile -or !$ManifestFile) {
     $run=Start-Process -FilePath $installer -ArgumentList '--quiet' -Wait -PassThru
     if ($run.ExitCode -eq 0) { throw 'Unqualified candidate was not refused.' }
-    Write-Host 'Native Windows installer compiled and refused the blocked release. No painting runtime tested.'; exit 0
+    python "$PSScriptRoot\smoke_installer.py"
+    if ($LASTEXITCODE -ne 0) { throw 'Native synthetic installer mechanics failed.' }
+    Write-Host 'Native Windows installer compile, refusal and synthetic mechanics passed. No painting runtime tested.'; exit 0
 }
 $work=Join-Path $env:RUNNER_TEMP ('flapart-installer-'+[Guid]::NewGuid().ToString('N')); New-Item -ItemType Directory -Path $work | Out-Null
 try {

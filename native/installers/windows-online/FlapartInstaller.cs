@@ -60,6 +60,7 @@ static class FlapartInstaller {
             }
         }
     }
+    static string ReadZone(string path) { try { return File.ReadAllText(path+":Zone.Identifier"); } catch(IOException) { return null; } }
     static void WriteJson(string path,Dictionary<string,object> data) { File.WriteAllText(path,Json.Serialize(data),new UTF8Encoding(false)); }
     static void Install(string destination,string archiveInput,bool shortcut,Action<string> progress) {
         Check(Environment.Is64BitOperatingSystem,"This package needs 64-bit Windows.");var release=Release();destination=Path.GetFullPath(destination);NoLinks(destination);
@@ -79,9 +80,9 @@ static class FlapartInstaller {
                 string font=Path.Combine(Source,"SyneMono-Regular.ttf");if(File.Exists(font))File.Copy(font,Path.Combine(payload,"SyneMono-Regular.ttf"));
                 // Mark the downloaded engine for standard Windows user review. No SmartScreen override.
                 string zone=Path.Combine(payload,executable)+":Zone.Identifier";
-                if(!File.Exists(zone)) {
+                if(ReadZone(Path.Combine(payload,executable))==null) {
                     if(archiveInput==null)File.WriteAllText(zone,"[ZoneTransfer]\r\nZoneId=3\r\nHostUrl="+Text(release,"url")+"\r\n");
-                    else if(File.Exists(archiveInput+":Zone.Identifier"))File.WriteAllText(zone,File.ReadAllText(archiveInput+":Zone.Identifier"));
+                    else { string archiveZone=ReadZone(archiveInput);if(archiveZone!=null)File.WriteAllText(zone,archiveZone); }
                 }
                 Directory.Move(payload,final);
                 var record=new Dictionary<string,object>{{"product","Flapart Studio"},{"version",Text(release,"version")},{"release",releaseId},{"executable",executable},{"sha256",Text(release,"sha256")},{"profileNamespace","flapart-native"}};

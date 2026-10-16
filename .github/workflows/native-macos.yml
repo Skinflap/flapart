@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['native/plugin/**', 'native/qa/portable/**', 'ci/**', '.github/workflows/native-macos.yml']
+    paths: ['native/plugin/**', 'native/qa/portable/flapart_probe/**', 'native/qa/portable/flapart_probe.desktop', 'ci/**', '.github/workflows/native-macos.yml']
 permissions:
   contents: read
 jobs:
