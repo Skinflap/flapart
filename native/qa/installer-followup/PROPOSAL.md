@@ -4,9 +4,7 @@ Baseline review, recorded before the scoped implementation. See `IMPLEMENTATION.
 for the current edits and remaining native checks. This document describes the
 pre-change producer and the private transfer proposal. No native run, workflow edit,
 CI dispatch, secret enrollment, candidate transfer, or publication performed.
-The parent reports run **38906245762** retained its exact Mac candidate encrypted.
-That candidate may be reused for a later private installed-runtime test; this
-review has not decrypted it or independently validated its retention chain.
+Correction: run **38906245762** failed during TLS fixture creation and produced no candidate archive. Later runs 38908987796 and 38912592153 also failed before packaging. The reuse procedure below is conditional on a future run producing an authenticated encrypted candidate; no retained Mac candidate is currently established.
 Relocation/TLS execution from the build is not an installer journey.
 
 ## Inspected contracts and concrete gaps

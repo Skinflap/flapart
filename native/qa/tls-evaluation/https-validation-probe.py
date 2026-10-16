@@ -3,13 +3,16 @@
 Usage: python https-validation-probe.py --openssl /path/to/openssl --output receipt.json
 The openssl CLI generates disposable CA/server keys only in TemporaryDirectory.
 """
-import argparse,datetime,http.server,json,pathlib,ssl,subprocess,tempfile,threading,urllib.request,sys
+import argparse,datetime,http.server,json,pathlib,ssl,subprocess,tempfile,threading,urllib.request,sys,time,platform
 sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent))
 from tls_fixture import command as fixture_command
 p=argparse.ArgumentParser();p.add_argument('--openssl',required=True);p.add_argument('--output',required=True);p.add_argument('--minimum',default='3.5.9');p.add_argument('--official-url',default='https://www.python.org/');a=p.parse_args()
 from PyQt5.QtCore import QCoreApplication,QEventLoop,QTimer,QUrl
 from PyQt5.QtNetwork import QNetworkAccessManager,QNetworkRequest,QSslConfiguration,QSslCertificate,QSslSocket,QSslError
 app=QCoreApplication.instance() or QCoreApplication([])
+# Windows Qt performs asynchronous OS root-chain discovery (up to15seconds).
+# Keep the fixture timeout above that operation without changing trust policy.
+local_qt_timeout_ms=30000 if platform.system()=='Windows' else 10000
 class Handler(http.server.BaseHTTPRequestHandler):
  def do_GET(self):self.send_response(200);self.end_headers();self.wfile.write(b'flapart-tls-ok')
  def log_message(self,*args):pass
@@ -42,18 +45,19 @@ try:
      assert isinstance(e.reason,ssl.SSLCertVerificationError),str(e);case.update(python_ok=False,python_certificate_rejected=True,python_verify_code=e.reason.verify_code)
     manager=QNetworkAccessManager();request=QNetworkRequest(QUrl(url));config=QSslConfiguration.defaultConfiguration();config.setPeerVerifyMode(QSslSocket.VerifyPeer)
     if trust:config.setCaCertificates(QSslCertificate.fromPath(str(root/'ca.pem')))
-    request.setSslConfiguration(config);reply=manager.get(request);loop=QEventLoop();timer=QTimer();timer.setSingleShot(True);timer.timeout.connect(loop.quit);reply.finished.connect(loop.quit);errors=[];error_codes=[];reply.sslErrors.connect(lambda es:(errors.extend(e.errorString() for e in es),error_codes.extend(int(e.error()) for e in es)));timer.start(10000);loop.exec_();timer.stop()
-    case.update(qt_ok=reply.isFinished() and int(reply.error())==0 and bytes(reply.readAll())==b'flapart-tls-ok',qt_ssl_errors=errors,qt_ssl_error_codes=error_codes,qt_error=int(reply.error()),qt_finished=reply.isFinished());reply.abort();reply.deleteLater()
+    request.setSslConfiguration(config);qt_started=time.monotonic();reply=manager.get(request);loop=QEventLoop();timer=QTimer();timer.setSingleShot(True);timer.timeout.connect(loop.quit);reply.finished.connect(loop.quit);errors=[];error_codes=[];reply.sslErrors.connect(lambda es:(errors.extend(e.errorString() for e in es),error_codes.extend(int(e.error()) for e in es)));timer.start(local_qt_timeout_ms);loop.exec_();timer.stop()
+    case.update(qt_elapsed_seconds=round(time.monotonic()-qt_started,3),qt_timeout_ms=local_qt_timeout_ms,qt_ok=reply.isFinished() and int(reply.error())==0 and bytes(reply.readAll())==b'flapart-tls-ok',qt_ssl_errors=errors,qt_ssl_error_codes=error_codes,qt_error=int(reply.error()),qt_finished=reply.isFinished());reply.abort();reply.deleteLater()
     assert case['python_ok']==expected and case['qt_ok']==expected,(name,case)
     if not expected:assert case['qt_ssl_errors'],(name,case)
     if name=='expired':assert case.get('python_verify_code')==10 and int(QSslError.CertificateExpired) in error_codes,(name,case)
     result['cases'][name]=case
   finally:server.shutdown();server.server_close()
  assert a.official_url.startswith('https://'), 'HTTPS required'
+ official_started=time.monotonic()
  with urllib.request.urlopen(a.official_url,context=ssl.create_default_context(),timeout=15) as response:
-  result['official_python']={'status':response.status,'verified':True};response.read(256)
- manager=QNetworkAccessManager();request=QNetworkRequest(QUrl(a.official_url));reply=manager.get(request);loop=QEventLoop();timer=QTimer();timer.setSingleShot(True);timer.timeout.connect(loop.quit);reply.finished.connect(loop.quit);errors=[];reply.sslErrors.connect(lambda es:errors.extend(e.errorString() for e in es));timer.start(15000);loop.exec_();timer.stop()
- result['official_qt']={'finished':reply.isFinished(),'error':int(reply.error()),'ssl_errors':errors,'status':reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)}
+  result['official_python']={'status':response.status,'verified':True,'elapsed_seconds':round(time.monotonic()-official_started,3)};response.read(256)
+ manager=QNetworkAccessManager();request=QNetworkRequest(QUrl(a.official_url));qt_started=time.monotonic();reply=manager.get(request);loop=QEventLoop();timer=QTimer();timer.setSingleShot(True);timer.timeout.connect(loop.quit);reply.finished.connect(loop.quit);errors=[];reply.sslErrors.connect(lambda es:errors.extend(e.errorString() for e in es));timer.start(15000);loop.exec_();timer.stop()
+ result['official_qt']={'elapsed_seconds':round(time.monotonic()-qt_started,3),'finished':reply.isFinished(),'error':int(reply.error()),'ssl_errors':errors,'status':reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)}
  assert reply.isFinished() and int(reply.error())==0 and not errors,result['official_qt']
  reply.deleteLater()
  result['passed']=True

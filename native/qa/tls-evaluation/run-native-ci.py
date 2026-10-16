@@ -58,6 +58,13 @@ try:
  prefix=work/'openssl';command=[sys.executable,ROOT/'build-openssl.py','--archive',ssl,'--work',work/'openssl-build','--prefix',prefix,'--perl',perl,'--make',ssl_make if system=='Windows' else make,'--jobs',a.jobs]
  if system=='Windows':command+=['--toolchain',llvm]
  run('build-openssl',command)
+ if system=='Windows':
+  # Qt's common SDK include directory precedes QMAKE_INCDIR_OPENSSL.
+  # Replace obsolete headers in the experiment copy, preserving the original SDK.
+  old_headers=candidate/'include/openssl'
+  assert old_headers.is_dir()
+  old_headers.rename(work/'openssl-headers-sdk-original')
+  shutil.copytree(prefix/'include/openssl',old_headers)
  # syncqt prepares forwarding headers in our private source copy only.
  # MSYS/Cygwin Perl reports Unix paths from Cwd::abs_path. Supply both
  # source and output in that namespace so generated relative headers do not
@@ -74,7 +81,8 @@ try:
  # Select only newly built module output, never the preexisting SDK module.
  search_roots=[work/'network-build',qtbase]
  if system=='Windows':
-  found=[f for base in search_roots for f in base.rglob('Qt5Network.dll') if f.is_file()];assert len(found)==1,found
+  found=[f for base in search_roots for f in base.rglob('Qt5Network.dll') if f.is_file()]
+  assert found and len({hashlib.sha256(f.read_bytes()).hexdigest() for f in found})==1, ('Different QtNetwork build outputs',found)
   shutil.copy2(found[0],candidate/'bin/Qt5Network.dll')
   for f in (prefix/'bin').glob('*.dll'):shutil.copy2(f,candidate/'bin'/f.name)
   env['FLAPART_DLL_DIRS']=os.pathsep.join(map(str,[candidate/'bin',prefix/'bin',llvm.parent/'x86_64-w64-mingw32/bin']))

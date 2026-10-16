@@ -33,6 +33,7 @@ for name,source in [('qtnetwork-config.h',headers/'qtnetwork-config.h'),('qtnetw
 
 # Absolute libraries prevent old SDK -L search order from choosing OpenSSL1.1.
 command=[str(a.qmake),(a.qtbase/'src/network/network.pro').as_posix(),'-o','Makefile','-after','QMAKE_INCDIR_OPENSSL='+(a.openssl_prefix/'include').as_posix(),'QMAKE_LIBS_OPENSSL='+a.ssl_library.as_posix()+' '+a.crypto_library.as_posix()]
+if platform.system()=='Windows':command.append('QMAKE_LIBDIR+='+ (sdk/'lib').as_posix())
 if platform.system()=='Darwin':command.extend(['QMAKE_APPLE_DEVICE_ARCHS=x86_64 arm64','QMAKE_MACOSX_DEPLOYMENT_TARGET=11.0'])
 receipt={'status':'planned','sdk_feature_configuration_sha256':config_sources,'qt_version':v,'qmake':command,'make':[a.make,'-j'+str(a.jobs)],'input_sdk_unmodified':True,'installation_performed':False,'native_runtime_validation_required':True}
 try:
