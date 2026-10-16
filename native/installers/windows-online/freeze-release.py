@@ -148,7 +148,7 @@ def validate_evidence(archive,evidence,platform,digest,evidence_root):
    require(relocation.get(key) is True,'Missing relocation gate: '+key)
   installer=collected['installer'][arch]
   require(installer['runtime_scope']=='installed-runtime','Installer proof must use actual installed launcher')
-  for key in ('installer_passed','native_runtime_tested','profile_isolation_verified','ordinary_krita_unchanged','native_canvas_png_kra_passed','studio_menu_reopens','failed_upgrade_preserved_receipt','failed_upgrade_preserved_artwork_and_settings','successful_upgrade_preserved_artwork_and_settings','previous_runtime_retained'):
+  for key in ('installer_passed','native_runtime_tested','profile_isolation_verified','ordinary_krita_unchanged','native_canvas_png_kra_passed','studio_menu_reopens','failed_upgrade_preserved_receipt','failed_upgrade_preserved_artwork_and_settings','successful_upgrade_preserved_artwork_and_settings','previous_runtime_retained','upgraded_runtime_tested','upgraded_native_child_exit_observed'):
    require(installer.get(key) is True,'Missing installed-launcher gate: '+key)
   require(installer.get('security_approval_automated') is False,'System security approval must not be automated')
   tls=collected['tls'][arch];require(tls.get('passed') is True,'TLS validation did not pass')

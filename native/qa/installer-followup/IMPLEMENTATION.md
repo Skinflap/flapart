@@ -52,8 +52,7 @@ The corruption attempt must preserve the receipt, artwork and settings; its
 explicit missing flag is now emitted after comparison. Before/after snapshots
 hash all previous-runtime files and record confined symlinks, instead of checking
 only directory existence. The subsequent same-archive CI edition upgrade is
-verified against ZIP bytes again. This is an installer upgrade mechanics test;
-it **does not launch the upgraded edition** or imply a separately built version.
+verified against ZIP bytes again. The newly selected edition is then launched through its real installed launcher, with a second child-image, architecture, artwork and process-exit check. This remains a same-archive installer mechanics test and does not imply qualification of a separately built application version. Freeze and receipt auditing now require both upgraded-runtime and upgraded-child-exit outcomes.
 Probe artwork and profile snapshots must be unchanged throughout the upgrades.
 Source closure and public release qualification are not produced by this driver.
 

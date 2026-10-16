@@ -104,7 +104,7 @@ def main():
  root=Path(__file__).resolve().parent;output=args.output.resolve()
  require(not output.is_relative_to(args.probe.resolve()),'Evidence must not be inside probe inputs')
  require(not output.exists() or not any(output.iterdir()),'Use a fresh empty evidence directory');output.mkdir(parents=True,exist_ok=True)
- result={'schema':2,'passed':False,'native_execution':False,'runtime_scope':'installed-runtime','release_qualified':False,'binary_published':False,'security_approval_automated':False,'downloaded_user_security_approval_tested':False,'stages':[],'artifacts':{},'requested_process_architecture':args.architecture}
+ result={'schema':2,'passed':False,'native_execution':False,'upgraded_runtime_tested':False,'upgraded_native_child_exit_observed':False,'runtime_scope':'installed-runtime','release_qualified':False,'binary_published':False,'security_approval_automated':False,'downloaded_user_security_approval_tested':False,'stages':[],'artifacts':{},'requested_process_architecture':args.architecture}
  def write():
   temporary=output/'installer-e2e.pending.json';temporary.write_text(json.dumps(result,indent=2)+'\n');temporary.replace(output/'installer-e2e.json')
  def artifact(name,path):
@@ -209,6 +209,29 @@ def main():
    after_art=snapshot([artwork]);after_profile=snapshot(profile_paths);save('artwork-after-upgrade',after_art);save('profile-after-upgrade',after_profile);save('ordinary-after',snapshot(ordinary));save('runtime-after-upgrade',snapshot([final]))
    require(after_art==creations and after_profile==user_profile and snapshot(ordinary)==ordinary_before,'Upgrade changed artwork/settings/Krita');result['successful_upgrade_preserved_artwork_and_settings']=True
    require(snapshot([final])==old_runtime and upgraded['release']!=record['release'],'Previous runtime changed or upgrade not selected');result['previous_runtime_retained']=True
+   # Exercise the newly selected edition through its real installed launcher.
+   # The first launch alone cannot establish that upgrade selection is usable.
+   upgraded_final=dest/'releases'/next_release
+   upgraded_executable=upgraded_final/(upgraded['executable'] if system=='Windows' else 'Flapart Studio.app/Contents/MacOS/krita')
+   upgraded_inventory=installed_inventory(archive,upgraded_final,extras)
+   upgraded_member=upgraded_executable.relative_to(upgraded_final).as_posix()
+   require(upgraded_member in upgraded_inventory and 'sha256' in upgraded_inventory[upgraded_member],'Missing upgraded native executable')
+   upgraded_expected=upgraded_inventory[upgraded_member]['sha256']
+   upgraded_artwork=output/'native-upgrade';upgraded_artwork.mkdir()
+   upgraded_launcher=upgraded_final/'Flapart Studio.exe' if system=='Windows' else dest/'Flapart Studio.command'
+   require(sha(upgraded_launcher)==sha(source_launcher),'Upgraded launcher differs from tested input')
+   upgraded_command=[str(upgraded_launcher),'--launch','--wait'] if system=='Windows' else ['/bin/bash',str(upgraded_launcher),'--flapart-qa-architecture',args.architecture]
+   require(run('upgrade-launcher',upgraded_command,clean_environment(system,upgraded_artwork),args.timeout)==0,'Upgraded launcher did not exit successfully')
+   upgraded_native_path=upgraded_artwork/'result.json';require(upgraded_native_path.is_file(),'No upgraded native probe receipt')
+   upgraded_native=json.loads(upgraded_native_path.read_text())
+   upgraded_identity=validate_child(upgraded_native,args.architecture,system,upgraded_executable,upgraded_expected)
+   require(upgraded_identity==identity,'Upgraded process identity changed')
+   require_process_exited(upgraded_native.get('process_id'),system)
+   require(snapshot(ordinary)==ordinary_before,'Ordinary Krita changed during upgraded launch')
+   require(snapshot([artwork])==creations,'Upgraded launch changed prior artwork')
+   require(snapshot([final])==old_runtime,'Upgraded launch changed previous runtime')
+   artifact('upgraded_native_probe',upgraded_native_path)
+   result.update(upgraded_runtime_tested=True,upgraded_native_child_exit_observed=True,upgraded_executable={'archive_path':upgraded_member,'sha256':upgraded_expected},upgraded_native_probe_sha256=sha(upgraded_native_path))
    require(sha(archive)==original_sha,'Candidate archive changed during qualification');result['passed']=True
  except Exception as exc:
   result['error']=str(exc);raise

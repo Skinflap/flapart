@@ -8,7 +8,7 @@ from pathlib import Path
 GATES=('installer_passed','native_runtime_tested','profile_isolation_verified',
  'ordinary_krita_unchanged','native_canvas_png_kra_passed','studio_menu_reopens',
  'failed_upgrade_preserved_receipt','failed_upgrade_preserved_artwork_and_settings',
- 'successful_upgrade_preserved_artwork_and_settings','previous_runtime_retained')
+ 'successful_upgrade_preserved_artwork_and_settings','previous_runtime_retained','upgraded_runtime_tested','upgraded_native_child_exit_observed')
 TARGETS={'windows-x86_64':{'x86_64'},'macos-x86_64':{'x86_64'},'macos-arm64':{'arm64'},'macos-universal2':{'arm64','x86_64'}}
 
 def digest(path):

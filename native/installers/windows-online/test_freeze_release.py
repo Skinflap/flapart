@@ -51,7 +51,7 @@ class Fixture:
     name=kind+'-'+arch;doc={**base,'process_architecture':arch,'hardware_architecture':'arm64' if not win else arch,'execution_mode':'translated' if not win and arch=='x86_64' else 'native','native_execution':True,'runtime_scope':'installed-runtime' if kind=='installer' else 'relocated-package'}
     if kind=='relocation':doc.update({k:True for k in ('relocated_package_test','compiled_fork','original_krita_sentinels_preserved','build_environment_absent')})
     if kind=='installer':
-     doc.update({k:True for k in ('installer_passed','native_runtime_tested','profile_isolation_verified','ordinary_krita_unchanged','native_canvas_png_kra_passed','studio_menu_reopens','failed_upgrade_preserved_receipt','failed_upgrade_preserved_artwork_and_settings','successful_upgrade_preserved_artwork_and_settings','previous_runtime_retained')});doc['security_approval_automated']=False
+     doc.update({k:True for k in ('installer_passed','native_runtime_tested','profile_isolation_verified','ordinary_krita_unchanged','native_canvas_png_kra_passed','studio_menu_reopens','failed_upgrade_preserved_receipt','failed_upgrade_preserved_artwork_and_settings','successful_upgrade_preserved_artwork_and_settings','previous_runtime_retained','upgraded_runtime_tested','upgraded_native_child_exit_observed')});doc['security_approval_automated']=False
     if kind=='tls':
      cases={'valid':{'python_ok':True,'qt_ok':True,'qt_finished':True,'qt_error':0,'qt_ssl_errors':[]}}
      for case in ('unknown_ca','hostname_mismatch','expired'):cases[case]={'python_ok':False,'qt_ok':False,'qt_finished':True,'qt_error':6,'qt_ssl_errors':['rejected'],'python_certificate_rejected':True,'python_verify_code':10 if case=='expired' else 62,'qt_ssl_error_codes':[6]}
